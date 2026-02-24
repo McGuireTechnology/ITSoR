@@ -1,0 +1,50 @@
+name: Feature request
+description: Propose an improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share the problem first, then the proposed solution.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user/developer problem are you trying to solve?
+      placeholder: Describe pain points and current limitations.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should we implement?
+      placeholder: Describe expected behavior and UX/API impacts.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What alternatives did you evaluate?
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - backend
+        - frontend
+        - web
+        - docs
+        - infra
+        - multiple areas
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Define what done looks like.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...

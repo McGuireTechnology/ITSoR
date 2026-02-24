@@ -1,0 +1,35 @@
+name: Cross Platform Smoke
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+
+      - name: Install GNU Make (Windows)
+        if: runner.os == 'Windows'
+        run: choco install make -y
+
+      - name: Smoke install (venv + docs + backend)
+        run: |
+          make venv
+          make docs-install
+          make backend-install

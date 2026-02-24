@@ -1,0 +1,109 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    groups:
+      github-actions-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      github-actions-major:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:15"
+    groups:
+      python-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      python-major:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:30"
+    groups:
+      frontend-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      frontend-major:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:45"
+    groups:
+      web-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      web-major:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    labels:
+      - "dependencies"
+      - "web"
+    commit-message:
+      prefix: "chore"
+      include: "scope"

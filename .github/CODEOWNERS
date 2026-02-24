@@ -1,0 +1,12 @@
+# ITSoR code ownership
+# Update owners as the team grows.
+
+# Default owners for all files
+* @nmcguire
+
+# Area-specific ownership
+/docs/ @nmcguire
+/backend/ @nmcguire
+/frontend/ @nmcguire
+/web/ @nmcguire
+/.github/ @nmcguire
