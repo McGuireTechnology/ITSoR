@@ -36,3 +36,89 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+
+
+site_name: ITSoR - Docs
+site_description: Information Technology System of Record - Documentation
+site_url: https://docs.itsor.app
+
+theme:
+  name: material
+  language: en
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: pink
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: pink
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: README.md
+  - Getting Started: getting-started.md
+  - Reading Path: reading-path.md
+  - Local Config: local-config.md
+  - Backend Env Vars: backend-env.md
+  - Backend Deployment Runtime: backend-deployment-runtime.md
+  - Domain Model Reference: domain-model-reference.md
+  - Backend Auth Setup: backend-auth-setup.md
+  - Frontend Auth Integration: frontend-auth-integration.md
+  - API Reference Strategy: api-reference-strategy.md
+  - Auth Token Strategy: auth-token-strategy.md
+  - Security Runbooks: security-runbooks.md
+  - Standards Baseline: standards-baseline.md
+  - Audience Map: audience-map.md
+  - Information Architecture: information-architecture.md
+  - References: references.md
+  - Environments: environments.md
+  - Branch Protection: branch-protection.md
+  - Docs Deployment: deploy-docs.md
+  - Docs Style Guide: docs-style-guide.md
+  - Branding: branding.md
+  - TODO: todo/README.md
+  - Documentation Cleanup TODO: todo/documentation-cleanup.md
+  - User Guide: user/README.md
+  - Developer Guide: developer/README.md
+  - Architecture: architecture.md
+  - System Definition: system-definition.md
+  - ADRs: adr/README.md
+  - Contributing: contributing.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - toc:
+      permalink: true
+
+extra_css:
+  - stylesheets/extra.css
