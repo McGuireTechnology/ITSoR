@@ -45,19 +45,29 @@ class UserUseCases:
     def __init__(self, repo: UserRepository) -> None:
         self._repo = repo
 
-    def signup(self, email: str, password: str) -> tuple[User, str]:
-        existing = self._repo.get_by_email(email)
-        if existing:
+    def signup(self, username: str, email: str, password: str) -> tuple[User, str]:
+        existing_by_username = self._repo.get_by_username(username)
+        if existing_by_username:
+            raise ValueError("Username already registered")
+        existing_by_email = self._repo.get_by_email(email)
+        if existing_by_email:
             raise ValueError("Email already registered")
-        user = User(id=uuid4(), email=email, password_hash=hash_password(password))
+        user = User(
+            id=uuid4(),
+            username=username,
+            email=email,
+            password_hash=hash_password(password),
+        )
         created = self._repo.create(user)
         token = create_access_token(str(created.id))
         return created, token
 
-    def login(self, email: str, password: str) -> tuple[User, str]:
-        user = self._repo.get_by_email(email)
+    def login(self, identifier: str, password: str) -> tuple[User, str]:
+        user = self._repo.get_by_email(identifier)
+        if not user:
+            user = self._repo.get_by_username(identifier)
         if not user or not verify_password(password, user.password_hash):
-            raise ValueError("Invalid email or password")
+            raise ValueError("Invalid username/email or password")
         token = create_access_token(str(user.id))
         return user, token
 
@@ -76,17 +86,36 @@ class UserUseCases:
     def get_user(self, user_id: UUID) -> Optional[User]:
         return self._repo.get_by_id(user_id)
 
-    def create_user(self, email: str, password: str) -> User:
-        existing = self._repo.get_by_email(email)
-        if existing:
+    def create_user(self, username: str, email: str, password: str) -> User:
+        existing_by_username = self._repo.get_by_username(username)
+        if existing_by_username:
+            raise ValueError("Username already registered")
+        existing_by_email = self._repo.get_by_email(email)
+        if existing_by_email:
             raise ValueError("Email already registered")
-        user = User(id=uuid4(), email=email, password_hash=hash_password(password))
+        user = User(
+            id=uuid4(),
+            username=username,
+            email=email,
+            password_hash=hash_password(password),
+        )
         return self._repo.create(user)
 
-    def update_user(self, user_id: UUID, email: Optional[str] = None, password: Optional[str] = None) -> User:
+    def update_user(
+        self,
+        user_id: UUID,
+        username: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+    ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")
+        if username is not None and username != user.username:
+            existing = self._repo.get_by_username(username)
+            if existing:
+                raise ValueError("Username already in use")
+            user.username = username
         if email is not None and email != user.email:
             existing = self._repo.get_by_email(email)
             if existing:
@@ -96,14 +125,19 @@ class UserUseCases:
             user.password_hash = hash_password(password)
         return self._repo.update(user)
 
-    def replace_user(self, user_id: UUID, email: str, password: str) -> User:
+    def replace_user(self, user_id: UUID, username: str, email: str, password: str) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")
+        if username != user.username:
+            existing = self._repo.get_by_username(username)
+            if existing:
+                raise ValueError("Username already in use")
         if email != user.email:
             existing = self._repo.get_by_email(email)
             if existing:
                 raise ValueError("Email already in use")
+        user.username = username
         user.email = email
         user.password_hash = hash_password(password)
         return self._repo.update(user)

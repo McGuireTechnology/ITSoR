@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from itsor.api.deps import get_current_user, get_user_use_cases
 from itsor.api.schemas.user import UserCreate, UserUpdate, UserReplace, UserResponse
 from itsor.domain.models.user import User
-from itsor.use_cases.user_use_cases import UserUseCases
+from itsor.domain.use_cases.user_use_cases import UserUseCases
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -26,7 +26,7 @@ def create_user(
     _: User = Depends(get_current_user),
 ):
     try:
-        return use_cases.create_user(body.email, body.password)
+        return use_cases.create_user(body.username, body.email, body.password)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
@@ -51,7 +51,7 @@ def update_user(
     _: User = Depends(get_current_user),
 ):
     try:
-        return use_cases.update_user(user_id, body.email, body.password)
+        return use_cases.update_user(user_id, body.username, body.email, body.password)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
@@ -64,7 +64,7 @@ def replace_user(
     _: User = Depends(get_current_user),
 ):
     try:
-        return use_cases.replace_user(user_id, body.email, body.password)
+        return use_cases.replace_user(user_id, body.username, body.email, body.password)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 

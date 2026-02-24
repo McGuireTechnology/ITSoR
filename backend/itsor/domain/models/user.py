@@ -5,5 +5,6 @@ from uuid import UUID, uuid4
 @dataclass
 class User:
     email: str
+    username: str
     password_hash: str
     id: UUID = field(default_factory=uuid4)
