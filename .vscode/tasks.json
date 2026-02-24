@@ -4,9 +4,9 @@
     {
       "label": "Workspace: Install",
       "type": "shell",
-      "command": "python -m venv .venv && .venv/bin/pip install -r requirements.txt && npm install",
+      "command": "python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && npm install",
       "windows": {
-        "command": "python -m venv .venv && .venv\\Scripts\\pip install -r requirements.txt && npm install"
+        "command": "python -m venv .venv; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; .\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; npm install"
       },
       "group": "build",
       "presentation": {
@@ -20,7 +20,7 @@
       "type": "shell",
       "command": "rm -rf .venv node_modules backend/__pycache__ backend/itsor/__pycache__",
       "windows": {
-        "command": "if exist .venv rmdir /s /q .venv && if exist node_modules rmdir /s /q node_modules"
+        "command": "if (Test-Path .venv) { Remove-Item .venv -Recurse -Force }; if (Test-Path node_modules) { Remove-Item node_modules -Recurse -Force }; Remove-Item backend/__pycache__, backend/itsor/__pycache__ -Recurse -Force -ErrorAction SilentlyContinue"
       },
       "group": "build",
       "presentation": {
@@ -32,9 +32,9 @@
     {
       "label": "Backend: Start",
       "type": "shell",
-      "command": ".venv/bin/uvicorn itsor.main:app --reload --host 0.0.0.0 --port 8000",
+      "command": "../.venv/bin/python -m uvicorn itsor.main:app --reload --host 0.0.0.0 --port 8000",
       "windows": {
-        "command": ".venv\\Scripts\\uvicorn itsor.main:app --reload --host 0.0.0.0 --port 8000"
+        "command": "..\\.venv\\Scripts\\python.exe -m uvicorn itsor.main:app --reload --host 0.0.0.0 --port 8000"
       },
       "options": {
         "cwd": "${workspaceFolder}/backend"
@@ -61,7 +61,7 @@
       "type": "shell",
       "command": "pkill -f 'uvicorn itsor.main:app' || true",
       "windows": {
-        "command": "for /f \"tokens=5\" %a in ('netstat -aon ^| find \":8000\"') do taskkill /F /PID %a"
+        "command": "$pids = netstat -ano | Select-String ':8000' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Sort-Object -Unique; foreach ($pid in $pids) { if ($pid -match '^[0-9]+$') { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } }"
       },
       "presentation": {
         "reveal": "always",
@@ -98,7 +98,7 @@
       "type": "shell",
       "command": "pkill -f 'vite' || true",
       "windows": {
-        "command": "for /f \"tokens=5\" %a in ('netstat -aon ^| find \":5173\"') do taskkill /F /PID %a"
+        "command": "$pids = netstat -ano | Select-String ':5173' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Sort-Object -Unique; foreach ($pid in $pids) { if ($pid -match '^[0-9]+$') { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } }"
       },
       "presentation": {
         "reveal": "always",
@@ -109,9 +109,9 @@
     {
       "label": "Docs: Start",
       "type": "shell",
-      "command": "../.venv/bin/mkdocs serve --dev-addr 0.0.0.0:8001",
+      "command": "../.venv/bin/python -m mkdocs serve --dev-addr 0.0.0.0:8001",
       "windows": {
-        "command": "..\\.venv\\Scripts\\mkdocs serve --dev-addr 0.0.0.0:8001"
+        "command": "..\\.venv\\Scripts\\python.exe -m mkdocs serve --dev-addr 0.0.0.0:8001"
       },
       "options": {
         "cwd": "${workspaceFolder}/docs"
@@ -138,7 +138,7 @@
       "type": "shell",
       "command": "pkill -f 'mkdocs serve' || true",
       "windows": {
-        "command": "for /f \"tokens=5\" %a in ('netstat -aon ^| find \":8001\"') do taskkill /F /PID %a"
+        "command": "$pids = netstat -ano | Select-String ':8001' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Sort-Object -Unique; foreach ($pid in $pids) { if ($pid -match '^[0-9]+$') { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } }"
       },
       "presentation": {
         "reveal": "always",
