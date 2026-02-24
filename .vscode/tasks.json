@@ -1,0 +1,150 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Workspace: Install",
+      "type": "shell",
+      "command": "python -m venv .venv && .venv/bin/pip install -r requirements.txt && npm install",
+      "windows": {
+        "command": "python -m venv .venv && .venv\\Scripts\\pip install -r requirements.txt && npm install"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Workspace: Clean",
+      "type": "shell",
+      "command": "rm -rf .venv node_modules backend/__pycache__ backend/itsor/__pycache__",
+      "windows": {
+        "command": "if exist .venv rmdir /s /q .venv && if exist node_modules rmdir /s /q node_modules"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: Start",
+      "type": "shell",
+      "command": ".venv/bin/uvicorn itsor.main:app --reload --host 0.0.0.0 --port 8000",
+      "windows": {
+        "command": ".venv\\Scripts\\uvicorn itsor.main:app --reload --host 0.0.0.0 --port 8000"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "INFO:.*uvicorn",
+          "endsPattern": "Application startup complete"
+        }
+      }
+    },
+    {
+      "label": "Backend: Stop",
+      "type": "shell",
+      "command": "pkill -f 'uvicorn itsor.main:app' || true",
+      "windows": {
+        "command": "for /f \"tokens=5\" %a in ('netstat -aon ^| find \":8000\"') do taskkill /F /PID %a"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: Start",
+      "type": "shell",
+      "command": "npm run frontend:dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern": "ready in"
+        }
+      }
+    },
+    {
+      "label": "Frontend: Stop",
+      "type": "shell",
+      "command": "pkill -f 'vite' || true",
+      "windows": {
+        "command": "for /f \"tokens=5\" %a in ('netstat -aon ^| find \":5173\"') do taskkill /F /PID %a"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docs: Start",
+      "type": "shell",
+      "command": "../.venv/bin/mkdocs serve --dev-addr 0.0.0.0:8001",
+      "windows": {
+        "command": "..\\.venv\\Scripts\\mkdocs serve --dev-addr 0.0.0.0:8001"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/docs"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "servers"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "INFO.*-.*mkdocs",
+          "endsPattern": "Serving on"
+        }
+      }
+    },
+    {
+      "label": "Docs: Stop",
+      "type": "shell",
+      "command": "pkill -f 'mkdocs serve' || true",
+      "windows": {
+        "command": "for /f \"tokens=5\" %a in ('netstat -aon ^| find \":8001\"') do taskkill /F /PID %a"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

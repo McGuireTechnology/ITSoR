@@ -8,11 +8,15 @@ venv/
 dist/
 build/
 
+# SQLite databases
+*.db
+
 # MkDocs build output
 site/
 
 # Node / frontend dependencies
 node_modules/
+package-lock.json
 
 # Environment files
 .env
