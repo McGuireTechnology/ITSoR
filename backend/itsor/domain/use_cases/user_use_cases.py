@@ -1,12 +1,12 @@
 import logging
 import os
 from datetime import datetime, timedelta, timezone
-from uuid import UUID, uuid4
 from typing import List, Optional
 
 import bcrypt
 from jose import JWTError, jwt
 
+from itsor.domain.ids import generate_ulid
 from itsor.domain.models.user import User
 from itsor.domain.ports.user_repository import UserRepository
 
@@ -53,7 +53,7 @@ class UserUseCases:
         if existing_by_email:
             raise ValueError("Email already registered")
         user = User(
-            id=uuid4(),
+            id=generate_ulid(),
             username=username,
             email=email,
             password_hash=hash_password(password),
@@ -75,15 +75,12 @@ class UserUseCases:
         user_id = decode_access_token(token)
         if not user_id:
             return None
-        try:
-            return self._repo.get_by_id(UUID(user_id))
-        except ValueError:
-            return None
+        return self._repo.get_by_id(user_id)
 
     def list_users(self) -> List[User]:
         return self._repo.list()
 
-    def get_user(self, user_id: UUID) -> Optional[User]:
+    def get_user(self, user_id: str) -> Optional[User]:
         return self._repo.get_by_id(user_id)
 
     def create_user(self, username: str, email: str, password: str) -> User:
@@ -94,7 +91,7 @@ class UserUseCases:
         if existing_by_email:
             raise ValueError("Email already registered")
         user = User(
-            id=uuid4(),
+            id=generate_ulid(),
             username=username,
             email=email,
             password_hash=hash_password(password),
@@ -103,7 +100,7 @@ class UserUseCases:
 
     def update_user(
         self,
-        user_id: UUID,
+        user_id: str,
         username: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
@@ -125,7 +122,7 @@ class UserUseCases:
             user.password_hash = hash_password(password)
         return self._repo.update(user)
 
-    def replace_user(self, user_id: UUID, username: str, email: str, password: str) -> User:
+    def replace_user(self, user_id: str, username: str, email: str, password: str) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")
@@ -142,7 +139,7 @@ class UserUseCases:
         user.password_hash = hash_password(password)
         return self._repo.update(user)
 
-    def delete_user(self, user_id: UUID) -> None:
+    def delete_user(self, user_id: str) -> None:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")

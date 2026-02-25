@@ -1,5 +1,4 @@
 from typing import List, Optional
-from uuid import UUID
 
 from itsor.domain.models.user import User
 from itsor.domain.ports.user_repository import UserRepository
@@ -7,9 +6,9 @@ from itsor.domain.ports.user_repository import UserRepository
 
 class InMemoryUserRepository(UserRepository):
     def __init__(self) -> None:
-        self._users: dict[UUID, User] = {}
+        self._users: dict[str, User] = {}
 
-    def get_by_id(self, user_id: UUID) -> Optional[User]:
+    def get_by_id(self, user_id: str) -> Optional[User]:
         return self._users.get(user_id)
 
     def get_by_email(self, email: str) -> Optional[User]:
@@ -37,5 +36,5 @@ class InMemoryUserRepository(UserRepository):
         self._users[user.id] = user
         return user
 
-    def delete(self, user_id: UUID) -> None:
+    def delete(self, user_id: str) -> None:
         self._users.pop(user_id, None)

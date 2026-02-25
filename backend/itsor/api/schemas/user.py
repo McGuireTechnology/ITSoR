@@ -1,4 +1,3 @@
-from uuid import UUID
 from pydantic import BaseModel, EmailStr
 
 
@@ -22,6 +21,6 @@ class UserReplace(UserBase):
 
 
 class UserResponse(UserBase):
-    id: UUID
+    id: str
 
     model_config = {"from_attributes": True}

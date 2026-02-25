@@ -1,4 +1,3 @@
-from uuid import UUID
 from typing import Optional, List
 
 from sqlalchemy.orm import Session
@@ -14,7 +13,7 @@ class SQLAlchemyUserRepository(UserRepository):
 
     def _to_domain(self, record: UserModel) -> User:
         return User(
-            id=UUID(record.id),
+            id=record.id,
             username=record.username,
             email=record.email,
             password_hash=record.password_hash,
@@ -22,14 +21,14 @@ class SQLAlchemyUserRepository(UserRepository):
 
     def _to_model(self, user: User) -> UserModel:
         return UserModel(
-            id=str(user.id),
+            id=user.id,
             username=user.username,
             email=user.email,
             password_hash=user.password_hash,
         )
 
-    def get_by_id(self, user_id: UUID) -> Optional[User]:
-        record = self._db.query(UserModel).filter(UserModel.id == str(user_id)).first()
+    def get_by_id(self, user_id: str) -> Optional[User]:
+        record = self._db.query(UserModel).filter(UserModel.id == user_id).first()
         return self._to_domain(record) if record else None
 
     def get_by_email(self, email: str) -> Optional[User]:
@@ -52,7 +51,7 @@ class SQLAlchemyUserRepository(UserRepository):
         return self._to_domain(record)
 
     def update(self, user: User) -> User:
-        record = self._db.query(UserModel).filter(UserModel.id == str(user.id)).first()
+        record = self._db.query(UserModel).filter(UserModel.id == user.id).first()
         if not record:
             raise ValueError(f"User {user.id} not found")
         record.username = user.username
@@ -62,8 +61,8 @@ class SQLAlchemyUserRepository(UserRepository):
         self._db.refresh(record)
         return self._to_domain(record)
 
-    def delete(self, user_id: UUID) -> None:
-        record = self._db.query(UserModel).filter(UserModel.id == str(user_id)).first()
+    def delete(self, user_id: str) -> None:
+        record = self._db.query(UserModel).filter(UserModel.id == user_id).first()
         if record:
             self._db.delete(record)
             self._db.commit()

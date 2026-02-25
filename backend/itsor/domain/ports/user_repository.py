@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from uuid import UUID
 from typing import Optional, List
 
 from itsor.domain.models.user import User
@@ -7,7 +6,7 @@ from itsor.domain.models.user import User
 
 class UserRepository(ABC):
     @abstractmethod
-    def get_by_id(self, user_id: UUID) -> Optional[User]:
+    def get_by_id(self, user_id: str) -> Optional[User]:
         ...
 
     @abstractmethod
@@ -31,5 +30,5 @@ class UserRepository(ABC):
         ...
 
     @abstractmethod
-    def delete(self, user_id: UUID) -> None:
+    def delete(self, user_id: str) -> None:
         ...

@@ -155,7 +155,7 @@ def test_delete_user(client):
 
 def test_get_user_not_found(client):
     headers = _auth_headers(client)
-    response = client.get("/users/00000000-0000-0000-0000-000000000000", headers=headers)
+    response = client.get("/users/01ARZ3NDEKTSV4RRFFQ69G5FAV", headers=headers)
     assert response.status_code == 404
 
 
@@ -170,3 +170,56 @@ def test_cookie_auth_without_bearer_header(client):
 
     response = client.get("/users")
     assert response.status_code == 200
+
+
+def test_list_tenants(client):
+    headers = _auth_headers(client)
+    response = client.get("/tenants", headers=headers)
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+def test_create_tenant(client):
+    headers = _auth_headers(client)
+    response = client.post("/tenants", json={"name": "Acme"}, headers=headers)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "Acme"
+    assert "id" in data
+
+
+def test_create_tenant_duplicate_name(client):
+    headers = _auth_headers(client)
+    client.post("/tenants", json={"name": "Acme"}, headers=headers)
+    response = client.post("/tenants", json={"name": "Acme"}, headers=headers)
+    assert response.status_code == 409
+
+
+def test_get_tenant(client):
+    headers = _auth_headers(client)
+    created = client.post("/tenants", json={"name": "Acme"}, headers=headers).json()
+    response = client.get(f"/tenants/{created['id']}", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["name"] == "Acme"
+
+
+def test_update_tenant(client):
+    headers = _auth_headers(client)
+    created = client.post("/tenants", json={"name": "Acme"}, headers=headers).json()
+    response = client.patch(f"/tenants/{created['id']}", json={"name": "Acme Updated"}, headers=headers)
+    assert response.status_code == 200
+    assert response.json()["name"] == "Acme Updated"
+
+
+def test_delete_tenant(client):
+    headers = _auth_headers(client)
+    created = client.post("/tenants", json={"name": "Acme"}, headers=headers).json()
+    response = client.delete(f"/tenants/{created['id']}", headers=headers)
+    assert response.status_code == 204
+    get_resp = client.get(f"/tenants/{created['id']}", headers=headers)
+    assert get_resp.status_code == 404
+
+
+def test_tenants_requires_auth(client):
+    response = client.get("/tenants")
+    assert response.status_code == 401

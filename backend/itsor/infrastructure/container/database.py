@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
 
+from itsor.infrastructure.models import tenant as tenant_models  # noqa: F401
 from itsor.infrastructure.models.user import Base
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./itsor.db")

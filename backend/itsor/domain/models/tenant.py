@@ -4,8 +4,6 @@ from itsor.domain.ids import generate_ulid
 
 
 @dataclass
-class User:
-    email: str
-    username: str
-    password_hash: str
+class Tenant:
+    name: str
     id: str = field(default_factory=generate_ulid)

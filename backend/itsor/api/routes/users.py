@@ -1,4 +1,3 @@
-from uuid import UUID
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -33,7 +32,7 @@ def create_user(
 
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(
-    user_id: UUID,
+    user_id: str,
     use_cases: UserUseCases = Depends(get_user_use_cases),
     _: User = Depends(get_current_user),
 ):
@@ -45,7 +44,7 @@ def get_user(
 
 @router.patch("/{user_id}", response_model=UserResponse)
 def update_user(
-    user_id: UUID,
+    user_id: str,
     body: UserUpdate,
     use_cases: UserUseCases = Depends(get_user_use_cases),
     _: User = Depends(get_current_user),
@@ -58,7 +57,7 @@ def update_user(
 
 @router.put("/{user_id}", response_model=UserResponse)
 def replace_user(
-    user_id: UUID,
+    user_id: str,
     body: UserReplace,
     use_cases: UserUseCases = Depends(get_user_use_cases),
     _: User = Depends(get_current_user),
@@ -71,7 +70,7 @@ def replace_user(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
-    user_id: UUID,
+    user_id: str,
     use_cases: UserUseCases = Depends(get_user_use_cases),
     _: User = Depends(get_current_user),
 ):

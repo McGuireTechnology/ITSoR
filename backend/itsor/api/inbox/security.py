@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
-from uuid import uuid4
+
+import ulid
 
 from fastapi import HTTPException, status
 
@@ -75,7 +76,7 @@ TOKENS: dict[str, str] = {}
 
 
 def _new_id(prefix: str) -> str:
-    return f"{prefix}-{uuid4().hex[:8]}"
+    return f"{prefix}-{str(ulid.new())[:8].lower()}"
 
 
 def _user_to_dict(user: User) -> dict[str, Any]:
@@ -181,7 +182,7 @@ def authenticate_user(username: str, password: str) -> User | None:
 
 
 def issue_access_token(user: User) -> str:
-    token = f"token-{user.id}-{uuid4().hex[:8]}"
+    token = f"token-{user.id}-{str(ulid.new())[:8].lower()}"
     TOKENS[token] = user.id
     return token
 
