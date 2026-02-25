@@ -5,7 +5,9 @@ from itsor.domain.ids import generate_ulid
 
 @dataclass
 class User:
-    email: str
-    username: str
-    password_hash: str
     id: str = field(default_factory=generate_ulid)
+    name: str = ""
+    group_id: str | None = None
+    email: str = ""
+    username: str = ""
+    password_hash: str = ""

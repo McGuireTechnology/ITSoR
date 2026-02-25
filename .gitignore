@@ -10,6 +10,8 @@ build/
 
 # SQLite databases
 *.db
+*.db-wal
+*.db-shm
 
 # MkDocs build output
 site/

@@ -3,8 +3,8 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from itsor.api.deps import get_current_user, get_user_use_cases
-from itsor.api.schemas.auth import LoginRequest, SignupRequest, TokenResponse
-from itsor.domain.models.user import User
+from itsor.api.schemas.auth_schamas import LoginRequest, SignupRequest, TokenResponse
+from itsor.domain.models import User
 from itsor.domain.use_cases.user_use_cases import UserUseCases
 
 router = APIRouter(tags=["auth"])
@@ -30,7 +30,13 @@ def _set_session_cookie(response: Response, token: str) -> None:
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def signup(body: SignupRequest, response: Response, use_cases: UserUseCases = Depends(get_user_use_cases)):
     try:
-        _, token = use_cases.signup(body.username, body.email, body.password)
+        _, token = use_cases.signup(
+            body.username,
+            body.email,
+            body.password,
+            invite_group_id=body.invite_group_id,
+            create_tenant_name=body.create_tenant_name,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     _set_session_cookie(response, token)

@@ -12,3 +12,9 @@ ITSoR is an IT System of Record that provides a centralized platform for managin
 
 - [Backend](../backend/README.md) – FastAPI service
 - [Frontend](../frontend/README.md) – Vue/Vite application
+
+
+
+## 
+
+CMDB

@@ -1,34 +1,14 @@
-from typing import List, Optional
-
-from itsor.domain.models.tenant import Tenant
+from itsor.domain.models import Tenant
 from itsor.domain.ports.tenant_repository import TenantRepository
+from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 
-class InMemoryTenantRepository(TenantRepository):
+class InMemoryTenantRepository(InMemoryBaseRepository[Tenant], TenantRepository):
     def __init__(self) -> None:
-        self._tenants: dict[str, Tenant] = {}
+        super().__init__("Tenant")
 
-    def get_by_id(self, tenant_id: str) -> Optional[Tenant]:
-        return self._tenants.get(tenant_id)
-
-    def get_by_name(self, name: str) -> Optional[Tenant]:
-        for tenant in self._tenants.values():
+    def get_by_name(self, name: str) -> Tenant | None:
+        for tenant in self._items.values():
             if tenant.name == name:
                 return tenant
         return None
-
-    def list(self) -> List[Tenant]:
-        return list(self._tenants.values())
-
-    def create(self, tenant: Tenant) -> Tenant:
-        self._tenants[tenant.id] = tenant
-        return tenant
-
-    def update(self, tenant: Tenant) -> Tenant:
-        if tenant.id not in self._tenants:
-            raise ValueError(f"Tenant {tenant.id} not found")
-        self._tenants[tenant.id] = tenant
-        return tenant
-
-    def delete(self, tenant_id: str) -> None:
-        self._tenants.pop(tenant_id, None)

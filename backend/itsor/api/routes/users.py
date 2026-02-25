@@ -3,8 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from itsor.api.deps import get_current_user, get_user_use_cases
-from itsor.api.schemas.user import UserCreate, UserUpdate, UserReplace, UserResponse
-from itsor.domain.models.user import User
+from itsor.api.schemas.user_schamas import UserCreate, UserUpdate, UserReplace, UserResponse
+from itsor.domain.models import User
 from itsor.domain.use_cases.user_use_cases import UserUseCases
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -25,7 +25,13 @@ def create_user(
     _: User = Depends(get_current_user),
 ):
     try:
-        return use_cases.create_user(body.username, body.email, body.password)
+        return use_cases.create_user(
+            body.username,
+            body.email,
+            body.password,
+            invite_group_id=body.invite_group_id,
+            create_tenant_name=body.create_tenant_name,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 

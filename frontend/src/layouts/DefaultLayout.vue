@@ -1,27 +1,48 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import CommandBar from '../components/CommandBar.vue'
+import ContextInspectorPane from '../components/ContextInspectorPane.vue'
+import GlobalNavigationRail from '../components/GlobalNavigationRail.vue'
+import PageHeader from '../components/PageHeader.vue'
+import SectionNavigator from '../components/SectionNavigator.vue'
+import TopBar from '../components/TopBar.vue'
+
 defineProps({
   isAuthenticated: {
     type: Boolean,
     required: true,
   },
 })
+
+const route = useRoute()
+const title = computed(() => route.meta.title || 'Workspace')
 </script>
 
 <template>
-  <header class="app-header">
-    <h1>ITSoR Frontend</h1>
-    <nav class="app-nav">
-      <RouterLink v-if="!isAuthenticated" to="/login">Login</RouterLink>
-      <RouterLink v-if="!isAuthenticated" to="/signup">Signup</RouterLink>
-      <RouterLink to="/tenants">Tenants</RouterLink>
-      <RouterLink to="/users">Users</RouterLink>
-      <RouterLink to="/users/me">Users Me</RouterLink>
-      <RouterLink v-if="isAuthenticated" to="/logout">Logout</RouterLink>
-    </nav>
-    <p class="auth-state">Auth: {{ isAuthenticated ? 'signed in' : 'signed out' }}</p>
-  </header>
+  <div class="admin-root">
+    <TopBar />
 
-  <main class="page-body">
-    <slot />
-  </main>
+    <div class="admin-shell">
+      <aside class="admin-rail">
+        <GlobalNavigationRail />
+      </aside>
+
+      <aside class="admin-section-nav">
+        <SectionNavigator />
+      </aside>
+
+      <section class="admin-workspace">
+        <PageHeader />
+        <CommandBar />
+        <main class="page-body">
+          <slot />
+        </main>
+      </section>
+
+      <aside class="admin-inspector">
+        <ContextInspectorPane />
+      </aside>
+    </div>
+  </div>
 </template>

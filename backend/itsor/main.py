@@ -6,8 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from itsor.infrastructure.container.database import create_tables
 from itsor.api.routes.auth import router as auth_router
+from itsor.api.routes.entity_records import router as entity_records_router
+from itsor.api.routes.entity_types import router as entity_types_router
+from itsor.api.routes.groups import router as groups_router
+from itsor.api.routes.namespaces import router as namespaces_router
 from itsor.api.routes.tenants import router as tenants_router
 from itsor.api.routes.users import router as users_router
+from itsor.api.routes.workspaces import router as workspaces_router
 
 
 @asynccontextmanager
@@ -59,6 +64,11 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(tenants_router)
+app.include_router(groups_router)
+app.include_router(workspaces_router)
+app.include_router(namespaces_router)
+app.include_router(entity_types_router)
+app.include_router(entity_records_router)
 
 
 @app.get("/")

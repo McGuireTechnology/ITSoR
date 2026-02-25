@@ -3,8 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from itsor.api.deps import get_current_user, get_tenant_use_cases
-from itsor.api.schemas.tenant import TenantCreate, TenantUpdate, TenantReplace, TenantResponse
-from itsor.domain.models.user import User
+from itsor.api.schemas.tenant_schamas import TenantCreate, TenantUpdate, TenantReplace, TenantResponse
+from itsor.domain.models import User
 from itsor.domain.use_cases.tenant_use_cases import TenantUseCases
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
@@ -22,10 +22,10 @@ def list_tenants(
 def create_tenant(
     body: TenantCreate,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     try:
-        return use_cases.create_tenant(body.name)
+        return use_cases.create_tenant(body.name, creator_user_id=current_user.id)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 

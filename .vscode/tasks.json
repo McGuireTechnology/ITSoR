@@ -4,9 +4,9 @@
     {
       "label": "Workspace: Install",
       "type": "shell",
-      "command": "python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && npm install",
+      "command": "python -m venv .venv && .venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -r requirements.txt && npm install",
       "windows": {
-        "command": "python -m venv .venv; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; .\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; npm install"
+        "command": "python -m venv .venv; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; .\\.venv\\Scripts\\python.exe -m pip install --upgrade pip; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; .\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; npm install"
       },
       "group": "build",
       "presentation": {
@@ -61,7 +61,7 @@
       "type": "shell",
       "command": "pkill -f 'uvicorn itsor.main:app' || true",
       "windows": {
-        "command": "$pids = netstat -ano | Select-String ':8000' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Sort-Object -Unique; foreach ($pid in $pids) { if ($pid -match '^[0-9]+$') { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } }"
+        "command": "$portPids = @(netstat -ano | Select-String ':8000' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Where-Object { $_ -match '^[0-9]+$' } | Sort-Object -Unique); foreach ($processId in $portPids) { Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue }; exit 0"
       },
       "presentation": {
         "reveal": "always",
@@ -98,7 +98,7 @@
       "type": "shell",
       "command": "pkill -f 'vite' || true",
       "windows": {
-        "command": "$pids = netstat -ano | Select-String ':5173' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Sort-Object -Unique; foreach ($pid in $pids) { if ($pid -match '^[0-9]+$') { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } }"
+        "command": "$portPids = @(netstat -ano | Select-String ':5173' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Where-Object { $_ -match '^[0-9]+$' } | Sort-Object -Unique); foreach ($processId in $portPids) { Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue }; exit 0"
       },
       "presentation": {
         "reveal": "always",
@@ -138,7 +138,7 @@
       "type": "shell",
       "command": "pkill -f 'mkdocs serve' || true",
       "windows": {
-        "command": "$pids = netstat -ano | Select-String ':8001' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Sort-Object -Unique; foreach ($pid in $pids) { if ($pid -match '^[0-9]+$') { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } }"
+        "command": "$portPids = @(netstat -ano | Select-String ':8001' | ForEach-Object { (($_ -split '\\s+')[-1]) } | Where-Object { $_ -match '^[0-9]+$' } | Sort-Object -Unique); foreach ($processId in $portPids) { Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue }; exit 0"
       },
       "presentation": {
         "reveal": "always",

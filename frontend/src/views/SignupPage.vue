@@ -53,5 +53,9 @@ async function handleSubmit() {
       <button type="submit" :disabled="loading">{{ loading ? 'Creating...' : 'Signup' }}</button>
       <p v-if="error" class="error">{{ error }}</p>
     </form>
+    <p>
+      Already have an account?
+      <RouterLink to="/login">Login</RouterLink>
+    </p>
   </section>
 </template>

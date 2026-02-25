@@ -1,30 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Optional, List
+from typing import Optional
 
-from itsor.domain.models.tenant import Tenant
+from itsor.domain.models import Tenant
+from itsor.domain.ports.base_repository import BaseRepository
 
 
-class TenantRepository(ABC):
-    @abstractmethod
-    def get_by_id(self, tenant_id: str) -> Optional[Tenant]:
-        ...
-
+class TenantRepository(BaseRepository[Tenant], ABC):
     @abstractmethod
     def get_by_name(self, name: str) -> Optional[Tenant]:
-        ...
-
-    @abstractmethod
-    def list(self) -> List[Tenant]:
-        ...
-
-    @abstractmethod
-    def create(self, tenant: Tenant) -> Tenant:
-        ...
-
-    @abstractmethod
-    def update(self, tenant: Tenant) -> Tenant:
-        ...
-
-    @abstractmethod
-    def delete(self, tenant_id: str) -> None:
         ...
