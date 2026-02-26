@@ -1,45 +1,8 @@
-site_name: ITSoR
-site_description: IT System of Record
+site_name: ITSoR - Docs
+site_description: Information Technology System of Record - Documentation
 site_author: McGuireTechnology
 repo_url: https://github.com/McGuireTechnology/ITSoR
 repo_name: McGuireTechnology/ITSoR
-
-theme:
-  name: material
-  palette:
-    - scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.top
-    - search.highlight
-    - search.share
-
-nav:
-  - Home: index.md
-
-plugins:
-  - search
-
-markdown_extensions:
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences
-
-
-site_name: ITSoR - Docs
-site_description: Information Technology System of Record - Documentation
 site_url: https://docs.itsor.app
 
 theme:
@@ -62,45 +25,21 @@ theme:
         icon: material/weather-night
         name: Switch to dark mode
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.sections
+    - navigation.expand
+    - navigation.indexes
     - navigation.top
     - navigation.tracking
+    - navigation.path
     - toc.follow
     - content.code.copy
     - search.suggest
     - search.highlight
-
-nav:
-  - Home: README.md
-  - Getting Started: getting-started.md
-  - Reading Path: reading-path.md
-  - Local Config: local-config.md
-  - Backend Env Vars: backend-env.md
-  - Backend Deployment Runtime: backend-deployment-runtime.md
-  - Domain Model Reference: domain-model-reference.md
-  - Backend Auth Setup: backend-auth-setup.md
-  - Frontend Auth Integration: frontend-auth-integration.md
-  - API Reference Strategy: api-reference-strategy.md
-  - Auth Token Strategy: auth-token-strategy.md
-  - Security Runbooks: security-runbooks.md
-  - Standards Baseline: standards-baseline.md
-  - Audience Map: audience-map.md
-  - Information Architecture: information-architecture.md
-  - References: references.md
-  - Environments: environments.md
-  - Branch Protection: branch-protection.md
-  - Docs Deployment: deploy-docs.md
-  - Docs Style Guide: docs-style-guide.md
-  - Branding: branding.md
-  - TODO: todo/README.md
-  - Documentation Cleanup TODO: todo/documentation-cleanup.md
-  - User Guide: user/README.md
-  - Developer Guide: developer/README.md
-  - Architecture: architecture.md
-  - System Definition: system-definition.md
-  - ADRs: adr/README.md
-  - Contributing: contributing.md
 
 plugins:
   - search

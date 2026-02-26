@@ -10,8 +10,8 @@ ITSoR is an IT System of Record that provides a centralized platform for managin
 
 ## Getting Started
 
-- [Backend](../backend/README.md) – FastAPI service
-- [Frontend](../frontend/README.md) – Vue/Vite application
+- [Backend](https://github.com/McGuireTechnology/ITSoR/tree/main/backend) – FastAPI service
+- [Frontend](https://github.com/McGuireTechnology/ITSoR/tree/main/frontend) – Vue/Vite application
 
 
 
