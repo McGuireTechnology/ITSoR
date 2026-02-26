@@ -17,5 +17,8 @@ class GroupReplace(TenantScopedNameSchema):
 
 class GroupResponse(TenantScopedNameSchema):
     id: str
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: int
 
     model_config = {"from_attributes": True}

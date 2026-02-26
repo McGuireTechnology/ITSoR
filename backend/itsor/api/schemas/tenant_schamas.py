@@ -17,5 +17,8 @@ class TenantReplace(NameSchema):
 
 class TenantResponse(NameSchema):
     id: str
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: int
 
     model_config = {"from_attributes": True}
