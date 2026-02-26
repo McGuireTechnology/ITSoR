@@ -1,22 +1,67 @@
+<script setup>
+import { computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { activeWorkspace, setActiveWorkspace, syncWorkspaceFromDomain } from '../lib/workspaceNav'
+
+defineProps({
+  collapsed: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+defineEmits(['toggle'])
+
+const route = useRoute()
+
+watch(
+  () => route.meta.domain,
+  (domain) => {
+    syncWorkspaceFromDomain(domain)
+  },
+  { immediate: true },
+)
+
+const isIdentityActive = computed(() => activeWorkspace.value === 'identity')
+const isCustomizationActive = computed(() => activeWorkspace.value === 'customization')
+</script>
+
 <template>
-  <nav class="rail-nav">
-    <h2 class="rail-title">Navigation</h2>
+  <nav class="rail-nav" :class="{ collapsed }">
+    <div class="rail-scroll">
+      <RouterLink class="rail-link" to="/home">
+        <span class="rail-icon">⌂</span>
+        <span v-if="!collapsed">Home</span>
+      </RouterLink>
 
-    <RouterLink to="/home">Home</RouterLink>
+      <RouterLink
+        class="rail-link"
+        :class="{ 'workspace-link-active': isIdentityActive }"
+        to="/users"
+        @click="setActiveWorkspace('identity')"
+      >
+        <span class="rail-icon">🪪</span>
+        <span v-if="!collapsed">Identity</span>
+      </RouterLink>
+      <RouterLink
+        class="rail-link"
+        :class="{ 'workspace-link-active': isCustomizationActive }"
+        to="/workspaces"
+        @click="setActiveWorkspace('customization')"
+      >
+        <span class="rail-icon">🧩</span>
+        <span v-if="!collapsed">Customization</span>
+      </RouterLink>
+    </div>
 
-    <p class="rail-section-label">Identity</p>
-    <RouterLink to="/users">Users</RouterLink>
-    <RouterLink to="/groups">Groups</RouterLink>
-    <RouterLink to="/tenants">Tenants</RouterLink>
-
-    <p class="rail-section-label">Data Model</p>
-    <RouterLink to="/workspaces">Workspaces</RouterLink>
-    <RouterLink to="/namespaces">Namespaces</RouterLink>
-    <RouterLink to="/entity-types">Entity Types</RouterLink>
-    <RouterLink to="/entity-records">Entity Records</RouterLink>
-
-    <p class="rail-section-label">Account</p>
-    <RouterLink to="/users/me">My Account</RouterLink>
-    <RouterLink to="/logout">Sign out</RouterLink>
+    <button
+      type="button"
+      class="rail-collapse-toggle"
+      :aria-label="collapsed ? 'Expand navigation pane' : 'Collapse navigation pane'"
+      @click="$emit('toggle')"
+    >
+      <span>{{ collapsed ? '»' : '«' }}</span>
+      <span v-if="!collapsed">Collapse</span>
+    </button>
   </nav>
 </template>

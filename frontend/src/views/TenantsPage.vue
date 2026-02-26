@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { createTenant, listTenants } from '../lib/api'
+import { formatNameId } from '../lib/formatters'
 
 const tenants = ref([])
 const name = ref('')
@@ -38,15 +39,15 @@ onMounted(loadTenants)
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Tenants</h2>
+  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
+    <h2 class="h3 fw-bold mb-3 text-brand-deep">Tenants</h2>
 
     <form class="form" @submit.prevent="handleCreateTenant">
       <label>
         Tenant Name
         <input v-model="name" type="text" required />
       </label>
-      <button type="submit" :disabled="creating">
+      <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
         {{ creating ? 'Creating...' : 'Create Tenant' }}
       </button>
     </form>
@@ -56,8 +57,8 @@ onMounted(loadTenants)
 
     <ul v-else class="user-list">
       <li v-for="tenant in tenants" :key="tenant.id">
-        <RouterLink :to="`/tenants/${tenant.id}`">{{ tenant.name }}</RouterLink>
-        <span class="meta">{{ tenant.id }}</span>
+        <RouterLink :to="`/tenants/${tenant.id}`">{{ formatNameId(tenant.name, tenant.id, '(unnamed tenant)') }}</RouterLink>
+        <span class="meta">{{ tenant.id }} · owner: {{ tenant.owner_id || '-' }} · group: {{ tenant.group_id || '-' }} · perms: {{ tenant.permissions ?? '-' }}</span>
       </li>
     </ul>
   </section>

@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { createEntityRecord, listEntityRecords } from '../lib/api'
+import { formatNameId } from '../lib/formatters'
 
 const entityRecords = ref([])
 const entityTypeId = ref('')
@@ -78,8 +79,8 @@ onMounted(loadEntityRecords)
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Entity Records</h2>
+  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
+    <h2 class="h3 fw-bold mb-3 text-brand-deep">Entity Records</h2>
 
     <form class="form section-gap" @submit.prevent="handleSearch">
       <label>
@@ -102,7 +103,7 @@ onMounted(loadEntityRecords)
           <option value="contains">contains</option>
         </select>
       </label>
-      <button type="submit" :disabled="searching">
+      <button class="btn btn-outline-secondary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white" type="submit" :disabled="searching">
         {{ searching ? 'Searching...' : 'Apply Filter' }}
       </button>
     </form>
@@ -120,7 +121,7 @@ onMounted(loadEntityRecords)
         Values JSON
         <textarea v-model="valuesJsonText" rows="6" required />
       </label>
-      <button type="submit" :disabled="creating">
+      <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
         {{ creating ? 'Creating...' : 'Create Entity Record' }}
       </button>
     </form>
@@ -130,8 +131,8 @@ onMounted(loadEntityRecords)
 
     <ul v-else class="user-list">
       <li v-for="entityRecord in entityRecords" :key="entityRecord.id">
-        <RouterLink :to="`/entity-records/${entityRecord.id}`">{{ entityRecord.name || '(unnamed)' }}</RouterLink>
-        <span class="meta">{{ entityRecord.id }}</span>
+        <RouterLink :to="`/entity-records/${entityRecord.id}`">{{ formatNameId(entityRecord.name, entityRecord.id, '(unnamed)') }}</RouterLink>
+        <span class="meta">{{ entityRecord.id }} · owner: {{ entityRecord.owner_id || '-' }} · group: {{ entityRecord.group_id || '-' }} · perms: {{ entityRecord.permissions ?? '-' }}</span>
       </li>
     </ul>
   </section>

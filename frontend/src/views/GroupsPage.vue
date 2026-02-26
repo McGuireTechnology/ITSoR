@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { createGroup, listGroups } from '../lib/api'
+import { formatNameId } from '../lib/formatters'
 
 const groups = ref([])
 const name = ref('')
@@ -38,15 +39,15 @@ onMounted(loadGroups)
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Groups</h2>
+  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
+    <h2 class="h3 fw-bold mb-3 text-brand-deep">Groups</h2>
 
     <form class="form" @submit.prevent="handleCreateGroup">
       <label>
         Group Name
         <input v-model="name" type="text" required />
       </label>
-      <button type="submit" :disabled="creating">
+      <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
         {{ creating ? 'Creating...' : 'Create Group' }}
       </button>
     </form>
@@ -56,8 +57,8 @@ onMounted(loadGroups)
 
     <ul v-else class="user-list">
       <li v-for="group in groups" :key="group.id">
-        <RouterLink :to="`/groups/${group.id}`">{{ group.name }}</RouterLink>
-        <span class="meta">{{ group.id }}</span>
+        <RouterLink :to="`/groups/${group.id}`">{{ formatNameId(group.name, group.id, '(unnamed group)') }}</RouterLink>
+        <span class="meta">{{ group.id }} · owner: {{ group.owner_id || '-' }} · group: {{ group.group_id || '-' }} · perms: {{ group.permissions ?? '-' }}</span>
       </li>
     </ul>
   </section>

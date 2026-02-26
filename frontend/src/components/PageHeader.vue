@@ -29,5 +29,10 @@ const breadcrumbs = computed(() => {
       </span>
     </nav>
     <h1>{{ pageTitle }}</h1>
+    <div class="page-tabs" role="tablist" aria-label="Page tabs">
+      <span class="page-tab page-tab-active">Overview</span>
+      <span class="page-tab">Monitoring</span>
+      <span class="page-tab">Properties</span>
+    </div>
   </header>
 </template>

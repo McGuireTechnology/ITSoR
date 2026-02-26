@@ -81,8 +81,8 @@ watch(
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Tenant Detail</h2>
+  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
+    <h2 class="h3 fw-bold mb-3 text-brand-deep">Tenant Detail</h2>
     <p v-if="loading">Loading tenant...</p>
     <p v-else-if="error" class="error">{{ error }}</p>
 
@@ -92,17 +92,24 @@ watch(
           Name
           <input v-model="name" type="text" required />
         </label>
-        <button type="submit" :disabled="saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
+        <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
       </form>
 
       <dl class="user-detail section-gap">
         <dt>ID</dt>
         <dd>{{ tenant.id }}</dd>
+        <dt>Owner</dt>
+        <dd>{{ tenant.owner_id || '-' }}</dd>
+        <dt>Group</dt>
+        <dd>{{ tenant.group_id || '-' }}</dd>
+        <dt>Permissions</dt>
+        <dd>{{ tenant.permissions ?? '-' }}</dd>
       </dl>
 
       <div class="section-gap">
         <button
           v-if="!confirmingDelete"
+          class="btn btn-outline-secondary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white"
           type="button"
           :disabled="deleting"
           @click="startDeleteConfirmation"
@@ -112,10 +119,10 @@ watch(
 
         <div v-else class="confirm-row">
           <p class="error">Delete tenant "{{ tenant.name }}"?</p>
-          <button type="button" :disabled="deleting" @click="handleDelete">
+          <button class="btn btn-primary bg-accent hover:bg-primary border-0" type="button" :disabled="deleting" @click="handleDelete">
             {{ deleting ? 'Deleting...' : 'Confirm Delete' }}
           </button>
-          <button type="button" :disabled="deleting" @click="cancelDeleteConfirmation">
+          <button class="btn btn-outline-secondary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white" type="button" :disabled="deleting" @click="cancelDeleteConfirmation">
             Cancel
           </button>
         </div>

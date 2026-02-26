@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getUserById } from '../lib/api'
+import { formatNameId } from '../lib/formatters'
 
 const route = useRoute()
 
@@ -34,8 +35,8 @@ watch(
 </script>
 
 <template>
-  <section class="panel">
-    <h2>User Detail</h2>
+  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
+    <h2 class="h3 fw-bold mb-3 text-brand-deep">User Detail</h2>
     <p v-if="loading">Loading user...</p>
     <p v-else-if="error" class="error">{{ error }}</p>
 
@@ -43,7 +44,7 @@ watch(
       <dt>ID</dt>
       <dd>{{ user.id }}</dd>
       <dt>Username</dt>
-      <dd>{{ user.username }}</dd>
+      <dd>{{ formatNameId(user.username, user.id, '(unnamed user)') }}</dd>
       <dt>Email</dt>
       <dd>{{ user.email }}</dd>
     </dl>

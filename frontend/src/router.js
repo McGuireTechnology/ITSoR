@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { clearToken, hasValidToken } from './lib/auth'
 import LoginPage from './views/LoginPage.vue'
 import LogoutPage from './views/LogoutPage.vue'
 import SignupPage from './views/SignupPage.vue'
@@ -45,6 +46,27 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+const authOnlyPaths = new Set(['/login', '/signup'])
+const publicPaths = new Set(['/login', '/signup', '/logout'])
+
+router.beforeEach((to) => {
+  const isAuthenticated = hasValidToken()
+
+  if (!isAuthenticated) {
+    clearToken()
+  }
+
+  if (isAuthenticated && authOnlyPaths.has(to.path)) {
+    return '/home'
+  }
+
+  if (!isAuthenticated && !publicPaths.has(to.path)) {
+    return '/logout'
+  }
+
+  return true
 })
 
 export default router

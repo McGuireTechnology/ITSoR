@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { createNamespace, listNamespaces } from '../lib/api'
+import { formatNameId } from '../lib/formatters'
 
 const namespaces = ref([])
 const name = ref('')
@@ -43,8 +44,8 @@ onMounted(loadNamespaces)
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Namespaces</h2>
+  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
+    <h2 class="h3 fw-bold mb-3 text-brand-deep">Namespaces</h2>
 
     <form class="form" @submit.prevent="handleCreateNamespace">
       <label>
@@ -55,7 +56,7 @@ onMounted(loadNamespaces)
         Workspace ID
         <input v-model="workspaceId" type="text" required />
       </label>
-      <button type="submit" :disabled="creating">
+      <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
         {{ creating ? 'Creating...' : 'Create Namespace' }}
       </button>
     </form>
@@ -65,8 +66,8 @@ onMounted(loadNamespaces)
 
     <ul v-else class="user-list">
       <li v-for="namespace in namespaces" :key="namespace.id">
-        <RouterLink :to="`/namespaces/${namespace.id}`">{{ namespace.name }}</RouterLink>
-        <span class="meta">{{ namespace.id }}</span>
+        <RouterLink :to="`/namespaces/${namespace.id}`">{{ formatNameId(namespace.name, namespace.id, '(unnamed namespace)') }}</RouterLink>
+        <span class="meta">{{ namespace.id }} · owner: {{ namespace.owner_id || '-' }} · group: {{ namespace.group_id || '-' }} · perms: {{ namespace.permissions ?? '-' }}</span>
       </li>
     </ul>
   </section>

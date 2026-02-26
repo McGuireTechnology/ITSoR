@@ -46,12 +46,12 @@ async function applyContextSearch() {
 <template>
   <div class="command-surface">
     <div class="command-primary">
-      <button type="button" @click="openList">New</button>
-      <button type="button">Create</button>
-      <button type="button" :disabled="!selectedId">Edit</button>
-      <button type="button" :disabled="!selectedId">Delete</button>
-      <button type="button">Export</button>
-      <button type="button" @click="refreshPage">Refresh</button>
+      <button type="button" @click="openList"><span>＋</span><span>New</span></button>
+      <button type="button"><span>✚</span><span>Create</span></button>
+      <button type="button" :disabled="!selectedId"><span>✎</span><span>Edit</span></button>
+      <button type="button" :disabled="!selectedId"><span>🗑</span><span>Delete</span></button>
+      <button type="button"><span>⇩</span><span>Export</span></button>
+      <button type="button" @click="refreshPage"><span>↻</span><span>Refresh</span></button>
     </div>
 
     <form class="command-search" @submit.prevent="applyContextSearch">

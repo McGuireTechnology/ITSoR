@@ -1,0 +1,27 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="IT-SoR data cube logo">
+  <defs>
+    <linearGradient id="cubeTop" x1="48" y1="12" x2="74" y2="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="cubeLeft" x1="20" y1="34" x2="48" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#312E81"/>
+      <stop offset="1" stop-color="#5B21B6"/>
+    </linearGradient>
+    <linearGradient id="cubeRight" x1="48" y1="34" x2="76" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A855F7"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M48 12L76 28L48 44L20 28L48 12Z" fill="url(#cubeTop)"/>
+  <path d="M20 28L48 44V78L20 62V28Z" fill="url(#cubeLeft)"/>
+  <path d="M76 28L48 44V78L76 62V28Z" fill="url(#cubeRight)"/>
+
+  <path d="M48 44L61.5 36.2L48 28.5L34.5 36.2L48 44Z" fill="#F472B6" fill-opacity="0.85"/>
+  <path d="M48 44V61.2L34.5 53.4V36.2L48 44Z" fill="#4338CA" fill-opacity="0.65"/>
+  <path d="M48 44V61.2L61.5 53.4V36.2L48 44Z" fill="#DB2777" fill-opacity="0.55"/>
+
+  <path d="M48 12V44" stroke="#F9A8D4" stroke-width="2" stroke-linecap="round" stroke-opacity="0.9"/>
+  <path d="M20 28L48 44L76 28" stroke="#F9A8D4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.55"/>
+</svg>

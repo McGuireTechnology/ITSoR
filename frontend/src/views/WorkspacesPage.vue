@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { createWorkspace, listWorkspaces } from '../lib/api'
+import { formatNameId } from '../lib/formatters'
 
 const workspaces = ref([])
 const name = ref('')
@@ -43,8 +44,8 @@ onMounted(loadWorkspaces)
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Workspaces</h2>
+  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
+    <h2 class="h3 fw-bold mb-3 text-brand-deep">Workspaces</h2>
 
     <form class="form" @submit.prevent="handleCreateWorkspace">
       <label>
@@ -55,7 +56,7 @@ onMounted(loadWorkspaces)
         Tenant ID (optional)
         <input v-model="tenantId" type="text" />
       </label>
-      <button type="submit" :disabled="creating">
+      <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
         {{ creating ? 'Creating...' : 'Create Workspace' }}
       </button>
     </form>
@@ -65,8 +66,8 @@ onMounted(loadWorkspaces)
 
     <ul v-else class="user-list">
       <li v-for="workspace in workspaces" :key="workspace.id">
-        <RouterLink :to="`/workspaces/${workspace.id}`">{{ workspace.name }}</RouterLink>
-        <span class="meta">{{ workspace.id }}</span>
+        <RouterLink :to="`/workspaces/${workspace.id}`">{{ formatNameId(workspace.name, workspace.id, '(unnamed workspace)') }}</RouterLink>
+        <span class="meta">{{ workspace.id }} · owner: {{ workspace.owner_id || '-' }} · group: {{ workspace.group_id || '-' }} · perms: {{ workspace.permissions ?? '-' }}</span>
       </li>
     </ul>
   </section>

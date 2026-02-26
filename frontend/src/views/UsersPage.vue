@@ -1,11 +1,13 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import DataTable from '../components/DataTable.vue'
 import { listUsers } from '../lib/api'
+import UserDetailBlade from '../components/blades/UserDetailBlade.vue'
+import { useBladeStack } from '../lib/blades'
 
 const route = useRoute()
-const router = useRouter()
+const bladeStack = useBladeStack()
 
 const users = ref([])
 const loading = ref(true)
@@ -65,7 +67,23 @@ function handleSortChange(nextKey) {
 }
 
 function openUser(user) {
-  router.push(`/users/${user.id}`)
+  if (!bladeStack) {
+    return
+  }
+
+  const detailBladeId = `user-detail-${user.id}`
+  bladeStack.closeBlade(detailBladeId)
+  bladeStack.openBlade({
+    id: detailBladeId,
+    type: 'detail',
+    title: user.username || user.id,
+    subtitle: user.email || '',
+    component: UserDetailBlade,
+    props: {
+      userId: user.id,
+      bladeId: detailBladeId,
+    },
+  })
 }
 
 onMounted(loadUsers)
@@ -79,26 +97,34 @@ watch(
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Users</h2>
-    <p class="meta section-gap">{{ visibleUsers.length }} users</p>
-    <p class="meta">{{ selectedIds.length }} selected</p>
+  <section class="container-fluid py-3 px-2 px-md-3">
+    <div class="card shadow-sm border-0 rounded-4 bg-brand-surface/70">
+      <div class="card-body p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h2 class="h3 fw-bold mb-0 text-brand-deep">Users</h2>
+          <div class="d-flex gap-3 text-body-secondary small">
+            <span>{{ visibleUsers.length }} users</span>
+            <span>{{ selectedIds.length }} selected</span>
+          </div>
+        </div>
 
-    <DataTable
-      :columns="columns"
-      :rows="visibleUsers"
-      :loading="loading"
-      :error="error"
-      :sort-key="sortKey"
-      :sort-dir="sortDir"
-      :selected-ids="selectedIds"
-      @sort-change="handleSortChange"
-      @selection-change="selectedIds = $event"
-      @row-open="openUser"
-    >
-      <template #row-actions="{ row }">
-        <button type="button" @click="openUser(row)">View</button>
-      </template>
-    </DataTable>
+        <DataTable
+          :columns="columns"
+          :rows="visibleUsers"
+          :loading="loading"
+          :error="error"
+          :sort-key="sortKey"
+          :sort-dir="sortDir"
+          :selected-ids="selectedIds"
+          @sort-change="handleSortChange"
+          @selection-change="selectedIds = $event"
+          @row-open="openUser"
+        >
+          <template #row-actions="{ row }">
+            <button class="btn btn-sm btn-outline-primary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white" type="button" @click="openUser(row)">View</button>
+          </template>
+        </DataTable>
+      </div>
+    </div>
   </section>
 </template>

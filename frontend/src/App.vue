@@ -3,15 +3,14 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AuthLayout from './layouts/AuthLayout.vue'
 import DefaultLayout from './layouts/DefaultLayout.vue'
-import { getToken } from './lib/auth'
+import { hasValidToken } from './lib/auth'
 
 const route = useRoute()
-const isAuthenticated = ref(Boolean(getToken()))
-const showNavigation = computed(() => route.meta.hideNavigation !== true)
+const isAuthenticated = ref(hasValidToken())
 const isAuthLayout = computed(() => route.meta.layout === 'auth')
 
 function syncAuthState() {
-  isAuthenticated.value = Boolean(getToken())
+  isAuthenticated.value = hasValidToken()
 }
 
 onMounted(() => {
@@ -27,14 +26,11 @@ onUnmounted(() => {
 
 <template>
   <div class="app-shell">
-    <DefaultLayout v-if="showNavigation" :is-authenticated="isAuthenticated">
-      <RouterView />
-    </DefaultLayout>
-    <AuthLayout v-else-if="isAuthLayout">
+    <AuthLayout v-if="isAuthLayout">
       <RouterView />
     </AuthLayout>
-    <main v-else class="page-body">
+    <DefaultLayout v-else :is-authenticated="isAuthenticated">
       <RouterView />
-    </main>
+    </DefaultLayout>
   </div>
 </template>

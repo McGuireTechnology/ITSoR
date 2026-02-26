@@ -32,30 +32,59 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <section class="panel">
-    <h2>Signup</h2>
-    <form class="form" @submit.prevent="handleSubmit">
-      <label>
-        Username
-        <input v-model="username" type="text" required autocomplete="username" />
-      </label>
+  <section class="container min-vh-100 d-flex align-items-center justify-content-center py-5 px-3">
+    <div class="card shadow-sm border-0 w-100 max-w-md rounded-4 bg-brand-surface/70">
+      <div class="card-body p-4 p-md-5">
+        <h2 class="h3 fw-bold mb-4 text-brand-deep">Signup</h2>
+        <form class="d-flex flex-column gap-3" @submit.prevent="handleSubmit">
+          <div>
+            <label class="form-label" for="signup-username">Username</label>
+            <input
+              id="signup-username"
+              v-model="username"
+              class="form-control"
+              type="text"
+              required
+              autocomplete="username"
+            />
+          </div>
 
-      <label>
-        Email
-        <input v-model="email" type="email" required autocomplete="email" />
-      </label>
+          <div>
+            <label class="form-label" for="signup-email">Email</label>
+            <input
+              id="signup-email"
+              v-model="email"
+              class="form-control"
+              type="email"
+              required
+              autocomplete="email"
+            />
+          </div>
 
-      <label>
-        Password
-        <input v-model="password" type="password" required autocomplete="new-password" />
-      </label>
+          <div>
+            <label class="form-label" for="signup-password">Password</label>
+            <input
+              id="signup-password"
+              v-model="password"
+              class="form-control"
+              type="password"
+              required
+              autocomplete="new-password"
+            />
+          </div>
 
-      <button type="submit" :disabled="loading">{{ loading ? 'Creating...' : 'Signup' }}</button>
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
-    <p>
-      Already have an account?
-      <RouterLink to="/login">Login</RouterLink>
-    </p>
+          <button class="btn btn-primary mt-2 bg-primary hover:bg-accent border-0" type="submit" :disabled="loading">
+            {{ loading ? 'Creating...' : 'Signup' }}
+          </button>
+
+          <div v-if="error" class="alert alert-danger py-2 mb-0" role="alert">{{ error }}</div>
+        </form>
+
+        <p class="text-body-secondary mt-4 mb-0">
+          Already have an account?
+          <RouterLink class="link-primary fw-semibold text-brand-purple hover:text-brand-pink" to="/login">Login</RouterLink>
+        </p>
+      </div>
+    </div>
   </section>
 </template>
