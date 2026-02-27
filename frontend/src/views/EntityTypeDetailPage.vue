@@ -2,9 +2,12 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { deleteEntityType, getEntityTypeById, updateEntityType } from '../lib/api'
+import { useDomainPermissions } from '../lib/permissions'
 
 const route = useRoute()
 const router = useRouter()
+const domain = ref('entity-types')
+const { canWrite } = useDomainPermissions(domain)
 
 const entityType = ref(null)
 const name = ref('')
@@ -43,7 +46,7 @@ async function loadEntityType() {
 }
 
 async function handleSave() {
-  if (!entityType.value) {
+  if (!entityType.value || !canWrite.value) {
     return
   }
 
@@ -64,7 +67,7 @@ async function handleSave() {
 }
 
 async function handleDelete() {
-  if (!entityType.value) {
+  if (!entityType.value || !canWrite.value) {
     return
   }
 
@@ -72,7 +75,7 @@ async function handleDelete() {
   error.value = ''
   try {
     await deleteEntityType(entityType.value.id)
-    await router.push('/entity-types')
+    await router.push('/customization/entity-types')
   } catch (deleteError) {
     error.value = deleteError.message
   } finally {
@@ -108,13 +111,13 @@ watch(
       <form class="form" @submit.prevent="handleSave">
         <label>
           Name
-          <input v-model="name" type="text" required />
+          <input v-model="name" type="text" required :disabled="!canWrite || saving" />
         </label>
         <label>
           Attributes JSON
-          <textarea v-model="attributesJsonText" rows="8" required />
+          <textarea v-model="attributesJsonText" rows="8" required :disabled="!canWrite || saving" />
         </label>
-        <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
+        <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="!canWrite || saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
       </form>
 
       <dl class="user-detail section-gap">
@@ -130,7 +133,7 @@ watch(
         <dd>{{ entityType.permissions ?? '-' }}</dd>
       </dl>
 
-      <div class="section-gap">
+      <div v-if="canWrite" class="section-gap">
         <button
           v-if="!confirmingDelete"
           class="btn btn-outline-secondary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white"

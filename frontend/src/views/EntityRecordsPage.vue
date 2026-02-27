@@ -2,8 +2,11 @@
 import { onMounted, ref } from 'vue'
 import { createEntityRecord, listEntityRecords } from '../lib/api'
 import { formatNameId } from '../lib/formatters'
+import { useDomainPermissions } from '../lib/permissions'
 
 const entityRecords = ref([])
+const domain = ref('entity-records')
+const { canWrite } = useDomainPermissions(domain)
 const entityTypeId = ref('')
 const name = ref('')
 const valuesJsonText = ref('{}')
@@ -40,6 +43,10 @@ async function loadEntityRecords() {
 }
 
 async function handleCreateEntityRecord() {
+  if (!canWrite.value) {
+    return
+  }
+
   creating.value = true
   error.value = ''
   try {
@@ -108,7 +115,7 @@ onMounted(loadEntityRecords)
       </button>
     </form>
 
-    <form class="form" @submit.prevent="handleCreateEntityRecord">
+    <form v-if="canWrite" class="form" @submit.prevent="handleCreateEntityRecord">
       <label>
         Entity Type ID
         <input v-model="entityTypeId" type="text" required />
@@ -131,7 +138,7 @@ onMounted(loadEntityRecords)
 
     <ul v-else class="user-list">
       <li v-for="entityRecord in entityRecords" :key="entityRecord.id">
-        <RouterLink :to="`/entity-records/${entityRecord.id}`">{{ formatNameId(entityRecord.name, entityRecord.id, '(unnamed)') }}</RouterLink>
+        <RouterLink :to="`/customization/entity-records/${entityRecord.id}`">{{ formatNameId(entityRecord.name, entityRecord.id, '(unnamed)') }}</RouterLink>
         <span class="meta">{{ entityRecord.id }} · owner: {{ entityRecord.owner_id || '-' }} · group: {{ entityRecord.group_id || '-' }} · perms: {{ entityRecord.permissions ?? '-' }}</span>
       </li>
     </ul>

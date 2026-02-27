@@ -2,8 +2,11 @@
 import { onMounted, ref } from 'vue'
 import { createWorkspace, listWorkspaces } from '../lib/api'
 import { formatNameId } from '../lib/formatters'
+import { useDomainPermissions } from '../lib/permissions'
 
 const workspaces = ref([])
+const domain = ref('workspaces')
+const { canWrite } = useDomainPermissions(domain)
 const name = ref('')
 const tenantId = ref('')
 const loading = ref(true)
@@ -23,6 +26,10 @@ async function loadWorkspaces() {
 }
 
 async function handleCreateWorkspace() {
+  if (!canWrite.value) {
+    return
+  }
+
   creating.value = true
   error.value = ''
   try {
@@ -47,7 +54,7 @@ onMounted(loadWorkspaces)
   <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
     <h2 class="h3 fw-bold mb-3 text-brand-deep">Workspaces</h2>
 
-    <form class="form" @submit.prevent="handleCreateWorkspace">
+    <form v-if="canWrite" class="form" @submit.prevent="handleCreateWorkspace">
       <label>
         Workspace Name
         <input v-model="name" type="text" required />
@@ -66,7 +73,7 @@ onMounted(loadWorkspaces)
 
     <ul v-else class="user-list">
       <li v-for="workspace in workspaces" :key="workspace.id">
-        <RouterLink :to="`/workspaces/${workspace.id}`">{{ formatNameId(workspace.name, workspace.id, '(unnamed workspace)') }}</RouterLink>
+        <RouterLink :to="`/customization/workspaces/${workspace.id}`">{{ formatNameId(workspace.name, workspace.id, '(unnamed workspace)') }}</RouterLink>
         <span class="meta">{{ workspace.id }} · owner: {{ workspace.owner_id || '-' }} · group: {{ workspace.group_id || '-' }} · perms: {{ workspace.permissions ?? '-' }}</span>
       </li>
     </ul>

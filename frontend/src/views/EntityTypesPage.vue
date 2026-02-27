@@ -2,8 +2,11 @@
 import { onMounted, ref } from 'vue'
 import { createEntityType, listEntityTypes } from '../lib/api'
 import { formatNameId } from '../lib/formatters'
+import { useDomainPermissions } from '../lib/permissions'
 
 const entityTypes = ref([])
+const domain = ref('entity-types')
+const { canWrite } = useDomainPermissions(domain)
 const name = ref('')
 const namespaceId = ref('')
 const attributesJsonText = ref('{}')
@@ -36,6 +39,10 @@ async function loadEntityTypes() {
 }
 
 async function handleCreateEntityType() {
+  if (!canWrite.value) {
+    return
+  }
+
   creating.value = true
   error.value = ''
   try {
@@ -62,7 +69,7 @@ onMounted(loadEntityTypes)
   <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
     <h2 class="h3 fw-bold mb-3 text-brand-deep">Entity Types</h2>
 
-    <form class="form" @submit.prevent="handleCreateEntityType">
+    <form v-if="canWrite" class="form" @submit.prevent="handleCreateEntityType">
       <label>
         Entity Type Name
         <input v-model="name" type="text" required />
@@ -85,7 +92,7 @@ onMounted(loadEntityTypes)
 
     <ul v-else class="user-list">
       <li v-for="entityType in entityTypes" :key="entityType.id">
-        <RouterLink :to="`/entity-types/${entityType.id}`">{{ formatNameId(entityType.name, entityType.id, '(unnamed entity type)') }}</RouterLink>
+        <RouterLink :to="`/customization/entity-types/${entityType.id}`">{{ formatNameId(entityType.name, entityType.id, '(unnamed entity type)') }}</RouterLink>
         <span class="meta">{{ entityType.id }} · owner: {{ entityType.owner_id || '-' }} · group: {{ entityType.group_id || '-' }} · perms: {{ entityType.permissions ?? '-' }}</span>
       </li>
     </ul>

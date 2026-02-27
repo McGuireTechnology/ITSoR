@@ -21,10 +21,10 @@ const appMenuOpen = ref(false)
 const userMenuOpen = ref(false)
 
 const appResources = [
-  { label: 'Users', to: '/users' },
-  { label: 'Groups', to: '/groups' },
-  { label: 'Tenants', to: '/tenants' },
-  { label: 'Workspaces', to: '/workspaces' },
+  { label: 'Users', to: '/platform/users' },
+  { label: 'Groups', to: '/platform/groups' },
+  { label: 'Tenants', to: '/platform/tenants' },
+  { label: 'Workspaces', to: '/customization/workspaces' },
 ]
 
 const query = ref('')
@@ -231,13 +231,13 @@ async function runGlobalSearch() {
       listEntityRecords(),
     ])
 
-    pushResults(users, 'User', (item) => formatNameId(item.username || item.email, item.id, '(unnamed user)'), (item) => `/users/${item.id}`, term)
-    pushResults(tenants, 'Tenant', (item) => formatNameId(item.name, item.id, '(unnamed tenant)'), (item) => `/tenants/${item.id}`, term)
-    pushResults(groups, 'Group', (item) => formatNameId(item.name, item.id, '(unnamed group)'), (item) => `/groups/${item.id}`, term)
-    pushResults(workspaces, 'Workspace', (item) => formatNameId(item.name, item.id, '(unnamed workspace)'), (item) => `/workspaces/${item.id}`, term)
-    pushResults(namespaces, 'Namespace', (item) => formatNameId(item.name, item.id, '(unnamed namespace)'), (item) => `/namespaces/${item.id}`, term)
-    pushResults(entityTypes, 'Entity Type', (item) => formatNameId(item.name, item.id, '(unnamed entity type)'), (item) => `/entity-types/${item.id}`, term)
-    pushResults(entityRecords, 'Entity Record', (item) => formatNameId(item.name, item.id, '(unnamed)'), (item) => `/entity-records/${item.id}`, term)
+    pushResults(users, 'User', (item) => formatNameId(item.username || item.email, item.id, '(unnamed user)'), (item) => `/platform/users/${item.id}`, term)
+    pushResults(tenants, 'Tenant', (item) => formatNameId(item.name, item.id, '(unnamed tenant)'), (item) => `/platform/tenants/${item.id}`, term)
+    pushResults(groups, 'Group', (item) => formatNameId(item.name, item.id, '(unnamed group)'), (item) => `/platform/groups/${item.id}`, term)
+    pushResults(workspaces, 'Workspace', (item) => formatNameId(item.name, item.id, '(unnamed workspace)'), (item) => `/customization/workspaces/${item.id}`, term)
+    pushResults(namespaces, 'Namespace', (item) => formatNameId(item.name, item.id, '(unnamed namespace)'), (item) => `/customization/namespaces/${item.id}`, term)
+    pushResults(entityTypes, 'Entity Type', (item) => formatNameId(item.name, item.id, '(unnamed entity type)'), (item) => `/customization/entity-types/${item.id}`, term)
+    pushResults(entityRecords, 'Entity Record', (item) => formatNameId(item.name, item.id, '(unnamed)'), (item) => `/customization/entity-records/${item.id}`, term)
 
     results.value = results.value.slice(0, 12)
   } catch (searchError) {
@@ -282,9 +282,17 @@ onUnmounted(() => {
           aria-controls="topbar-app-menu"
           @click="toggleAppMenu"
         >
-          <span class="waffle-icon" aria-hidden="true">
-            <span v-for="dot in 9" :key="dot" class="waffle-dot" />
-          </span>
+          <svg class="app-drawer-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="6" cy="6" r="1.5" />
+            <circle cx="12" cy="6" r="1.5" />
+            <circle cx="18" cy="6" r="1.5" />
+            <circle cx="6" cy="12" r="1.5" />
+            <circle cx="12" cy="12" r="1.5" />
+            <circle cx="18" cy="12" r="1.5" />
+            <circle cx="6" cy="18" r="1.5" />
+            <circle cx="12" cy="18" r="1.5" />
+            <circle cx="18" cy="18" r="1.5" />
+          </svg>
         </button>
         <div v-if="appMenuOpen" id="topbar-app-menu" ref="appMenuRef" class="app-menu" role="menu">
           <p class="app-menu-title">Apps</p>
@@ -299,29 +307,33 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-      <img class="brand-logo" :src="brandLogo" alt="IT-SoR logo" />
-      <div class="brand-block">
-        <strong class="brand-title">IT-SoR</strong>
-        <span class="brand-subtitle">IT System of Record</span>
+      <div class="brand-cluster">
+        <img class="brand-logo" :src="brandLogo" alt="IT-SoR logo" />
+        <div class="brand-block">
+          <strong class="brand-title">IT-SoR</strong>
+          <span class="brand-subtitle">IT System of Record</span>
+        </div>
       </div>
-      <span class="tenant-pill bg-brand-purple text-primary-foreground">{{ tenantLabel }}</span>
     </div>
 
     <div class="topbar-search">
-      <form class="topbar-search-form" @submit.prevent="runGlobalSearch">
-        <input
-          v-model="query"
-          type="search"
-          placeholder="Search resources, services, and docs"
-        />
-        <button
-          type="submit"
-          class="bg-primary text-primary-foreground border-0 hover:bg-accent"
-          :disabled="searching"
-        >
-          {{ searching ? 'Searching…' : 'Search' }}
-        </button>
-      </form>
+      <div class="topbar-search-row">
+        <form class="topbar-search-form" @submit.prevent="runGlobalSearch">
+          <input
+            v-model="query"
+            type="search"
+            placeholder="Search resources, services, and docs"
+          />
+          <button
+            type="submit"
+            class="bg-primary text-primary-foreground border-0 hover:bg-accent"
+            :disabled="searching"
+          >
+            {{ searching ? 'Searching…' : 'Search' }}
+          </button>
+        </form>
+        <span class="tenant-pill bg-brand-purple text-primary-foreground">{{ tenantLabel }}</span>
+      </div>
       <p v-if="error" class="error topbar-error">{{ error }}</p>
       <ul v-if="results.length" class="search-results">
         <li v-for="item in results" :key="item.key">
@@ -353,7 +365,7 @@ onUnmounted(() => {
           <span aria-hidden="true">▾</span>
         </button>
         <div v-if="userMenuOpen" id="topbar-user-menu" ref="userMenuRef" class="user-menu" role="menu">
-          <RouterLink class="user-menu-link" role="menuitem" to="/users/me" @click="closeUserMenu()">My Account</RouterLink>
+          <RouterLink class="user-menu-link" role="menuitem" to="/platform/users/me" @click="closeUserMenu()">My Account</RouterLink>
           <RouterLink class="user-menu-link" role="menuitem" to="/logout" @click="closeUserMenu()">Sign out</RouterLink>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginUser } from '../lib/api'
 import { setToken } from '../lib/auth'
+import itsorCubeLogo from '../assets/itsor-cube-logo.svg'
 
 const router = useRouter()
 
@@ -20,7 +21,7 @@ async function handleSubmit() {
       password: password.value,
     })
     setToken(response.access_token)
-    await router.push('/users')
+    await router.push('/home')
   } catch (submitError) {
     error.value = submitError.message
   } finally {
@@ -33,7 +34,9 @@ async function handleSubmit() {
   <section class="container min-vh-100 d-flex align-items-center justify-content-center py-5 px-3">
     <div class="card shadow-sm border-0 w-100 max-w-md rounded-4 bg-brand-surface/70">
       <div class="card-body p-4 p-md-5">
-        <h2 class="h3 fw-bold mb-4 text-brand-deep">Login</h2>
+        <img :src="itsorCubeLogo" alt="ITSoR logo" class="d-block mx-auto mb-3" width="80" height="80" />
+        <p class="text-center h3 text-brand-deep fw-bold mb-1">ITSoR</p>
+        <p class="text-center text-body-secondary mb-4">IT System of Record</p>
         <form class="d-flex flex-column gap-3" @submit.prevent="handleSubmit">
           <div>
             <label class="form-label" for="login-identifier">Username or Email</label>

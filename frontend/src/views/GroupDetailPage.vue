@@ -2,9 +2,12 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { deleteGroup, getGroupById, updateGroup } from '../lib/api'
+import { useDomainPermissions } from '../lib/permissions'
 
 const route = useRoute()
 const router = useRouter()
+const domain = ref('groups')
+const { canWrite } = useDomainPermissions(domain)
 
 const group = ref(null)
 const name = ref('')
@@ -29,7 +32,7 @@ async function loadGroup() {
 }
 
 async function handleSave() {
-  if (!group.value) {
+  if (!group.value || !canWrite.value) {
     return
   }
 
@@ -46,7 +49,7 @@ async function handleSave() {
 }
 
 async function handleDelete() {
-  if (!group.value) {
+  if (!group.value || !canWrite.value) {
     return
   }
 
@@ -54,7 +57,7 @@ async function handleDelete() {
   error.value = ''
   try {
     await deleteGroup(group.value.id)
-    await router.push('/groups')
+    await router.push('/platform/groups')
   } catch (deleteError) {
     error.value = deleteError.message
   } finally {
@@ -90,9 +93,9 @@ watch(
       <form class="form" @submit.prevent="handleSave">
         <label>
           Name
-          <input v-model="name" type="text" required />
+          <input v-model="name" type="text" required :disabled="!canWrite || saving" />
         </label>
-        <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
+        <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="!canWrite || saving">{{ saving ? 'Saving...' : 'Save Changes' }}</button>
       </form>
 
       <dl class="user-detail section-gap">
@@ -106,7 +109,7 @@ watch(
         <dd>{{ group.permissions ?? '-' }}</dd>
       </dl>
 
-      <div class="section-gap">
+      <div v-if="canWrite" class="section-gap">
         <button
           v-if="!confirmingDelete"
           class="btn btn-outline-secondary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white"

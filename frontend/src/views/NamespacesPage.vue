@@ -2,8 +2,11 @@
 import { onMounted, ref } from 'vue'
 import { createNamespace, listNamespaces } from '../lib/api'
 import { formatNameId } from '../lib/formatters'
+import { useDomainPermissions } from '../lib/permissions'
 
 const namespaces = ref([])
+const domain = ref('namespaces')
+const { canWrite } = useDomainPermissions(domain)
 const name = ref('')
 const workspaceId = ref('')
 const loading = ref(true)
@@ -23,6 +26,10 @@ async function loadNamespaces() {
 }
 
 async function handleCreateNamespace() {
+  if (!canWrite.value) {
+    return
+  }
+
   creating.value = true
   error.value = ''
   try {
@@ -47,7 +54,7 @@ onMounted(loadNamespaces)
   <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
     <h2 class="h3 fw-bold mb-3 text-brand-deep">Namespaces</h2>
 
-    <form class="form" @submit.prevent="handleCreateNamespace">
+    <form v-if="canWrite" class="form" @submit.prevent="handleCreateNamespace">
       <label>
         Namespace Name
         <input v-model="name" type="text" required />
@@ -66,7 +73,7 @@ onMounted(loadNamespaces)
 
     <ul v-else class="user-list">
       <li v-for="namespace in namespaces" :key="namespace.id">
-        <RouterLink :to="`/namespaces/${namespace.id}`">{{ formatNameId(namespace.name, namespace.id, '(unnamed namespace)') }}</RouterLink>
+        <RouterLink :to="`/customization/namespaces/${namespace.id}`">{{ formatNameId(namespace.name, namespace.id, '(unnamed namespace)') }}</RouterLink>
         <span class="meta">{{ namespace.id }} · owner: {{ namespace.owner_id || '-' }} · group: {{ namespace.group_id || '-' }} · perms: {{ namespace.permissions ?? '-' }}</span>
       </li>
     </ul>
