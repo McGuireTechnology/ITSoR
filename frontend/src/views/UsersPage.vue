@@ -1,13 +1,13 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import DataTable from '../components/DataTable.vue'
 import { listUsers } from '../lib/api'
-import UserDetailBlade from '../components/blades/UserDetailBlade.vue'
-import { useBladeStack } from '../lib/blades'
+import { clearCommandSurfaceMetrics, setCommandSurfaceMetrics } from '../lib/commandSurface'
+import { inspectorState, openUserEditInspector } from '../lib/inspectorActions'
 
 const route = useRoute()
-const bladeStack = useBladeStack()
+const router = useRouter()
 
 const users = ref([])
 const loading = ref(true)
@@ -44,17 +44,15 @@ const visibleUsers = computed(() => {
     )
   }
 
-  const sorted = [...filtered].sort((left, right) => {
-    const a = String(left[sortKey.value] || '').toLowerCase()
-    const b = String(right[sortKey.value] || '').toLowerCase()
-    if (a === b) {
+  return [...filtered].sort((left, right) => {
+    const leftValue = String(left[sortKey.value] || '').toLowerCase()
+    const rightValue = String(right[sortKey.value] || '').toLowerCase()
+    if (leftValue === rightValue) {
       return 0
     }
-    const result = a > b ? 1 : -1
+    const result = leftValue > rightValue ? 1 : -1
     return sortDir.value === 'asc' ? result : -result
   })
-
-  return sorted
 })
 
 function handleSortChange(nextKey) {
@@ -66,27 +64,37 @@ function handleSortChange(nextKey) {
   sortDir.value = 'asc'
 }
 
-function openUser(user) {
-  if (!bladeStack) {
-    return
-  }
+function navigateToUser(user) {
+  router.push(`/platform/users/${user.id}`)
+}
 
-  const detailBladeId = `user-detail-${user.id}`
-  bladeStack.closeBlade(detailBladeId)
-  bladeStack.openBlade({
-    id: detailBladeId,
-    type: 'detail',
-    title: user.username || user.id,
-    subtitle: user.email || '',
-    component: UserDetailBlade,
-    props: {
-      userId: user.id,
-      bladeId: detailBladeId,
-    },
-  })
+function editUserInline(user) {
+  openUserEditInspector(user.id)
+}
+
+function inspectUser(user) {
+  const nextQuery = { ...route.query, inspectUserId: user.id }
+  router.replace({ path: '/platform/users', query: nextQuery })
 }
 
 onMounted(loadUsers)
+
+watch(
+  [visibleUsers, selectedIds],
+  () => {
+    setCommandSurfaceMetrics({
+      total: visibleUsers.value.length,
+      selected: selectedIds.value.length,
+      selectedIds: selectedIds.value,
+      noun: 'users',
+    })
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  clearCommandSurfaceMetrics()
+})
 
 watch(
   () => route.query._refresh,
@@ -94,37 +102,44 @@ watch(
     loadUsers()
   },
 )
+
+watch(
+  () => inspectorState.usersRefreshTick,
+  () => {
+    loadUsers()
+  },
+)
 </script>
 
 <template>
-  <section class="container-fluid py-3 px-2 px-md-3">
-    <div class="card shadow-sm border-0 rounded-4 bg-brand-surface/70">
-      <div class="card-body p-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-          <h2 class="h3 fw-bold mb-0 text-brand-deep">Users</h2>
-          <div class="d-flex gap-3 text-body-secondary small">
-            <span>{{ visibleUsers.length }} users</span>
-            <span>{{ selectedIds.length }} selected</span>
+  <section class="users-page">
+    <div class="users-table-fill">
+      <DataTable
+        :columns="columns"
+        :rows="visibleUsers"
+        :loading="loading"
+        :error="error"
+        :sort-key="sortKey"
+        :sort-dir="sortDir"
+        :selected-ids="selectedIds"
+        @sort-change="handleSortChange"
+        @selection-change="selectedIds = $event"
+        @row-open="navigateToUser"
+      >
+        <template #row-actions="{ row }">
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-sm btn-outline-secondary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white"
+              type="button"
+              @click="editUserInline(row)"
+            >
+              ✎
+            </button>
+            <button class="btn btn-sm btn-outline-primary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white" type="button" @click="inspectUser(row)">Inspect</button>
+            <button class="btn btn-sm btn-primary" type="button" @click="navigateToUser(row)">Open</button>
           </div>
-        </div>
-
-        <DataTable
-          :columns="columns"
-          :rows="visibleUsers"
-          :loading="loading"
-          :error="error"
-          :sort-key="sortKey"
-          :sort-dir="sortDir"
-          :selected-ids="selectedIds"
-          @sort-change="handleSortChange"
-          @selection-change="selectedIds = $event"
-          @row-open="openUser"
-        >
-          <template #row-actions="{ row }">
-            <button class="btn btn-sm btn-outline-primary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white" type="button" @click="openUser(row)">View</button>
-          </template>
-        </DataTable>
-      </div>
+        </template>
+      </DataTable>
     </div>
   </section>
 </template>

@@ -3,6 +3,13 @@ import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { activeWorkspace, workspaceConfig, syncWorkspaceFromDomain } from '../lib/workspaceNav'
 
+defineProps({
+  collapsed: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const route = useRoute()
 
 watch(
@@ -17,12 +24,13 @@ const activeWorkspaceModel = computed(() => workspaceConfig[activeWorkspace.valu
 </script>
 
 <template>
-  <div class="section-nav-body">
-    <h3>{{ activeWorkspaceModel.label }} Namespaces</h3>
-
-    <ul class="section-list">
+  <div class="section-nav-body pane-body">
+    <ul class="section-list pane-list">
       <li v-for="item in activeWorkspaceModel.namespaces" :key="item.to">
-        <RouterLink :to="item.to">{{ item.label }}</RouterLink>
+        <RouterLink class="section-link pane-link" :to="item.to" :title="collapsed ? item.label : null">
+          <span class="section-icon pane-icon" aria-hidden="true">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </RouterLink>
       </li>
     </ul>
   </div>

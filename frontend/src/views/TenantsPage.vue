@@ -1,13 +1,25 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { createTenant, listTenants } from '../lib/api'
-import { formatNameId } from '../lib/formatters'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import DataTable from '../components/DataTable.vue'
+import { listTenants } from '../lib/api'
+import { clearCommandSurfaceMetrics, setCommandSurfaceMetrics } from '../lib/commandSurface'
+import { inspectorState, openTenantEditInspector } from '../lib/inspectorActions'
+
+const route = useRoute()
+const router = useRouter()
 
 const tenants = ref([])
-const name = ref('')
 const loading = ref(true)
-const creating = ref(false)
 const error = ref('')
+const selectedIds = ref([])
+const sortKey = ref('name')
+const sortDir = ref('asc')
+
+const columns = [
+  { key: 'name', label: 'Tenant Name', sortable: true },
+  { key: 'id', label: 'Tenant ID', sortable: false },
+]
 
 async function loadTenants() {
   loading.value = true
@@ -21,45 +33,105 @@ async function loadTenants() {
   }
 }
 
-async function handleCreateTenant() {
-  creating.value = true
-  error.value = ''
-  try {
-    const created = await createTenant({ name: name.value.trim() })
-    tenants.value = [...tenants.value, created]
-    name.value = ''
-  } catch (createError) {
-    error.value = createError.message
-  } finally {
-    creating.value = false
+const visibleTenants = computed(() => {
+  const query = String(route.query.q || '').trim().toLowerCase()
+  let filtered = tenants.value
+
+  if (query) {
+    filtered = tenants.value.filter((tenant) =>
+      `${tenant.name || ''} ${tenant.id || ''}`.toLowerCase().includes(query),
+    )
   }
+  return [...filtered].sort((left, right) => {
+    const leftValue = String(left[sortKey.value] || '').toLowerCase()
+    const rightValue = String(right[sortKey.value] || '').toLowerCase()
+    if (leftValue === rightValue) {
+      return 0
+    }
+    const result = leftValue > rightValue ? 1 : -1
+    return sortDir.value === 'asc' ? result : -result
+  })
+})
+
+function handleSortChange(nextKey) {
+  if (sortKey.value === nextKey) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+    return
+  }
+  sortKey.value = nextKey
+  sortDir.value = 'asc'
+}
+
+function navigateToTenant(tenant) {
+  router.push(`/platform/tenants/${tenant.id}`)
+}
+
+function editTenantInline(tenant) {
+  openTenantEditInspector(tenant.id)
 }
 
 onMounted(loadTenants)
+
+watch(
+  [visibleTenants, selectedIds],
+  () => {
+    setCommandSurfaceMetrics({
+      total: visibleTenants.value.length,
+      selected: selectedIds.value.length,
+      selectedIds: selectedIds.value,
+      noun: 'tenants',
+    })
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  clearCommandSurfaceMetrics()
+})
+
+watch(
+  () => route.query._refresh,
+  () => {
+    loadTenants()
+  },
+)
+
+watch(
+  () => inspectorState.tenantsRefreshTick,
+  () => {
+    loadTenants()
+  },
+)
 </script>
 
 <template>
-  <section class="panel card shadow-sm border-0 rounded-4 p-4 bg-brand-surface/70">
-    <h2 class="h3 fw-bold mb-3 text-brand-deep">Tenants</h2>
-
-    <form class="form" @submit.prevent="handleCreateTenant">
-      <label>
-        Tenant Name
-        <input v-model="name" type="text" required />
-      </label>
-      <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
-        {{ creating ? 'Creating...' : 'Create Tenant' }}
-      </button>
-    </form>
-
-    <p v-if="loading">Loading tenants...</p>
-    <p v-else-if="error" class="error">{{ error }}</p>
-
-    <ul v-else class="user-list">
-      <li v-for="tenant in tenants" :key="tenant.id">
-        <RouterLink :to="`/tenants/${tenant.id}`">{{ formatNameId(tenant.name, tenant.id, '(unnamed tenant)') }}</RouterLink>
-        <span class="meta">{{ tenant.id }} · owner: {{ tenant.owner_id || '-' }} · group: {{ tenant.group_id || '-' }} · perms: {{ tenant.permissions ?? '-' }}</span>
-      </li>
-    </ul>
+  <section class="users-page">
+    <div class="users-table-fill">
+      <DataTable
+        :columns="columns"
+        :rows="visibleTenants"
+        :loading="loading"
+        :error="error"
+        :sort-key="sortKey"
+        :sort-dir="sortDir"
+        :selected-ids="selectedIds"
+        @sort-change="handleSortChange"
+        @selection-change="selectedIds = $event"
+        @row-open="navigateToTenant"
+      >
+        <template #row-actions="{ row }">
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-sm btn-outline-secondary border-brand-purple/50 text-brand-purple hover:bg-brand-pink hover:text-white"
+              type="button"
+              @click="editTenantInline(row)"
+            >
+              ✎
+            </button>
+            <button class="btn btn-sm btn-primary" type="button" @click="navigateToTenant(row)">Open</button>
+          </div>
+        </template>
+      </DataTable>
+    </div>
   </section>
 </template>

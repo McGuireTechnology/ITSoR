@@ -116,21 +116,31 @@ function handleBladeUpdate(event) {
     <TopBar />
 
     <div class="admin-shell">
-      <aside class="admin-rail">
+      <aside class="admin-rail admin-pane">
         <GlobalNavigationRail :collapsed="railCollapsed" @toggle="toggleRailCollapse" />
       </aside>
 
-      <aside v-if="sectionApplicable" class="admin-section-nav">
-        <div v-if="!sectionCollapsed" class="pane-scroll">
-          <SectionNavigator />
+      <aside v-if="sectionApplicable" class="admin-section-nav admin-pane">
+        <div class="pane-scroll">
+          <SectionNavigator :collapsed="sectionCollapsed" />
         </div>
         <button
           type="button"
-          class="pane-bottom-toggle"
+          class="pane-bottom-toggle pane-toggle"
           :aria-label="sectionCollapsed ? 'Expand namespace pane' : 'Collapse namespace pane'"
           @click="toggleSectionCollapse"
         >
-          {{ sectionCollapsed ? '» Expand namespace' : '« Collapse namespace' }}
+          <svg
+            class="pane-toggle-icon"
+            :class="sectionCollapsed ? 'is-expand is-left' : 'is-collapse is-left'"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+          >
+            <rect x="1.5" y="2" width="13" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2" />
+            <path d="M5 2V14" stroke="currentColor" stroke-width="1.2" />
+            <path d="M10.5 5.5L7.5 8L10.5 10.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span v-if="!sectionCollapsed">Namespaces</span>
         </button>
       </aside>
 
@@ -152,17 +162,27 @@ function handleBladeUpdate(event) {
         </BladeWorkspace>
       </section>
 
-      <aside v-if="inspectorApplicable" class="admin-inspector" :aria-hidden="inspectorHidden">
+      <aside v-if="inspectorApplicable" class="admin-inspector admin-pane" :aria-hidden="inspectorHidden">
         <div v-if="!inspectorHidden" class="pane-scroll">
           <ContextInspectorPane />
         </div>
         <button
           type="button"
-          class="pane-bottom-toggle"
+          class="pane-bottom-toggle pane-toggle"
           :aria-label="inspectorHidden ? 'Expand inspector pane' : 'Collapse inspector pane'"
           @click="toggleInspector"
         >
-          {{ inspectorHidden ? '« Expand inspector' : '» Collapse inspector' }}
+          <svg
+            class="pane-toggle-icon"
+            :class="inspectorHidden ? 'is-expand is-right' : 'is-collapse is-right'"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+          >
+            <rect x="1.5" y="2" width="13" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2" />
+            <path d="M11 2V14" stroke="currentColor" stroke-width="1.2" />
+            <path d="M5.5 5.5L8.5 8L5.5 10.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span v-if="!inspectorHidden">Inspector</span>
         </button>
       </aside>
     </div>

@@ -164,9 +164,6 @@ watch(
 <template>
   <div class="blade-viewport" @keydown="handleKeydown">
     <section ref="rootSectionRef" class="blade blade-root" aria-label="Root workspace" @click="handleRootClick">
-      <header class="blade-header">
-        <h2 class="blade-title">{{ rootTitle }}</h2>
-      </header>
       <div class="blade-content">
         <slot />
       </div>
