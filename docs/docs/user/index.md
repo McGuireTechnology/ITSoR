@@ -21,6 +21,12 @@ Welcome to the ITSoR User Guide. This section explains how end users access and 
 
 - [Signup and Login Guide](signup-and-login.md)
 
+## Workspace Navigation
+
+- [Platform Workspace](platform.md)
+- [Identity Workspace](identity.md)
+- [Customization Workspace](customization.md)
+
 ## Troubleshooting
 
 - If sign-in fails, verify your credentials and network/VPN.
