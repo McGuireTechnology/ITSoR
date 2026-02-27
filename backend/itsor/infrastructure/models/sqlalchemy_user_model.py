@@ -7,7 +7,7 @@ class Base(DeclarativeBase):
 
 
 class UserModel(Base):
-    __tablename__ = "users"
+    __tablename__ = "platform_users"
 
     id = Column(String(36), primary_key=True)
     name = Column(String(255), nullable=False, default="")

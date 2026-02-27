@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_current_user, get_entity_record_use_cases
+from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_entity_record_use_cases
 from itsor.api.schemas.entity_record_schamas import (
     EntityRecordCreate,
     EntityRecordReplace,
@@ -22,8 +22,19 @@ def list_entity_records(
     value: str | None = None,
     operator: str = "eq",
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    if entity_type_id:
+        tenant_id = authz.resolve_tenant_id_for_entity_type(entity_type_id)
+        if tenant_id:
+            authz.authorize_tenant_scope(
+                current_user=current_user,
+                tenant_id=tenant_id,
+                action="read",
+                endpoint_name="entity-records",
+            )
+
     if field is None and value is None:
         return use_cases.list_entity_records(entity_type_id)
     if not field or value is None:
@@ -41,10 +52,20 @@ def list_entity_records(
 def create_entity_record(
     body: EntityRecordCreate,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    tenant_id = authz.resolve_tenant_id_for_entity_type(body.entity_type_id)
+    if tenant_id:
+        authz.authorize_tenant_scope(
+            current_user=current_user,
+            tenant_id=tenant_id,
+            action="write",
+            endpoint_name="entity-records",
+        )
+
     try:
-        return use_cases.create_entity_record(body.entity_type_id, body.values_json, body.name)
+        return use_cases.create_entity_record(body.entity_type_id, body.values_json, body.name, creator_user_id=current_user.id)
     except ValueError as exc:
         detail = str(exc)
         if detail == "Entity type not found":
@@ -56,11 +77,13 @@ def create_entity_record(
 def get_entity_record(
     entity_record_id: str,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_record = use_cases.get_entity_record(entity_record_id)
     if not entity_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entity record not found")
+    authz.authorize_resource_action(current_user=current_user, resource=entity_record, action="read", endpoint_name="entity-records")
     return entity_record
 
 
@@ -69,8 +92,14 @@ def update_entity_record(
     entity_record_id: str,
     body: EntityRecordUpdate,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    entity_record = use_cases.get_entity_record(entity_record_id)
+    if not entity_record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entity record not found")
+    authz.authorize_resource_action(current_user=current_user, resource=entity_record, action="write", endpoint_name="entity-records")
+
     try:
         return use_cases.update_entity_record(entity_record_id, body.name, body.values_json)
     except ValueError as exc:
@@ -85,8 +114,14 @@ def replace_entity_record(
     entity_record_id: str,
     body: EntityRecordReplace,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    entity_record = use_cases.get_entity_record(entity_record_id)
+    if not entity_record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entity record not found")
+    authz.authorize_resource_action(current_user=current_user, resource=entity_record, action="write", endpoint_name="entity-records")
+
     try:
         return use_cases.replace_entity_record(
             entity_record_id,
@@ -105,8 +140,14 @@ def replace_entity_record(
 def delete_entity_record(
     entity_record_id: str,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    entity_record = use_cases.get_entity_record(entity_record_id)
+    if not entity_record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entity record not found")
+    authz.authorize_resource_action(current_user=current_user, resource=entity_record, action="write", endpoint_name="entity-records")
+
     try:
         use_cases.delete_entity_record(entity_record_id)
     except ValueError as exc:

@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from itsor.api.apps.platform import app as platform_app
 from itsor.main import app
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_user_model import Base
@@ -36,9 +37,11 @@ def setup_db():
 @pytest.fixture
 def client(setup_db):
     app.dependency_overrides[get_db] = override_get_db
+    platform_app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+    platform_app.dependency_overrides.clear()
 
 
 def test_health(client):
@@ -71,7 +74,7 @@ def test_signup_does_not_create_tenant(client):
     login = client.post("/login", json={"identifier": "plain@example.com", "password": "pw"})
     token = login.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
-    tenants = client.get("/tenants", headers=headers)
+    tenants = client.get("/platform/tenants", headers=headers)
     assert tenants.status_code == 200
     assert tenants.json() == []
 
@@ -141,7 +144,7 @@ def _auth_headers(client, username="admin", email="admin@example.com", password=
 
 def test_list_users(client):
     headers = _auth_headers(client)
-    response = client.get("/users", headers=headers)
+    response = client.get("/platform/users", headers=headers)
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
@@ -149,7 +152,7 @@ def test_list_users(client):
 def test_create_user(client):
     headers = _auth_headers(client)
     response = client.post(
-        "/users",
+        "/platform/users",
         json={"username": "newuser", "email": "new@example.com", "password": "pw", "create_tenant_name": "New User Tenant"},
         headers=headers,
     )
@@ -163,11 +166,11 @@ def test_create_user(client):
 def test_get_user(client):
     headers = _auth_headers(client)
     created = client.post(
-        "/users",
+        "/platform/users",
         json={"username": "getuser", "email": "get@example.com", "password": "pw", "create_tenant_name": "Get User Tenant"},
         headers=headers,
     ).json()
-    response = client.get(f"/users/{created['id']}", headers=headers)
+    response = client.get(f"/platform/users/{created['id']}", headers=headers)
     assert response.status_code == 200
     assert response.json()["email"] == "get@example.com"
 
@@ -175,11 +178,11 @@ def test_get_user(client):
 def test_update_user(client):
     headers = _auth_headers(client)
     created = client.post(
-        "/users",
+        "/platform/users",
         json={"username": "patchuser", "email": "patch@example.com", "password": "pw", "create_tenant_name": "Patch User Tenant"},
         headers=headers,
     ).json()
-    response = client.patch(f"/users/{created['id']}", json={"username": "patcheduser", "email": "patched@example.com"}, headers=headers)
+    response = client.patch(f"/platform/users/{created['id']}", json={"username": "patcheduser", "email": "patched@example.com"}, headers=headers)
     assert response.status_code == 200
     assert response.json()["username"] == "patcheduser"
     assert response.json()["email"] == "patched@example.com"
@@ -188,11 +191,11 @@ def test_update_user(client):
 def test_replace_user(client):
     headers = _auth_headers(client)
     created = client.post(
-        "/users",
+        "/platform/users",
         json={"username": "putuser", "email": "put@example.com", "password": "pw", "create_tenant_name": "Put User Tenant"},
         headers=headers,
     ).json()
-    response = client.put(f"/users/{created['id']}", json={"username": "replaceduser", "email": "replaced@example.com", "password": "newpw"}, headers=headers)
+    response = client.put(f"/platform/users/{created['id']}", json={"username": "replaceduser", "email": "replaced@example.com", "password": "newpw"}, headers=headers)
     assert response.status_code == 200
     assert response.json()["username"] == "replaceduser"
     assert response.json()["email"] == "replaced@example.com"
@@ -201,24 +204,24 @@ def test_replace_user(client):
 def test_delete_user(client):
     headers = _auth_headers(client)
     created = client.post(
-        "/users",
+        "/platform/users",
         json={"username": "deluser", "email": "del@example.com", "password": "pw", "create_tenant_name": "Del User Tenant"},
         headers=headers,
     ).json()
-    response = client.delete(f"/users/{created['id']}", headers=headers)
+    response = client.delete(f"/platform/users/{created['id']}", headers=headers)
     assert response.status_code == 204
-    get_resp = client.get(f"/users/{created['id']}", headers=headers)
+    get_resp = client.get(f"/platform/users/{created['id']}", headers=headers)
     assert get_resp.status_code == 404
 
 
 def test_get_user_not_found(client):
     headers = _auth_headers(client)
-    response = client.get("/users/01ARZ3NDEKTSV4RRFFQ69G5FAV", headers=headers)
+    response = client.get("/platform/users/01ARZ3NDEKTSV4RRFFQ69G5FAV", headers=headers)
     assert response.status_code == 404
 
 
 def test_unauthorized_without_token(client):
-    response = client.get("/users")
+    response = client.get("/platform/users")
     assert response.status_code == 401
 
 
@@ -229,20 +232,20 @@ def test_cookie_auth_without_bearer_header(client):
     )
     client.post("/login", json={"identifier": "cookie@example.com", "password": "pass"})
 
-    response = client.get("/users")
+    response = client.get("/platform/users")
     assert response.status_code == 200
 
 
 def test_list_tenants(client):
     headers = _auth_headers(client)
-    response = client.get("/tenants", headers=headers)
+    response = client.get("/platform/tenants", headers=headers)
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
 
 def test_create_tenant(client):
     headers = _auth_headers(client)
-    response = client.post("/tenants", json={"name": "Acme"}, headers=headers)
+    response = client.post("/platform/tenants", json={"name": "Acme"}, headers=headers)
     assert response.status_code == 201
     data = response.json()
     assert data["name"] == "Acme"
@@ -251,51 +254,51 @@ def test_create_tenant(client):
 
 def test_create_tenant_duplicate_name(client):
     headers = _auth_headers(client)
-    client.post("/tenants", json={"name": "Acme"}, headers=headers)
-    response = client.post("/tenants", json={"name": "Acme"}, headers=headers)
+    client.post("/platform/tenants", json={"name": "Acme"}, headers=headers)
+    response = client.post("/platform/tenants", json={"name": "Acme"}, headers=headers)
     assert response.status_code == 409
 
 
 def test_get_tenant(client):
     headers = _auth_headers(client)
-    created = client.post("/tenants", json={"name": "Acme"}, headers=headers).json()
-    response = client.get(f"/tenants/{created['id']}", headers=headers)
+    created = client.post("/platform/tenants", json={"name": "Acme"}, headers=headers).json()
+    response = client.get(f"/platform/tenants/{created['id']}", headers=headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Acme"
 
 
 def test_update_tenant(client):
     headers = _auth_headers(client)
-    created = client.post("/tenants", json={"name": "Acme"}, headers=headers).json()
-    response = client.patch(f"/tenants/{created['id']}", json={"name": "Acme Updated"}, headers=headers)
+    created = client.post("/platform/tenants", json={"name": "Acme"}, headers=headers).json()
+    response = client.patch(f"/platform/tenants/{created['id']}", json={"name": "Acme Updated"}, headers=headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Acme Updated"
 
 
 def test_delete_tenant(client):
     headers = _auth_headers(client)
-    created = client.post("/tenants", json={"name": "Acme"}, headers=headers).json()
-    response = client.delete(f"/tenants/{created['id']}", headers=headers)
+    created = client.post("/platform/tenants", json={"name": "Acme"}, headers=headers).json()
+    response = client.delete(f"/platform/tenants/{created['id']}", headers=headers)
     assert response.status_code == 204
-    get_resp = client.get(f"/tenants/{created['id']}", headers=headers)
+    get_resp = client.get(f"/platform/tenants/{created['id']}", headers=headers)
     assert get_resp.status_code == 404
 
 
 def test_tenants_requires_auth(client):
-    response = client.get("/tenants")
+    response = client.get("/platform/tenants")
     assert response.status_code == 401
 
 
 def test_list_groups(client):
     headers = _auth_headers(client)
-    response = client.get("/groups", headers=headers)
+    response = client.get("/platform/groups", headers=headers)
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
 
 def test_create_group(client):
     headers = _auth_headers(client)
-    response = client.post("/groups", json={"name": "Engineering"}, headers=headers)
+    response = client.post("/platform/groups", json={"name": "Engineering"}, headers=headers)
     assert response.status_code == 201
     data = response.json()
     assert data["name"] == "Engineering"
@@ -304,46 +307,46 @@ def test_create_group(client):
 
 def test_create_group_duplicate_name(client):
     headers = _auth_headers(client)
-    client.post("/groups", json={"name": "Engineering"}, headers=headers)
-    response = client.post("/groups", json={"name": "Engineering"}, headers=headers)
+    client.post("/platform/groups", json={"name": "Engineering"}, headers=headers)
+    response = client.post("/platform/groups", json={"name": "Engineering"}, headers=headers)
     assert response.status_code == 409
 
 
 def test_get_group(client):
     headers = _auth_headers(client)
-    created = client.post("/groups", json={"name": "Engineering"}, headers=headers).json()
-    response = client.get(f"/groups/{created['id']}", headers=headers)
+    created = client.post("/platform/groups", json={"name": "Engineering"}, headers=headers).json()
+    response = client.get(f"/platform/groups/{created['id']}", headers=headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Engineering"
 
 
 def test_update_group(client):
     headers = _auth_headers(client)
-    created = client.post("/groups", json={"name": "Engineering"}, headers=headers).json()
-    response = client.patch(f"/groups/{created['id']}", json={"name": "Platform"}, headers=headers)
+    created = client.post("/platform/groups", json={"name": "Engineering"}, headers=headers).json()
+    response = client.patch(f"/platform/groups/{created['id']}", json={"name": "Platform"}, headers=headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Platform"
 
 
 def test_delete_group(client):
     headers = _auth_headers(client)
-    created = client.post("/groups", json={"name": "Engineering"}, headers=headers).json()
-    response = client.delete(f"/groups/{created['id']}", headers=headers)
+    created = client.post("/platform/groups", json={"name": "Engineering"}, headers=headers).json()
+    response = client.delete(f"/platform/groups/{created['id']}", headers=headers)
     assert response.status_code == 204
-    get_resp = client.get(f"/groups/{created['id']}", headers=headers)
+    get_resp = client.get(f"/platform/groups/{created['id']}", headers=headers)
     assert get_resp.status_code == 404
 
 
 def test_groups_requires_auth(client):
-    response = client.get("/groups")
+    response = client.get("/platform/groups")
     assert response.status_code == 401
 
 
 def test_create_tenant_creates_default_tenant_groups(client):
     headers = _auth_headers(client)
-    created_tenant = client.post("/tenants", json={"name": "Beta"}, headers=headers).json()
+    created_tenant = client.post("/platform/tenants", json={"name": "Beta"}, headers=headers).json()
 
-    groups = client.get("/groups", headers=headers).json()
+    groups = client.get("/platform/groups", headers=headers).json()
     tenant_groups = [g for g in groups if g.get("tenant_id") == created_tenant["id"]]
 
     names = sorted(g["name"] for g in tenant_groups)

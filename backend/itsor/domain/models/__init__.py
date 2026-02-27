@@ -9,6 +9,11 @@ from itsor.domain.models.base_model import (
 	PermissionLevel,
 )
 from itsor.domain.models.group_model import Group
+from itsor.domain.models.idm_group_membership_model import IdmGroupMembership
+from itsor.domain.models.idm_group_model import IdmGroup
+from itsor.domain.models.idm_identity_model import IdmIdentity
+from itsor.domain.models.idm_person_model import IdmPerson
+from itsor.domain.models.idm_user_model import IdmUser
 from itsor.domain.models.namespace_model import Namespace
 from itsor.domain.models.tenant_model import Tenant
 from itsor.domain.models.entity_type_model import EntityType
@@ -26,6 +31,11 @@ __all__ = [
 	"DEFAULT_CONTROL_FLAGS",
 	"DEFAULT_PERMISSIONS",
 	"Group",
+	"IdmGroup",
+	"IdmGroupMembership",
+	"IdmIdentity",
+	"IdmPerson",
+	"IdmUser",
 	"Namespace",
 	"Tenant",
 	"EntityType",

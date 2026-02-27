@@ -5,7 +5,7 @@ from itsor.infrastructure.models.sqlalchemy_user_model import Base
 
 
 class TenantModel(Base):
-    __tablename__ = "tenants"
+    __tablename__ = "platform_tenants"
 
     id = Column(String(36), primary_key=True)
     name = Column(String(255), unique=True, nullable=False, index=True)

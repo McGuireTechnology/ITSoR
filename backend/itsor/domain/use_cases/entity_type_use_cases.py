@@ -33,6 +33,7 @@ class EntityTypeUseCases(BaseUseCase):
         name: str,
         namespace_id: str,
         attributes_json: dict[str, Any] | None = None,
+        creator_user_id: str | None = None,
     ) -> EntityType:
         namespace = self._namespace_repo.get_by_id(namespace_id)
         if not namespace:
@@ -45,6 +46,7 @@ class EntityTypeUseCases(BaseUseCase):
             name=name,
             namespace_id=namespace_id,
             attributes_json=attributes_json or {},
+            owner_id=creator_user_id,
         )
         return self._repo.create(entity_type)
 

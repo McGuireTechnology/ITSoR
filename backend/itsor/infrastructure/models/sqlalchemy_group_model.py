@@ -5,9 +5,9 @@ from itsor.infrastructure.models.sqlalchemy_user_model import Base
 
 
 class GroupModel(Base):
-    __tablename__ = "groups"
+    __tablename__ = "platform_groups"
     __table_args__ = (
-        UniqueConstraint("tenant_id", "name", name="uq_groups_tenant_id_name"),
+        UniqueConstraint("tenant_id", "name", name="uq_platform_groups_tenant_id_name"),
     )
 
     id = Column(String(36), primary_key=True)

@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_current_user, get_tenant_use_cases
+from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_tenant_use_cases
 from itsor.api.schemas.tenant_schamas import TenantCreate, TenantUpdate, TenantReplace, TenantResponse
 from itsor.domain.models import User
 from itsor.domain.use_cases.tenant_use_cases import TenantUseCases
@@ -34,11 +34,13 @@ def create_tenant(
 def get_tenant(
     tenant_id: str,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant = use_cases.get_tenant(tenant_id)
     if not tenant:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
+    authz.authorize_resource_action(current_user=current_user, resource=tenant, action="read", endpoint_name="tenants")
     return tenant
 
 
@@ -47,8 +49,14 @@ def update_tenant(
     tenant_id: str,
     body: TenantUpdate,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    tenant = use_cases.get_tenant(tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
+    authz.authorize_resource_action(current_user=current_user, resource=tenant, action="write", endpoint_name="tenants")
+
     try:
         return use_cases.update_tenant(tenant_id, body.name)
     except ValueError as exc:
@@ -63,8 +71,14 @@ def replace_tenant(
     tenant_id: str,
     body: TenantReplace,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    tenant = use_cases.get_tenant(tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
+    authz.authorize_resource_action(current_user=current_user, resource=tenant, action="write", endpoint_name="tenants")
+
     try:
         return use_cases.replace_tenant(tenant_id, body.name)
     except ValueError as exc:
@@ -78,8 +92,14 @@ def replace_tenant(
 def delete_tenant(
     tenant_id: str,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    tenant = use_cases.get_tenant(tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
+    authz.authorize_resource_action(current_user=current_user, resource=tenant, action="write", endpoint_name="tenants")
+
     try:
         use_cases.delete_tenant(tenant_id)
     except ValueError as exc:

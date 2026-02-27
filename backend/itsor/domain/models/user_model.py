@@ -11,3 +11,4 @@ class User:
     email: str = ""
     username: str = ""
     password_hash: str = ""
+    platform_endpoint_permissions: dict[str, list[str]] = field(default_factory=dict)

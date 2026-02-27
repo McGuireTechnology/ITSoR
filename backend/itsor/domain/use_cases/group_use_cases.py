@@ -16,14 +16,31 @@ class GroupUseCases(BaseUseCase):
     def get_group(self, group_id: str) -> Optional[Group]:
         return self._repo.get_by_id(group_id)
 
-    def create_group(self, name: str, tenant_id: str | None = None) -> Group:
+    def create_group(
+        self,
+        name: str,
+        tenant_id: str | None = None,
+        creator_user_id: str | None = None,
+        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+    ) -> Group:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
             raise ValueError("Group name already registered")
-        group = Group(id=generate_ulid(), name=name, tenant_id=tenant_id)
+        group = Group(
+            id=generate_ulid(),
+            name=name,
+            tenant_id=tenant_id,
+            owner_id=creator_user_id,
+            platform_endpoint_permissions=platform_endpoint_permissions or {"*": ["read", "write"]},
+        )
         return self._repo.create(group)
 
-    def update_group(self, group_id: str, name: Optional[str] = None) -> Group:
+    def update_group(
+        self,
+        group_id: str,
+        name: Optional[str] = None,
+        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+    ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
             raise ValueError("Group not found")
@@ -32,9 +49,16 @@ class GroupUseCases(BaseUseCase):
             if existing:
                 raise ValueError("Group name already in use")
             group.name = name
+        if platform_endpoint_permissions is not None:
+            group.platform_endpoint_permissions = platform_endpoint_permissions
         return self._repo.update(group)
 
-    def replace_group(self, group_id: str, name: str) -> Group:
+    def replace_group(
+        self,
+        group_id: str,
+        name: str,
+        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+    ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
             raise ValueError("Group not found")
@@ -43,6 +67,7 @@ class GroupUseCases(BaseUseCase):
             if existing:
                 raise ValueError("Group name already in use")
         group.name = name
+        group.platform_endpoint_permissions = platform_endpoint_permissions or {"*": ["read", "write"]}
         return self._repo.update(group)
 
     def delete_group(self, group_id: str) -> None:

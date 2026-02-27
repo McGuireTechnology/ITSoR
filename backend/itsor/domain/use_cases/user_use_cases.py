@@ -123,6 +123,7 @@ class UserUseCases(BaseUseCase):
             username=username,
             email=email,
             password_hash=hash_password(password),
+            platform_endpoint_permissions={"*": ["read", "write"]},
         )
         self._assign_signup_group(user, invite_group_id)
         created = self._repo.create(user)
@@ -157,6 +158,7 @@ class UserUseCases(BaseUseCase):
         password: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
+        platform_endpoint_permissions: dict[str, list[str]] | None = None,
     ) -> User:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
@@ -170,6 +172,7 @@ class UserUseCases(BaseUseCase):
             username=username,
             email=email,
             password_hash=hash_password(password),
+            platform_endpoint_permissions=platform_endpoint_permissions or {"*": ["read", "write"]},
         )
         self._assign_user_group(user, username, invite_group_id, create_tenant_name)
         return self._repo.create(user)
@@ -180,6 +183,7 @@ class UserUseCases(BaseUseCase):
         username: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
+        platform_endpoint_permissions: dict[str, list[str]] | None = None,
     ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
@@ -199,9 +203,18 @@ class UserUseCases(BaseUseCase):
             user.email = email
         if password is not None:
             user.password_hash = hash_password(password)
+        if platform_endpoint_permissions is not None:
+            user.platform_endpoint_permissions = platform_endpoint_permissions
         return self._repo.update(user)
 
-    def replace_user(self, user_id: str, username: str, email: str, password: str) -> User:
+    def replace_user(
+        self,
+        user_id: str,
+        username: str,
+        email: str,
+        password: str,
+        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+    ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")
@@ -219,6 +232,7 @@ class UserUseCases(BaseUseCase):
             user.name = username
         user.email = email
         user.password_hash = hash_password(password)
+        user.platform_endpoint_permissions = platform_endpoint_permissions or {"*": ["read", "write"]}
         return self._repo.update(user)
 
     def delete_user(self, user_id: str) -> None:

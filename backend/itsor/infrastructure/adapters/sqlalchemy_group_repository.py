@@ -2,6 +2,10 @@ from sqlalchemy.orm import Session
 
 from itsor.domain.models import Group
 from itsor.domain.ports.group_repository import GroupRepository
+from itsor.infrastructure.adapters.platform_endpoint_permissions import (
+    fetch_platform_endpoint_permissions,
+    replace_platform_endpoint_permissions,
+)
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.models.sqlalchemy_group_model import GroupModel
 
@@ -20,6 +24,11 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Group, GroupModel], Gro
             owner_id=record.owner_id,
             group_id=record.group_id,
             permissions=record.permissions,
+            platform_endpoint_permissions=fetch_platform_endpoint_permissions(
+                self._db,
+                principal_type="group",
+                principal_id=record.id,
+            ),
         )
 
     def _to_model(self, group: Group) -> GroupModel:
@@ -38,6 +47,26 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Group, GroupModel], Gro
         record.owner_id = group.owner_id
         record.group_id = group.group_id
         record.permissions = group.permissions
+
+    def create(self, entity: Group) -> Group:
+        created = super().create(entity)
+        replace_platform_endpoint_permissions(
+            self._db,
+            principal_type="group",
+            principal_id=created.id,
+            permissions=entity.platform_endpoint_permissions,
+        )
+        return self.get_by_id(created.id) or created
+
+    def update(self, entity: Group) -> Group:
+        updated = super().update(entity)
+        replace_platform_endpoint_permissions(
+            self._db,
+            principal_type="group",
+            principal_id=updated.id,
+            permissions=entity.platform_endpoint_permissions,
+        )
+        return self.get_by_id(updated.id) or updated
 
     def get_by_name(self, name: str, tenant_id: str | None = None) -> Group | None:
         record = (

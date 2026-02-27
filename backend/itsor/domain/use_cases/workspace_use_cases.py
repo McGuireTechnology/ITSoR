@@ -31,11 +31,11 @@ class WorkspaceUseCases(BaseUseCase):
     def get_workspace(self, workspace_id: str) -> Optional[Workspace]:
         return self._repo.get_by_id(workspace_id)
 
-    def create_workspace(self, name: str, tenant_id: str | None = None) -> Workspace:
+    def create_workspace(self, name: str, tenant_id: str | None = None, creator_user_id: str | None = None) -> Workspace:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
             raise ValueError("Workspace name already registered")
-        workspace = Workspace(id=generate_ulid(), name=name, tenant_id=tenant_id)
+        workspace = Workspace(id=generate_ulid(), name=name, tenant_id=tenant_id, owner_id=creator_user_id)
         return self._repo.create(workspace)
 
     def update_workspace(self, workspace_id: str, name: str | None = None) -> Workspace:

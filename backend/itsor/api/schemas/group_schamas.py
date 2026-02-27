@@ -4,15 +4,16 @@ from itsor.api.schemas.base_schemas import TenantScopedNameSchema
 
 
 class GroupCreate(TenantScopedNameSchema):
-    pass
+    platform_endpoint_permissions: dict[str, list[str]] | None = None
 
 
 class GroupUpdate(BaseModel):
     name: str | None = None
+    platform_endpoint_permissions: dict[str, list[str]] | None = None
 
 
 class GroupReplace(TenantScopedNameSchema):
-    pass
+    platform_endpoint_permissions: dict[str, list[str]] | None = None
 
 
 class GroupResponse(TenantScopedNameSchema):
@@ -20,5 +21,6 @@ class GroupResponse(TenantScopedNameSchema):
     owner_id: str | None = None
     group_id: str | None = None
     permissions: int
+    platform_endpoint_permissions: dict[str, list[str]]
 
     model_config = {"from_attributes": True}

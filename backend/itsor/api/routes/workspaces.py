@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_current_user, get_workspace_use_cases
+from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_workspace_use_cases
 from itsor.api.schemas.workspace_schamas import (
     WorkspaceCreate,
     WorkspaceReplace,
@@ -19,8 +19,16 @@ router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 def list_workspaces(
     tenant_id: str | None = None,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    if tenant_id:
+        authz.authorize_tenant_scope(
+            current_user=current_user,
+            tenant_id=tenant_id,
+            action="read",
+            endpoint_name="workspaces",
+        )
     return use_cases.list_workspaces(tenant_id)
 
 
@@ -28,10 +36,19 @@ def list_workspaces(
 def create_workspace(
     body: WorkspaceCreate,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    if body.tenant_id:
+        authz.authorize_tenant_scope(
+            current_user=current_user,
+            tenant_id=body.tenant_id,
+            action="write",
+            endpoint_name="workspaces",
+        )
+
     try:
-        return use_cases.create_workspace(body.name, body.tenant_id)
+        return use_cases.create_workspace(body.name, body.tenant_id, creator_user_id=current_user.id)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
@@ -40,11 +57,13 @@ def create_workspace(
 def get_workspace(
     workspace_id: str,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
     workspace = use_cases.get_workspace(workspace_id)
     if not workspace:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workspace not found")
+    authz.authorize_resource_action(current_user=current_user, resource=workspace, action="read", endpoint_name="workspaces")
     return workspace
 
 
@@ -53,8 +72,14 @@ def update_workspace(
     workspace_id: str,
     body: WorkspaceUpdate,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    workspace = use_cases.get_workspace(workspace_id)
+    if not workspace:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workspace not found")
+    authz.authorize_resource_action(current_user=current_user, resource=workspace, action="write", endpoint_name="workspaces")
+
     try:
         return use_cases.update_workspace(workspace_id, body.name)
     except ValueError as exc:
@@ -69,8 +94,14 @@ def replace_workspace(
     workspace_id: str,
     body: WorkspaceReplace,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    workspace = use_cases.get_workspace(workspace_id)
+    if not workspace:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workspace not found")
+    authz.authorize_resource_action(current_user=current_user, resource=workspace, action="write", endpoint_name="workspaces")
+
     try:
         return use_cases.replace_workspace(workspace_id, body.name, body.tenant_id)
     except ValueError as exc:
@@ -84,8 +115,14 @@ def replace_workspace(
 def delete_workspace(
     workspace_id: str,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
+    authz: AuthorizationService = Depends(get_authorization_service),
 ):
+    workspace = use_cases.get_workspace(workspace_id)
+    if not workspace:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workspace not found")
+    authz.authorize_resource_action(current_user=current_user, resource=workspace, action="write", endpoint_name="workspaces")
+
     try:
         use_cases.delete_workspace(workspace_id)
     except ValueError as exc:

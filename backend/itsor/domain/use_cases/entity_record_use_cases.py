@@ -61,6 +61,7 @@ class EntityRecordUseCases(BaseUseCase):
         entity_type_id: str,
         values_json: dict[str, Any],
         name: str = "",
+        creator_user_id: str | None = None,
     ) -> EntityRecord:
         entity_type = self._entity_type_repo.get_by_id(entity_type_id)
         if not entity_type:
@@ -74,6 +75,7 @@ class EntityRecordUseCases(BaseUseCase):
             name=name,
             entity_type_id=entity_type_id,
             values_json=values_json,
+            owner_id=creator_user_id,
         )
         return self._repo.create(entity_record)
 

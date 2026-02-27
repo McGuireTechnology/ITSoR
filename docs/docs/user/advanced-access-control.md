@@ -95,3 +95,77 @@ curl -X POST http://localhost:8000/records \
 3. Create user and attach them to tenant/group.
 4. Create record ACL entries for owner/group/tenant/public.
 5. Validate access using GET, PATCH, and DELETE with different users.
+
+## Current Authorization Resolution Order
+
+For tenant-scoped resources, authorization is evaluated in this order before an action is allowed:
+
+1. Resource owner check
+2. Resource permission-byte check
+3. Endpoint permission check in tenant scope
+4. Tenant permission-byte check
+
+If any required check fails, the API returns `403 Forbidden`.
+
+### Platform endpoint permissions
+
+Endpoint authorization can now be assigned directly on:
+
+- platform users (`users.platform_endpoint_permissions`)
+- platform groups (`groups.platform_endpoint_permissions`)
+
+Storage model:
+
+- persisted in dedicated table: `platform_endpoint_permissions`
+
+Field name:
+
+`platform_endpoint_permissions`
+
+Shape:
+
+```json
+{
+	"users": ["read", "write"],
+	"groups": ["read"],
+	"*": ["read"]
+}
+```
+
+Notes:
+
+- Endpoint keys map to API endpoint names (for example: `users`, `groups`, `tenants`, `workspaces`).
+- Actions support `read`, `write`, or `*`.
+- `*` endpoint key acts as a wildcard.
+
+### Root Tenant override
+
+ITSoR supports a Root Tenant concept for full administrative control across tenant-scoped resources.
+
+- Users operating in the Root Tenant can manage resources across tenants.
+- Root Tenant is resolved by:
+	- `ROOT_TENANT_ID` (preferred), or
+	- tenant name match using `ROOT_TENANT_NAME` (default: `Root`).
+
+This override is applied in the authorization dependency layer.
+
+### Operator configuration examples
+
+Recommended production configuration (explicit tenant ID):
+
+```dotenv
+ROOT_TENANT_ID=01HZX9M9B3Q2X4R7K8N1P5T6V0
+ROOT_TENANT_NAME=Root
+```
+
+Name-based fallback (when ID is not yet pinned):
+
+```dotenv
+ROOT_TENANT_ID=
+ROOT_TENANT_NAME=Root
+```
+
+Notes:
+
+- `ROOT_TENANT_ID` takes precedence when both values are set.
+- Use an immutable tenant ID in production to avoid accidental name-collision privilege escalation.

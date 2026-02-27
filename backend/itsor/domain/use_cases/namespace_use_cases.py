@@ -31,14 +31,14 @@ class NamespaceUseCases(BaseUseCase):
     def get_namespace(self, namespace_id: str) -> Optional[Namespace]:
         return self._repo.get_by_id(namespace_id)
 
-    def create_namespace(self, name: str, workspace_id: str) -> Namespace:
+    def create_namespace(self, name: str, workspace_id: str, creator_user_id: str | None = None) -> Namespace:
         workspace = self._workspace_repo.get_by_id(workspace_id)
         if not workspace:
             raise ValueError("Workspace not found")
         existing = self._repo.get_by_name(name, workspace_id)
         if existing:
             raise ValueError("Namespace name already registered")
-        namespace = Namespace(id=generate_ulid(), name=name, workspace_id=workspace_id)
+        namespace = Namespace(id=generate_ulid(), name=name, workspace_id=workspace_id, owner_id=creator_user_id)
         return self._repo.create(namespace)
 
     def update_namespace(self, namespace_id: str, name: str | None = None) -> Namespace:
