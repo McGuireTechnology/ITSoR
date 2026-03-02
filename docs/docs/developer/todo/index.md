@@ -13,6 +13,7 @@ Rules now applied:
 - [Platform and Architecture](platform-and-architecture.md)
 - [Product, Security, and Quality](product-security-and-quality.md)
 - [Documentation and Operations](documentation-and-operations.md)
+- [Domain Slice Roadmap](domain-slice-roadmap.md)
 
 ## Priority Legend
 
