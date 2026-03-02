@@ -9,7 +9,7 @@ from itsor.api.schemas.entity_type_schamas import (
     EntityTypeResponse,
     EntityTypeUpdate,
 )
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.domain.use_cases.entity_type_use_cases import EntityTypeUseCases
 
 router = APIRouter(prefix="/entity-types", tags=["entity-types"])
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/entity-types", tags=["entity-types"])
 def list_entity_types(
     namespace_id: str | None = None,
     use_cases: EntityTypeUseCases = Depends(get_entity_type_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     if namespace_id:
@@ -38,7 +38,7 @@ def list_entity_types(
 def create_entity_type(
     body: EntityTypeCreate,
     use_cases: EntityTypeUseCases = Depends(get_entity_type_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant_id = authz.resolve_tenant_id_for_namespace(body.namespace_id)
@@ -63,7 +63,7 @@ def create_entity_type(
 def get_entity_type(
     entity_type_id: str,
     use_cases: EntityTypeUseCases = Depends(get_entity_type_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_type = use_cases.get_entity_type(entity_type_id)
@@ -78,7 +78,7 @@ def update_entity_type(
     entity_type_id: str,
     body: EntityTypeUpdate,
     use_cases: EntityTypeUseCases = Depends(get_entity_type_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_type = use_cases.get_entity_type(entity_type_id)
@@ -100,7 +100,7 @@ def replace_entity_type(
     entity_type_id: str,
     body: EntityTypeReplace,
     use_cases: EntityTypeUseCases = Depends(get_entity_type_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_type = use_cases.get_entity_type(entity_type_id)
@@ -126,7 +126,7 @@ def replace_entity_type(
 def delete_entity_type(
     entity_type_id: str,
     use_cases: EntityTypeUseCases = Depends(get_entity_type_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_type = use_cases.get_entity_type(entity_type_id)

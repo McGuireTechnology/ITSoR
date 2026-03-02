@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from itsor.domain.models import Group
+from itsor.domain.models import PlatformGroup
 from itsor.domain.ports.group_repository import GroupRepository
 from itsor.infrastructure.adapters.platform_endpoint_permissions import (
     fetch_platform_endpoint_permissions,
@@ -10,14 +10,14 @@ from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyB
 from itsor.infrastructure.models.sqlalchemy_group_model import GroupModel
 
 
-class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Group, GroupModel], GroupRepository):
+class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[PlatformGroup, GroupModel], GroupRepository):
     model_class = GroupModel
 
     def __init__(self, db: Session) -> None:
         super().__init__(db, "Group")
 
-    def _to_domain(self, record: GroupModel) -> Group:
-        return Group(
+    def _to_domain(self, record: GroupModel) -> PlatformGroup:
+        return PlatformGroup(
             id=record.id,
             name=record.name,
             tenant_id=record.tenant_id,
@@ -31,7 +31,7 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Group, GroupModel], Gro
             ),
         )
 
-    def _to_model(self, group: Group) -> GroupModel:
+    def _to_model(self, group: PlatformGroup) -> GroupModel:
         return GroupModel(
             id=group.id,
             name=group.name,
@@ -41,14 +41,14 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Group, GroupModel], Gro
             permissions=group.permissions,
         )
 
-    def _apply_updates(self, record: GroupModel, group: Group) -> None:
+    def _apply_updates(self, record: GroupModel, group: PlatformGroup) -> None:
         record.tenant_id = group.tenant_id
         record.name = group.name
         record.owner_id = group.owner_id
         record.group_id = group.group_id
         record.permissions = group.permissions
 
-    def create(self, entity: Group) -> Group:
+    def create(self, entity: PlatformGroup) -> PlatformGroup:
         created = super().create(entity)
         replace_platform_endpoint_permissions(
             self._db,
@@ -58,7 +58,7 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Group, GroupModel], Gro
         )
         return self.get_by_id(created.id) or created
 
-    def update(self, entity: Group) -> Group:
+    def update(self, entity: PlatformGroup) -> PlatformGroup:
         updated = super().update(entity)
         replace_platform_endpoint_permissions(
             self._db,
@@ -68,7 +68,7 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Group, GroupModel], Gro
         )
         return self.get_by_id(updated.id) or updated
 
-    def get_by_name(self, name: str, tenant_id: str | None = None) -> Group | None:
+    def get_by_name(self, name: str, tenant_id: str | None = None) -> PlatformGroup | None:
         record = (
             self._db.query(GroupModel)
             .filter(GroupModel.name == name, GroupModel.tenant_id == tenant_id)

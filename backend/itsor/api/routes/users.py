@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_user_use_cases
 from itsor.api.schemas.user_schamas import UserCreate, UserUpdate, UserReplace, UserResponse
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.domain.use_cases.user_use_cases import UserUseCases
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.get("", response_model=List[UserResponse])
 def list_users(
     use_cases: UserUseCases = Depends(get_user_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="users", action="read")
@@ -24,7 +24,7 @@ def list_users(
 def create_user(
     body: UserCreate,
     use_cases: UserUseCases = Depends(get_user_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="users", action="write")
@@ -45,7 +45,7 @@ def create_user(
 def get_user(
     user_id: str,
     use_cases: UserUseCases = Depends(get_user_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="users", action="read")
@@ -60,7 +60,7 @@ def update_user(
     user_id: str,
     body: UserUpdate,
     use_cases: UserUseCases = Depends(get_user_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="users", action="write")
@@ -75,7 +75,7 @@ def replace_user(
     user_id: str,
     body: UserReplace,
     use_cases: UserUseCases = Depends(get_user_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="users", action="write")
@@ -89,7 +89,7 @@ def replace_user(
 def delete_user(
     user_id: str,
     use_cases: UserUseCases = Depends(get_user_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="users", action="write")

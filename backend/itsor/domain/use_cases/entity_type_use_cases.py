@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import EntityType
+from itsor.domain.models import CustomEntityType
 from itsor.domain.ports.entity_record_repository import EntityRecordRepository
 from itsor.domain.ports.entity_type_repository import EntityTypeRepository
 from itsor.domain.ports.namespace_repository import NamespaceRepository
@@ -19,13 +19,13 @@ class EntityTypeUseCases(BaseUseCase):
         self._namespace_repo = namespace_repo
         self._entity_record_repo = entity_record_repo
 
-    def list_entity_types(self, namespace_id: str | None = None) -> List[EntityType]:
+    def list_entity_types(self, namespace_id: str | None = None) -> List[CustomEntityType]:
         items = self._repo.list()
         if namespace_id is None:
             return items
         return [item for item in items if item.namespace_id == namespace_id]
 
-    def get_entity_type(self, entity_type_id: str) -> Optional[EntityType]:
+    def get_entity_type(self, entity_type_id: str) -> Optional[CustomEntityType]:
         return self._repo.get_by_id(entity_type_id)
 
     def create_entity_type(
@@ -34,14 +34,14 @@ class EntityTypeUseCases(BaseUseCase):
         namespace_id: str,
         attributes_json: dict[str, Any] | None = None,
         creator_user_id: str | None = None,
-    ) -> EntityType:
+    ) -> CustomEntityType:
         namespace = self._namespace_repo.get_by_id(namespace_id)
         if not namespace:
             raise ValueError("Namespace not found")
         existing = self._repo.get_by_name(name, namespace_id)
         if existing:
             raise ValueError("Entity type name already registered")
-        entity_type = EntityType(
+        entity_type = CustomEntityType(
             id=generate_ulid(),
             name=name,
             namespace_id=namespace_id,
@@ -55,7 +55,7 @@ class EntityTypeUseCases(BaseUseCase):
         entity_type_id: str,
         name: str | None = None,
         attributes_json: dict[str, Any] | None = None,
-    ) -> EntityType:
+    ) -> CustomEntityType:
         entity_type = self._repo.get_by_id(entity_type_id)
         if not entity_type:
             raise ValueError("Entity type not found")
@@ -74,7 +74,7 @@ class EntityTypeUseCases(BaseUseCase):
         name: str,
         namespace_id: str,
         attributes_json: dict[str, Any] | None = None,
-    ) -> EntityType:
+    ) -> CustomEntityType:
         entity_type = self._repo.get_by_id(entity_type_id)
         if not entity_type:
             raise ValueError("Entity type not found")

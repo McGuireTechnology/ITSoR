@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import Group
+from itsor.domain.models import PlatformGroup
 from itsor.domain.ports.group_repository import GroupRepository
 from itsor.domain.use_cases.base_use_case import BaseUseCase
 
@@ -10,10 +10,10 @@ class GroupUseCases(BaseUseCase):
     def __init__(self, repo: GroupRepository) -> None:
         self._repo = repo
 
-    def list_groups(self) -> List[Group]:
+    def list_groups(self) -> List[PlatformGroup]:
         return self._repo.list()
 
-    def get_group(self, group_id: str) -> Optional[Group]:
+    def get_group(self, group_id: str) -> Optional[PlatformGroup]:
         return self._repo.get_by_id(group_id)
 
     def create_group(
@@ -22,11 +22,11 @@ class GroupUseCases(BaseUseCase):
         tenant_id: str | None = None,
         creator_user_id: str | None = None,
         platform_endpoint_permissions: dict[str, list[str]] | None = None,
-    ) -> Group:
+    ) -> PlatformGroup:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
             raise ValueError("Group name already registered")
-        group = Group(
+        group = PlatformGroup(
             id=generate_ulid(),
             name=name,
             tenant_id=tenant_id,
@@ -40,7 +40,7 @@ class GroupUseCases(BaseUseCase):
         group_id: str,
         name: Optional[str] = None,
         platform_endpoint_permissions: dict[str, list[str]] | None = None,
-    ) -> Group:
+    ) -> PlatformGroup:
         group = self._repo.get_by_id(group_id)
         if not group:
             raise ValueError("Group not found")
@@ -58,7 +58,7 @@ class GroupUseCases(BaseUseCase):
         group_id: str,
         name: str,
         platform_endpoint_permissions: dict[str, list[str]] | None = None,
-    ) -> Group:
+    ) -> PlatformGroup:
         group = self._repo.get_by_id(group_id)
         if not group:
             raise ValueError("Group not found")

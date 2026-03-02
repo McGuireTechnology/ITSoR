@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import EntityRecord
+from itsor.domain.models import CustomEntityRecord
 from itsor.domain.ports.entity_record_repository import EntityRecordRepository
 from itsor.domain.ports.entity_type_repository import EntityTypeRepository
 from itsor.domain.use_cases.base_use_case import BaseUseCase
@@ -12,7 +12,7 @@ class EntityRecordUseCases(BaseUseCase):
         self._repo = repo
         self._entity_type_repo = entity_type_repo
 
-    def list_entity_records(self, entity_type_id: str | None = None) -> List[EntityRecord]:
+    def list_entity_records(self, entity_type_id: str | None = None) -> List[CustomEntityRecord]:
         items = self._repo.list()
         if entity_type_id is None:
             return items
@@ -53,7 +53,7 @@ class EntityRecordUseCases(BaseUseCase):
 
         return matched
 
-    def get_entity_record(self, entity_record_id: str) -> Optional[EntityRecord]:
+    def get_entity_record(self, entity_record_id: str) -> Optional[CustomEntityRecord]:
         return self._repo.get_by_id(entity_record_id)
 
     def create_entity_record(
@@ -62,7 +62,7 @@ class EntityRecordUseCases(BaseUseCase):
         values_json: dict[str, Any],
         name: str = "",
         creator_user_id: str | None = None,
-    ) -> EntityRecord:
+    ) -> CustomEntityRecord:
         entity_type = self._entity_type_repo.get_by_id(entity_type_id)
         if not entity_type:
             raise ValueError("Entity type not found")
@@ -70,7 +70,7 @@ class EntityRecordUseCases(BaseUseCase):
             existing = self._repo.get_by_name(name, entity_type_id)
             if existing:
                 raise ValueError("Entity record name already in use")
-        entity_record = EntityRecord(
+        entity_record = CustomEntityRecord(
             id=generate_ulid(),
             name=name,
             entity_type_id=entity_type_id,
@@ -84,7 +84,7 @@ class EntityRecordUseCases(BaseUseCase):
         entity_record_id: str,
         name: str | None = None,
         values_json: dict[str, Any] | None = None,
-    ) -> EntityRecord:
+    ) -> CustomEntityRecord:
         entity_record = self._repo.get_by_id(entity_record_id)
         if not entity_record:
             raise ValueError("Entity record not found")
@@ -104,7 +104,7 @@ class EntityRecordUseCases(BaseUseCase):
         entity_type_id: str,
         values_json: dict[str, Any],
         name: str = "",
-    ) -> EntityRecord:
+    ) -> CustomEntityRecord:
         entity_record = self._repo.get_by_id(entity_record_id)
         if not entity_record:
             raise ValueError("Entity record not found")

@@ -2,17 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from itsor.api.deps import get_current_user
-from itsor.api.schemas.idm_group_memberships_schemas import (
-    IdmGroupMembershipCreate,
-    IdmGroupMembershipResponse,
-    IdmGroupMembershipUpdate,
+from itsor.api.schemas.platform_group_memberships_schemas import (
+    PlatformGroupMembershipCreate,
+    PlatformGroupMembershipResponse,
+    PlatformGroupMembershipUpdate,
 )
 from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
-from itsor.infrastructure.models.sqlalchemy_idm_group_membership_model import IdmGroupMembershipModel
-from itsor.infrastructure.models.sqlalchemy_idm_group_model import IdmGroupModel
-from itsor.infrastructure.models.sqlalchemy_idm_user_model import IdmUserModel
+from itsor.infrastructure.models.sqlalchemy_group_model import GroupModel
+from itsor.infrastructure.models.sqlalchemy_platform_group_membership_model import PlatformGroupMembershipModel
+from itsor.infrastructure.models.sqlalchemy_user_model import UserModel
 
 router = APIRouter(prefix="/group-memberships", tags=["group-memberships"])
 
@@ -24,26 +24,30 @@ def _validate_member_ref(db: Session, member_type: str, member_user_id: str | No
     if member_type == "user":
         if not member_user_id or member_group_id:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="user membership requires member_user_id only")
-        user = db.query(IdmUserModel).filter(IdmUserModel.id == member_user_id).first()
+        user = db.query(UserModel).filter(UserModel.id == member_user_id).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Member user not found")
         return
 
     if not member_group_id or member_user_id:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="group membership requires member_group_id only")
-    group = db.query(IdmGroupModel).filter(IdmGroupModel.id == member_group_id).first()
+    group = db.query(GroupModel).filter(GroupModel.id == member_group_id).first()
     if not group:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Member group not found")
 
 
-@router.get("", response_model=list[IdmGroupMembershipResponse])
+@router.get("", response_model=list[PlatformGroupMembershipResponse])
 def list_group_memberships(db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
-    return db.query(IdmGroupMembershipModel).all()
+    return db.query(PlatformGroupMembershipModel).all()
 
 
-@router.post("", response_model=IdmGroupMembershipResponse, status_code=status.HTTP_201_CREATED)
-def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
-    group = db.query(IdmGroupModel).filter(IdmGroupModel.id == body.group_id).first()
+@router.post("", response_model=PlatformGroupMembershipResponse, status_code=status.HTTP_201_CREATED)
+def create_group_membership(
+    body: PlatformGroupMembershipCreate,
+    db: Session = Depends(get_db),
+    _: PlatformUser = Depends(get_current_user),
+):
+    group = db.query(GroupModel).filter(GroupModel.id == body.group_id).first()
     if not group:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group not found")
 
@@ -52,7 +56,7 @@ def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depend
     if body.member_type == "group" and body.member_group_id == body.group_id:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group cannot directly contain itself")
 
-    membership = IdmGroupMembershipModel(
+    membership = PlatformGroupMembershipModel(
         id=generate_ulid(),
         group_id=body.group_id,
         member_type=body.member_type,
@@ -65,22 +69,22 @@ def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depend
     return membership
 
 
-@router.get("/{membership_id}", response_model=IdmGroupMembershipResponse)
+@router.get("/{membership_id}", response_model=PlatformGroupMembershipResponse)
 def get_group_membership(membership_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
-    membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
+    membership = db.query(PlatformGroupMembershipModel).filter(PlatformGroupMembershipModel.id == membership_id).first()
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
     return membership
 
 
-@router.patch("/{membership_id}", response_model=IdmGroupMembershipResponse)
+@router.patch("/{membership_id}", response_model=PlatformGroupMembershipResponse)
 def update_group_membership(
     membership_id: str,
-    body: IdmGroupMembershipUpdate,
+    body: PlatformGroupMembershipUpdate,
     db: Session = Depends(get_db),
     _: PlatformUser = Depends(get_current_user),
 ):
-    membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
+    membership = db.query(PlatformGroupMembershipModel).filter(PlatformGroupMembershipModel.id == membership_id).first()
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
 
@@ -107,7 +111,7 @@ def update_group_membership(
 
 @router.delete("/{membership_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_group_membership(membership_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
-    membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
+    membership = db.query(PlatformGroupMembershipModel).filter(PlatformGroupMembershipModel.id == membership_id).first()
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
 

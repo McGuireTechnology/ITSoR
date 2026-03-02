@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import Namespace
+from itsor.domain.models import CustomNamespace
 from itsor.domain.ports.entity_record_repository import EntityRecordRepository
 from itsor.domain.ports.entity_type_repository import EntityTypeRepository
 from itsor.domain.ports.namespace_repository import NamespaceRepository
@@ -22,26 +22,26 @@ class NamespaceUseCases(BaseUseCase):
         self._entity_type_repo = entity_type_repo
         self._entity_record_repo = entity_record_repo
 
-    def list_namespaces(self, workspace_id: str | None = None) -> List[Namespace]:
+    def list_namespaces(self, workspace_id: str | None = None) -> List[CustomNamespace]:
         items = self._repo.list()
         if workspace_id is None:
             return items
         return [item for item in items if item.workspace_id == workspace_id]
 
-    def get_namespace(self, namespace_id: str) -> Optional[Namespace]:
+    def get_namespace(self, namespace_id: str) -> Optional[CustomNamespace]:
         return self._repo.get_by_id(namespace_id)
 
-    def create_namespace(self, name: str, workspace_id: str, creator_user_id: str | None = None) -> Namespace:
+    def create_namespace(self, name: str, workspace_id: str, creator_user_id: str | None = None) -> CustomNamespace:
         workspace = self._workspace_repo.get_by_id(workspace_id)
         if not workspace:
             raise ValueError("Workspace not found")
         existing = self._repo.get_by_name(name, workspace_id)
         if existing:
             raise ValueError("Namespace name already registered")
-        namespace = Namespace(id=generate_ulid(), name=name, workspace_id=workspace_id, owner_id=creator_user_id)
+        namespace = CustomNamespace(id=generate_ulid(), name=name, workspace_id=workspace_id, owner_id=creator_user_id)
         return self._repo.create(namespace)
 
-    def update_namespace(self, namespace_id: str, name: str | None = None) -> Namespace:
+    def update_namespace(self, namespace_id: str, name: str | None = None) -> CustomNamespace:
         namespace = self._repo.get_by_id(namespace_id)
         if not namespace:
             raise ValueError("Namespace not found")
@@ -52,7 +52,7 @@ class NamespaceUseCases(BaseUseCase):
             namespace.name = name
         return self._repo.update(namespace)
 
-    def replace_namespace(self, namespace_id: str, name: str, workspace_id: str) -> Namespace:
+    def replace_namespace(self, namespace_id: str, name: str, workspace_id: str) -> CustomNamespace:
         namespace = self._repo.get_by_id(namespace_id)
         if not namespace:
             raise ValueError("Namespace not found")

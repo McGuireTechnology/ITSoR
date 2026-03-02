@@ -7,7 +7,7 @@ import bcrypt
 from jose import JWTError, jwt
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import Group, Tenant, User
+from itsor.domain.models import PlatformGroup, PlatformTenant, PlatformUser
 from itsor.domain.ports.group_repository import GroupRepository
 from itsor.domain.ports.tenant_repository import TenantRepository
 from itsor.domain.ports.user_repository import UserRepository
@@ -52,7 +52,7 @@ class UserUseCases(BaseUseCase):
 
     def _assign_user_group(
         self,
-        user: User,
+        user: PlatformUser,
         username: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
@@ -72,10 +72,10 @@ class UserUseCases(BaseUseCase):
         if existing_tenant:
             raise ValueError("Tenant name already registered")
 
-        tenant = Tenant(id=generate_ulid(), name=tenant_name, owner_id=user.id)
+        tenant = PlatformTenant(id=generate_ulid(), name=tenant_name, owner_id=user.id)
         created_tenant = self._tenant_repo.create(tenant)
 
-        admins_group = Group(
+        admins_group = PlatformGroup(
             id=generate_ulid(),
             name="Tenant Admins",
             tenant_id=created_tenant.id,
@@ -83,7 +83,7 @@ class UserUseCases(BaseUseCase):
         )
         self._group_repo.create(admins_group)
 
-        users_group = Group(
+        users_group = PlatformGroup(
             id=generate_ulid(),
             name="Tenant Users",
             tenant_id=created_tenant.id,
@@ -93,7 +93,7 @@ class UserUseCases(BaseUseCase):
 
         user.group_id = created_users_group.id
 
-    def _assign_signup_group(self, user: User, invite_group_id: str | None = None) -> None:
+    def _assign_signup_group(self, user: PlatformUser, invite_group_id: str | None = None) -> None:
         if not invite_group_id:
             user.group_id = None
             return
@@ -110,14 +110,14 @@ class UserUseCases(BaseUseCase):
         password: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
-    ) -> tuple[User, str]:
+    ) -> tuple[PlatformUser, str]:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
             raise ValueError("Username already registered")
         existing_by_email = self._repo.get_by_email(email)
         if existing_by_email:
             raise ValueError("Email already registered")
-        user = User(
+        user = PlatformUser(
             id=generate_ulid(),
             name=username,
             username=username,
@@ -130,7 +130,7 @@ class UserUseCases(BaseUseCase):
         token = create_access_token(str(created.id))
         return created, token
 
-    def login(self, identifier: str, password: str) -> tuple[User, str]:
+    def login(self, identifier: str, password: str) -> tuple[PlatformUser, str]:
         user = self._repo.get_by_email(identifier)
         if not user:
             user = self._repo.get_by_username(identifier)
@@ -139,16 +139,16 @@ class UserUseCases(BaseUseCase):
         token = create_access_token(str(user.id))
         return user, token
 
-    def get_current_user(self, token: str) -> Optional[User]:
+    def get_current_user(self, token: str) -> Optional[PlatformUser]:
         user_id = decode_access_token(token)
         if not user_id:
             return None
         return self._repo.get_by_id(user_id)
 
-    def list_users(self) -> List[User]:
+    def list_users(self) -> List[PlatformUser]:
         return self._repo.list()
 
-    def get_user(self, user_id: str) -> Optional[User]:
+    def get_user(self, user_id: str) -> Optional[PlatformUser]:
         return self._repo.get_by_id(user_id)
 
     def create_user(
@@ -159,14 +159,14 @@ class UserUseCases(BaseUseCase):
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
         platform_endpoint_permissions: dict[str, list[str]] | None = None,
-    ) -> User:
+    ) -> PlatformUser:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
             raise ValueError("Username already registered")
         existing_by_email = self._repo.get_by_email(email)
         if existing_by_email:
             raise ValueError("Email already registered")
-        user = User(
+        user = PlatformUser(
             id=generate_ulid(),
             name=username,
             username=username,
@@ -184,7 +184,7 @@ class UserUseCases(BaseUseCase):
         email: Optional[str] = None,
         password: Optional[str] = None,
         platform_endpoint_permissions: dict[str, list[str]] | None = None,
-    ) -> User:
+    ) -> PlatformUser:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")
@@ -214,7 +214,7 @@ class UserUseCases(BaseUseCase):
         email: str,
         password: str,
         platform_endpoint_permissions: dict[str, list[str]] | None = None,
-    ) -> User:
+    ) -> PlatformUser:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")

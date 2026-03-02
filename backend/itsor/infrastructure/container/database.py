@@ -8,6 +8,7 @@ from typing import Generator
 from itsor.infrastructure.models import sqlalchemy_entity_record_model as entity_record_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_entity_type_model as entity_type_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_group_model as group_models  # noqa: F401
+from itsor.infrastructure.models import sqlalchemy_platform_group_membership_model as platform_group_membership_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_idm_group_membership_model as idm_group_membership_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_idm_group_model as idm_group_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_idm_identity_model as idm_identity_models  # noqa: F401

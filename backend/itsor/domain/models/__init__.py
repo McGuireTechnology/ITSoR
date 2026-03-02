@@ -8,18 +8,31 @@ from itsor.domain.models.base_model import (
 	PermissionControlFlag,
 	PermissionLevel,
 )
-from itsor.domain.models.group_model import Group
-from itsor.domain.models.idm_group_membership_model import IdmGroupMembership
-from itsor.domain.models.idm_group_model import IdmGroup
-from itsor.domain.models.idm_identity_model import IdmIdentity
-from itsor.domain.models.idm_person_model import IdmPerson
-from itsor.domain.models.idm_user_model import IdmUser
-from itsor.domain.models.namespace_model import Namespace
-from itsor.domain.models.tenant_model import Tenant
-from itsor.domain.models.entity_type_model import EntityType
-from itsor.domain.models.entity_record_model import EntityRecord
-from itsor.domain.models.user_model import User
-from itsor.domain.models.workspace_model import Workspace
+from itsor.domain.models.idm_models import IdmGroup, IdmGroupMembership, IdmIdentity, IdmPerson, IdmUser
+from itsor.domain.models.platform_models import (
+	PlatformGroup,
+	PlatformGroupMembership,
+	PlatformGroupRole,
+	PlatformRole,
+	PlatformRolePermission,
+	PlatformTenant,
+	PlatformUser,
+	PlatformUserRole,
+)
+from itsor.domain.models.custom_models import CustomEntityRecord, CustomEntityType, CustomNamespace, CustomWorkspace
+
+Group = PlatformGroup
+GroupMember = PlatformGroupMembership
+Tenant = PlatformTenant
+User = PlatformUser
+Role = PlatformRole
+RolePermission = PlatformRolePermission
+UserRole = PlatformUserRole
+GroupRole = PlatformGroupRole
+Namespace = CustomNamespace
+EntityType = CustomEntityType
+EntityRecord = CustomEntityRecord
+Workspace = CustomWorkspace
 
 __all__ = [
 	"BaseModel",
@@ -30,16 +43,33 @@ __all__ = [
 	"DEFAULT_WORLD_PERMISSIONS",
 	"DEFAULT_CONTROL_FLAGS",
 	"DEFAULT_PERMISSIONS",
+	"PlatformGroup",
+	"PlatformGroupMembership",
+	"PlatformRole",
+	"PlatformRolePermission",
+	"PlatformUserRole",
+	"PlatformGroupRole",
 	"Group",
+	"GroupMember",
 	"IdmGroup",
 	"IdmGroupMembership",
 	"IdmIdentity",
 	"IdmPerson",
 	"IdmUser",
+	"CustomNamespace",
 	"Namespace",
+	"CustomEntityType",
+	"CustomEntityRecord",
+	"PlatformTenant",
 	"Tenant",
 	"EntityType",
 	"EntityRecord",
+	"PlatformUser",
 	"User",
+	"Role",
+	"RolePermission",
+	"UserRole",
+	"GroupRole",
+	"CustomWorkspace",
 	"Workspace",
 ]

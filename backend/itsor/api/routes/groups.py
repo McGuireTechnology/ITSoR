@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_group_use_cases
 from itsor.api.schemas.group_schamas import GroupCreate, GroupUpdate, GroupReplace, GroupResponse
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.domain.use_cases.group_use_cases import GroupUseCases
 
 router = APIRouter(prefix="/groups", tags=["groups"])
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/groups", tags=["groups"])
 @router.get("", response_model=List[GroupResponse])
 def list_groups(
     use_cases: GroupUseCases = Depends(get_group_use_cases),
-    _: User = Depends(get_current_user),
+    _: PlatformUser = Depends(get_current_user),
 ):
     return use_cases.list_groups()
 
@@ -22,7 +22,7 @@ def list_groups(
 def create_group(
     body: GroupCreate,
     use_cases: GroupUseCases = Depends(get_group_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     if body.tenant_id:
@@ -48,7 +48,7 @@ def create_group(
 def get_group(
     group_id: str,
     use_cases: GroupUseCases = Depends(get_group_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     group = use_cases.get_group(group_id)
@@ -63,7 +63,7 @@ def update_group(
     group_id: str,
     body: GroupUpdate,
     use_cases: GroupUseCases = Depends(get_group_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     group = use_cases.get_group(group_id)
@@ -85,7 +85,7 @@ def replace_group(
     group_id: str,
     body: GroupReplace,
     use_cases: GroupUseCases = Depends(get_group_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     group = use_cases.get_group(group_id)
@@ -106,7 +106,7 @@ def replace_group(
 def delete_group(
     group_id: str,
     use_cases: GroupUseCases = Depends(get_group_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     group = use_cases.get_group(group_id)

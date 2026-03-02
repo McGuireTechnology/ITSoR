@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from itsor.api.deps import get_current_user
 from itsor.api.schemas.idm_identities_schemas import IdmIdentityCreate, IdmIdentityResponse, IdmIdentityUpdate
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_identity_model import IdmIdentityModel
 from itsor.infrastructure.models.sqlalchemy_idm_person_model import IdmPersonModel
@@ -38,13 +38,13 @@ def _identity_response(model: IdmIdentityModel) -> IdmIdentityResponse:
 
 
 @router.get("", response_model=list[IdmIdentityResponse])
-def list_identities(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def list_identities(db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     rows = db.query(IdmIdentityModel).all()
     return [_identity_response(row) for row in rows]
 
 
 @router.post("", response_model=IdmIdentityResponse, status_code=status.HTTP_201_CREATED)
-def create_identity(body: IdmIdentityCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def create_identity(body: IdmIdentityCreate, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     person = db.query(IdmPersonModel).filter(IdmPersonModel.id == body.person_id).first()
     if not person:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Person not found")
@@ -66,7 +66,7 @@ def create_identity(body: IdmIdentityCreate, db: Session = Depends(get_db), _: U
 
 
 @router.get("/{identity_id}", response_model=IdmIdentityResponse)
-def get_identity(identity_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_identity(identity_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     identity = db.query(IdmIdentityModel).filter(IdmIdentityModel.id == identity_id).first()
     if not identity:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Identity not found")
@@ -74,7 +74,7 @@ def get_identity(identity_id: str, db: Session = Depends(get_db), _: User = Depe
 
 
 @router.patch("/{identity_id}", response_model=IdmIdentityResponse)
-def update_identity(identity_id: str, body: IdmIdentityUpdate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def update_identity(identity_id: str, body: IdmIdentityUpdate, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     identity = db.query(IdmIdentityModel).filter(IdmIdentityModel.id == identity_id).first()
     if not identity:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Identity not found")
@@ -98,7 +98,7 @@ def update_identity(identity_id: str, body: IdmIdentityUpdate, db: Session = Dep
 
 
 @router.delete("/{identity_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_identity(identity_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def delete_identity(identity_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     identity = db.query(IdmIdentityModel).filter(IdmIdentityModel.id == identity_id).first()
     if not identity:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Identity not found")

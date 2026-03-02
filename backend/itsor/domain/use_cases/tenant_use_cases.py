@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import Group, Tenant
+from itsor.domain.models import PlatformGroup, PlatformTenant
 from itsor.domain.ports.group_repository import GroupRepository
 from itsor.domain.ports.tenant_repository import TenantRepository
 from itsor.domain.ports.user_repository import UserRepository
@@ -14,20 +14,20 @@ class TenantUseCases(BaseUseCase):
         self._group_repo = group_repo
         self._user_repo = user_repo
 
-    def list_tenants(self) -> List[Tenant]:
+    def list_tenants(self) -> List[PlatformTenant]:
         return self._repo.list()
 
-    def get_tenant(self, tenant_id: str) -> Optional[Tenant]:
+    def get_tenant(self, tenant_id: str) -> Optional[PlatformTenant]:
         return self._repo.get_by_id(tenant_id)
 
-    def create_tenant(self, name: str, creator_user_id: str | None = None) -> Tenant:
+    def create_tenant(self, name: str, creator_user_id: str | None = None) -> PlatformTenant:
         existing = self._repo.get_by_name(name)
         if existing:
             raise ValueError("Tenant name already registered")
-        tenant = Tenant(id=generate_ulid(), name=name, owner_id=creator_user_id)
+        tenant = PlatformTenant(id=generate_ulid(), name=name, owner_id=creator_user_id)
         created_tenant = self._repo.create(tenant)
 
-        admins_group = Group(
+        admins_group = PlatformGroup(
             id=generate_ulid(),
             name="Tenant Admins",
             tenant_id=created_tenant.id,
@@ -35,7 +35,7 @@ class TenantUseCases(BaseUseCase):
         )
         self._group_repo.create(admins_group)
 
-        users_group = Group(
+        users_group = PlatformGroup(
             id=generate_ulid(),
             name="Tenant Users",
             tenant_id=created_tenant.id,
@@ -51,7 +51,7 @@ class TenantUseCases(BaseUseCase):
 
         return created_tenant
 
-    def update_tenant(self, tenant_id: str, name: Optional[str] = None) -> Tenant:
+    def update_tenant(self, tenant_id: str, name: Optional[str] = None) -> PlatformTenant:
         tenant = self._repo.get_by_id(tenant_id)
         if not tenant:
             raise ValueError("Tenant not found")
@@ -62,7 +62,7 @@ class TenantUseCases(BaseUseCase):
             tenant.name = name
         return self._repo.update(tenant)
 
-    def replace_tenant(self, tenant_id: str, name: str) -> Tenant:
+    def replace_tenant(self, tenant_id: str, name: str) -> PlatformTenant:
         tenant = self._repo.get_by_id(tenant_id)
         if not tenant:
             raise ValueError("Tenant not found")

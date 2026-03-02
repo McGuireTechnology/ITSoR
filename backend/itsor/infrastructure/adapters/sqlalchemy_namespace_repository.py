@@ -1,19 +1,19 @@
 from sqlalchemy.orm import Session
 
-from itsor.domain.models import Namespace
+from itsor.domain.models import CustomNamespace
 from itsor.domain.ports.namespace_repository import NamespaceRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.models.sqlalchemy_namespace_model import NamespaceModel
 
 
-class SQLAlchemyNamespaceRepository(SQLAlchemyBaseRepository[Namespace, NamespaceModel], NamespaceRepository):
+class SQLAlchemyNamespaceRepository(SQLAlchemyBaseRepository[CustomNamespace, NamespaceModel], NamespaceRepository):
     model_class = NamespaceModel
 
     def __init__(self, db: Session) -> None:
         super().__init__(db, "Namespace")
 
-    def _to_domain(self, record: NamespaceModel) -> Namespace:
-        return Namespace(
+    def _to_domain(self, record: NamespaceModel) -> CustomNamespace:
+        return CustomNamespace(
             id=record.id,
             workspace_id=record.workspace_id,
             name=record.name,
@@ -22,7 +22,7 @@ class SQLAlchemyNamespaceRepository(SQLAlchemyBaseRepository[Namespace, Namespac
             permissions=record.permissions,
         )
 
-    def _to_model(self, namespace: Namespace) -> NamespaceModel:
+    def _to_model(self, namespace: CustomNamespace) -> NamespaceModel:
         return NamespaceModel(
             id=namespace.id,
             workspace_id=namespace.workspace_id,
@@ -32,14 +32,14 @@ class SQLAlchemyNamespaceRepository(SQLAlchemyBaseRepository[Namespace, Namespac
             permissions=namespace.permissions,
         )
 
-    def _apply_updates(self, record: NamespaceModel, entity: Namespace) -> None:
+    def _apply_updates(self, record: NamespaceModel, entity: CustomNamespace) -> None:
         record.name = entity.name
         record.workspace_id = entity.workspace_id
         record.owner_id = entity.owner_id
         record.group_id = entity.group_id
         record.permissions = entity.permissions
 
-    def get_by_name(self, name: str, workspace_id: str) -> Namespace | None:
+    def get_by_name(self, name: str, workspace_id: str) -> CustomNamespace | None:
         record = (
             self._db.query(NamespaceModel)
             .filter(NamespaceModel.name == name, NamespaceModel.workspace_id == workspace_id)

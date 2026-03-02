@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import Workspace
+from itsor.domain.models import CustomWorkspace
 from itsor.domain.ports.entity_record_repository import EntityRecordRepository
 from itsor.domain.ports.entity_type_repository import EntityTypeRepository
 from itsor.domain.ports.namespace_repository import NamespaceRepository
@@ -22,23 +22,23 @@ class WorkspaceUseCases(BaseUseCase):
         self._entity_type_repo = entity_type_repo
         self._entity_record_repo = entity_record_repo
 
-    def list_workspaces(self, tenant_id: str | None = None) -> List[Workspace]:
+    def list_workspaces(self, tenant_id: str | None = None) -> List[CustomWorkspace]:
         items = self._repo.list()
         if tenant_id is None:
             return items
         return [item for item in items if item.tenant_id == tenant_id]
 
-    def get_workspace(self, workspace_id: str) -> Optional[Workspace]:
+    def get_workspace(self, workspace_id: str) -> Optional[CustomWorkspace]:
         return self._repo.get_by_id(workspace_id)
 
-    def create_workspace(self, name: str, tenant_id: str | None = None, creator_user_id: str | None = None) -> Workspace:
+    def create_workspace(self, name: str, tenant_id: str | None = None, creator_user_id: str | None = None) -> CustomWorkspace:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
             raise ValueError("Workspace name already registered")
-        workspace = Workspace(id=generate_ulid(), name=name, tenant_id=tenant_id, owner_id=creator_user_id)
+        workspace = CustomWorkspace(id=generate_ulid(), name=name, tenant_id=tenant_id, owner_id=creator_user_id)
         return self._repo.create(workspace)
 
-    def update_workspace(self, workspace_id: str, name: str | None = None) -> Workspace:
+    def update_workspace(self, workspace_id: str, name: str | None = None) -> CustomWorkspace:
         workspace = self._repo.get_by_id(workspace_id)
         if not workspace:
             raise ValueError("Workspace not found")
@@ -49,7 +49,7 @@ class WorkspaceUseCases(BaseUseCase):
             workspace.name = name
         return self._repo.update(workspace)
 
-    def replace_workspace(self, workspace_id: str, name: str, tenant_id: str | None = None) -> Workspace:
+    def replace_workspace(self, workspace_id: str, name: str, tenant_id: str | None = None) -> CustomWorkspace:
         workspace = self._repo.get_by_id(workspace_id)
         if not workspace:
             raise ValueError("Workspace not found")

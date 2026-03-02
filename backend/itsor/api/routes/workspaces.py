@@ -9,7 +9,7 @@ from itsor.api.schemas.workspace_schamas import (
     WorkspaceResponse,
     WorkspaceUpdate,
 )
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.domain.use_cases.workspace_use_cases import WorkspaceUseCases
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 def list_workspaces(
     tenant_id: str | None = None,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     if tenant_id:
@@ -36,7 +36,7 @@ def list_workspaces(
 def create_workspace(
     body: WorkspaceCreate,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     if body.tenant_id:
@@ -57,7 +57,7 @@ def create_workspace(
 def get_workspace(
     workspace_id: str,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     workspace = use_cases.get_workspace(workspace_id)
@@ -72,7 +72,7 @@ def update_workspace(
     workspace_id: str,
     body: WorkspaceUpdate,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     workspace = use_cases.get_workspace(workspace_id)
@@ -94,7 +94,7 @@ def replace_workspace(
     workspace_id: str,
     body: WorkspaceReplace,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     workspace = use_cases.get_workspace(workspace_id)
@@ -115,7 +115,7 @@ def replace_workspace(
 def delete_workspace(
     workspace_id: str,
     use_cases: WorkspaceUseCases = Depends(get_workspace_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     workspace = use_cases.get_workspace(workspace_id)

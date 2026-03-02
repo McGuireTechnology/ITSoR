@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from itsor.api.deps import get_current_user
 from itsor.api.schemas.idm_people_schemas import IdmPersonCreate, IdmPersonResponse, IdmPersonUpdate
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_identity_model import IdmIdentityModel
 from itsor.infrastructure.models.sqlalchemy_idm_person_model import IdmPersonModel
@@ -14,12 +14,12 @@ router = APIRouter(prefix="/people", tags=["people"])
 
 
 @router.get("", response_model=list[IdmPersonResponse])
-def list_people(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def list_people(db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     return db.query(IdmPersonModel).all()
 
 
 @router.post("", response_model=IdmPersonResponse, status_code=status.HTTP_201_CREATED)
-def create_person(body: IdmPersonCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def create_person(body: IdmPersonCreate, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     if body.current_identity_id:
         current_identity = db.query(IdmIdentityModel).filter(IdmIdentityModel.id == body.current_identity_id).first()
         if not current_identity:
@@ -37,7 +37,7 @@ def create_person(body: IdmPersonCreate, db: Session = Depends(get_db), _: User 
 
 
 @router.get("/{person_id}", response_model=IdmPersonResponse)
-def get_person(person_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_person(person_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     person = db.query(IdmPersonModel).filter(IdmPersonModel.id == person_id).first()
     if not person:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Person not found")
@@ -45,7 +45,7 @@ def get_person(person_id: str, db: Session = Depends(get_db), _: User = Depends(
 
 
 @router.patch("/{person_id}", response_model=IdmPersonResponse)
-def update_person(person_id: str, body: IdmPersonUpdate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def update_person(person_id: str, body: IdmPersonUpdate, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     person = db.query(IdmPersonModel).filter(IdmPersonModel.id == person_id).first()
     if not person:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Person not found")
@@ -67,7 +67,7 @@ def update_person(person_id: str, body: IdmPersonUpdate, db: Session = Depends(g
 
 
 @router.delete("/{person_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_person(person_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def delete_person(person_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     person = db.query(IdmPersonModel).filter(IdmPersonModel.id == person_id).first()
     if not person:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Person not found")

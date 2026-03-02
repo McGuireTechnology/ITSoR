@@ -9,7 +9,7 @@ from itsor.api.schemas.entity_record_schamas import (
     EntityRecordResponse,
     EntityRecordUpdate,
 )
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.domain.use_cases.entity_record_use_cases import EntityRecordUseCases
 
 router = APIRouter(prefix="/entity-records", tags=["entity-records"])
@@ -22,7 +22,7 @@ def list_entity_records(
     value: str | None = None,
     operator: str = "eq",
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     if entity_type_id:
@@ -52,7 +52,7 @@ def list_entity_records(
 def create_entity_record(
     body: EntityRecordCreate,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant_id = authz.resolve_tenant_id_for_entity_type(body.entity_type_id)
@@ -77,7 +77,7 @@ def create_entity_record(
 def get_entity_record(
     entity_record_id: str,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_record = use_cases.get_entity_record(entity_record_id)
@@ -92,7 +92,7 @@ def update_entity_record(
     entity_record_id: str,
     body: EntityRecordUpdate,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_record = use_cases.get_entity_record(entity_record_id)
@@ -114,7 +114,7 @@ def replace_entity_record(
     entity_record_id: str,
     body: EntityRecordReplace,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_record = use_cases.get_entity_record(entity_record_id)
@@ -140,7 +140,7 @@ def replace_entity_record(
 def delete_entity_record(
     entity_record_id: str,
     use_cases: EntityRecordUseCases = Depends(get_entity_record_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     entity_record = use_cases.get_entity_record(entity_record_id)

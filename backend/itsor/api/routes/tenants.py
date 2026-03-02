@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_tenant_use_cases
 from itsor.api.schemas.tenant_schamas import TenantCreate, TenantUpdate, TenantReplace, TenantResponse
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.domain.use_cases.tenant_use_cases import TenantUseCases
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/tenants", tags=["tenants"])
 @router.get("", response_model=List[TenantResponse])
 def list_tenants(
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    _: User = Depends(get_current_user),
+    _: PlatformUser = Depends(get_current_user),
 ):
     return use_cases.list_tenants()
 
@@ -22,7 +22,7 @@ def list_tenants(
 def create_tenant(
     body: TenantCreate,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
 ):
     try:
         return use_cases.create_tenant(body.name, creator_user_id=current_user.id)
@@ -34,7 +34,7 @@ def create_tenant(
 def get_tenant(
     tenant_id: str,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant = use_cases.get_tenant(tenant_id)
@@ -49,7 +49,7 @@ def update_tenant(
     tenant_id: str,
     body: TenantUpdate,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant = use_cases.get_tenant(tenant_id)
@@ -71,7 +71,7 @@ def replace_tenant(
     tenant_id: str,
     body: TenantReplace,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant = use_cases.get_tenant(tenant_id)
@@ -92,7 +92,7 @@ def replace_tenant(
 def delete_tenant(
     tenant_id: str,
     use_cases: TenantUseCases = Depends(get_tenant_use_cases),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant = use_cases.get_tenant(tenant_id)

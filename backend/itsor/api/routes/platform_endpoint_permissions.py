@@ -9,7 +9,7 @@ from itsor.api.schemas.platform_endpoint_permissions_schemas import (
     PlatformEndpointPermissionEntryResponse,
     PlatformEndpointPermissionUpdateRequest,
 )
-from itsor.domain.models import User
+from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_platform_endpoint_permission_model import PlatformEndpointPermissionModel
 
@@ -33,7 +33,7 @@ def list_platform_endpoint_permission_rows(
     principal_type: PrincipalType | None = None,
     principal_id: str | None = None,
     db=Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="endpoint-permissions", action="read")
@@ -49,7 +49,7 @@ def list_platform_endpoint_permission_rows(
 def create_platform_endpoint_permission_row(
     body: PlatformEndpointPermissionEntry,
     db=Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="endpoint-permissions", action="write")
@@ -75,7 +75,7 @@ def create_platform_endpoint_permission_row(
 def get_platform_endpoint_permission_row(
     endpoint_permission_id: int,
     db=Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="endpoint-permissions", action="read")
@@ -90,7 +90,7 @@ def put_platform_endpoint_permission_row(
     endpoint_permission_id: int,
     body: PlatformEndpointPermissionUpdateRequest,
     db=Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="endpoint-permissions", action="write")
@@ -116,7 +116,7 @@ def patch_platform_endpoint_permission_row(
     endpoint_permission_id: int,
     body: PlatformEndpointPermissionPatchRequest,
     db=Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="endpoint-permissions", action="write")
@@ -161,7 +161,7 @@ def patch_platform_endpoint_permission_row(
 def delete_platform_endpoint_permission_row(
     endpoint_permission_id: int,
     db=Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     authz.authorize_platform_endpoint(current_user=current_user, endpoint_name="endpoint-permissions", action="write")
