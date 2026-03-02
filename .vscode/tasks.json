@@ -41,9 +41,8 @@
       },
       "isBackground": true,
       "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "group": "servers"
+        "reveal": "silent",
+        "panel": "dedicated"
       },
       "problemMatcher": {
         "pattern": {
@@ -78,9 +77,8 @@
       },
       "isBackground": true,
       "presentation": {
-        "reveal": "always",
+        "reveal": "silent",
         "panel": "dedicated",
-        "group": "servers"
       },
       "problemMatcher": {
         "pattern": {
@@ -118,9 +116,8 @@
       },
       "isBackground": true,
       "presentation": {
-        "reveal": "always",
+        "reveal": "silent",
         "panel": "dedicated",
-        "group": "servers"
       },
       "problemMatcher": {
         "pattern": {
