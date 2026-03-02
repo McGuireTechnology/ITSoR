@@ -6,7 +6,6 @@ import CommandBar from '../components/CommandBar.vue'
 import ContextInspectorPane from '../components/ContextInspectorPane.vue'
 import GlobalNavigationRail from '../components/GlobalNavigationRail.vue'
 import PageHeader from '../components/PageHeader.vue'
-import SectionNavigator from '../components/SectionNavigator.vue'
 import TopBar from '../components/TopBar.vue'
 import { createBladeStack, provideBladeStack } from '../lib/blades'
 
@@ -19,8 +18,8 @@ defineProps({
 
 const route = useRoute()
 const title = computed(() => route.meta.title || 'Workspace')
+const showCommandBar = computed(() => route.meta.showCommandBar !== false)
 const manuallyCollapsed = ref(false)
-const manuallySectionCollapsed = ref(false)
 const manuallyInspectorHidden = ref(false)
 const viewportWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1440)
 const bladeStack = createBladeStack()
@@ -29,10 +28,6 @@ provideBladeStack(bladeStack)
 
 const autoCollapsed = computed(() => viewportWidth.value <= 1200)
 const railCollapsed = computed(() => autoCollapsed.value || manuallyCollapsed.value)
-const sectionApplicable = computed(() => Boolean(route.meta.domain))
-const sectionUnavailable = computed(() => !sectionApplicable.value)
-const autoSectionCollapsed = computed(() => viewportWidth.value <= 1320)
-const sectionCollapsed = computed(() => autoSectionCollapsed.value || manuallySectionCollapsed.value)
 const autoInspectorHidden = computed(() => viewportWidth.value <= 1280)
 const inspectorApplicable = computed(() => {
   return Boolean(route.meta.domain) || Boolean(route.params.id) || bladeStack.blades.value.length > 0
@@ -48,13 +43,6 @@ function toggleRailCollapse() {
     return
   }
   manuallyCollapsed.value = !manuallyCollapsed.value
-}
-
-function toggleSectionCollapse() {
-  if (autoSectionCollapsed.value) {
-    return
-  }
-  manuallySectionCollapsed.value = !manuallySectionCollapsed.value
 }
 
 function toggleInspector() {
@@ -106,8 +94,6 @@ function handleBladeUpdate(event) {
     class="admin-root"
     :class="{
       'rail-collapsed': railCollapsed,
-      'section-collapsed': sectionCollapsed,
-      'section-unavailable': sectionUnavailable,
       'inspector-collapsed': inspectorCollapsed,
       'inspector-unavailable': inspectorUnavailable,
       'content-is-detail': contentIsDetail,
@@ -120,33 +106,9 @@ function handleBladeUpdate(event) {
         <GlobalNavigationRail :collapsed="railCollapsed" @toggle="toggleRailCollapse" />
       </aside>
 
-      <aside v-if="sectionApplicable" class="admin-section-nav admin-pane">
-        <div class="pane-scroll">
-          <SectionNavigator :collapsed="sectionCollapsed" />
-        </div>
-        <button
-          type="button"
-          class="pane-bottom-toggle pane-toggle"
-          :aria-label="sectionCollapsed ? 'Expand namespace pane' : 'Collapse namespace pane'"
-          @click="toggleSectionCollapse"
-        >
-          <svg
-            class="pane-toggle-icon"
-            :class="sectionCollapsed ? 'is-expand is-left' : 'is-collapse is-left'"
-            viewBox="0 0 16 16"
-            aria-hidden="true"
-          >
-            <rect x="1.5" y="2" width="13" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2" />
-            <path d="M5 2V14" stroke="currentColor" stroke-width="1.2" />
-            <path d="M10.5 5.5L7.5 8L10.5 10.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <span v-if="!sectionCollapsed">Namespaces</span>
-        </button>
-      </aside>
-
       <section class="admin-workspace">
         <PageHeader />
-        <CommandBar />
+        <CommandBar v-if="showCommandBar" />
         <main v-if="useSimpleContentPane" class="page-body">
           <slot />
         </main>

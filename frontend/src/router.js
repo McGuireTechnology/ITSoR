@@ -30,6 +30,9 @@ import IdmPeoplePage from './views/IdmPeoplePage.vue'
 import IdmUsersPage from './views/IdmUsersPage.vue'
 import IdmGroupMembershipsPage from './views/IdmGroupMembershipsPage.vue'
 import DashboardPage from './views/DashboardPage.vue'
+import PlatformHomePage from './views/PlatformHomePage.vue'
+import IdentityHomePage from './views/IdentityHomePage.vue'
+import CustomizationHomePage from './views/CustomizationHomePage.vue'
 
 const routes = [
   { path: '/', redirect: '/home' },
@@ -37,6 +40,8 @@ const routes = [
   { path: '/login', component: LoginPage, meta: { hideNavigation: true, layout: 'auth' } },
   { path: '/logout', component: LogoutPage, meta: { hideNavigation: true, layout: 'auth' } },
   { path: '/signup', component: SignupPage, meta: { hideNavigation: true, layout: 'auth' } },
+  { path: '/platform/overview', component: PlatformHomePage, meta: { domain: 'platform_home', title: 'Platform Overview', showCommandBar: false } },
+  { path: '/platform/home', redirect: '/platform/overview' },
   { path: '/platform/users', component: UsersPage, meta: { domain: 'users', title: 'Users' } },
   { path: '/platform/users/me', component: UserMePage, meta: { domain: 'users', title: 'My Account' } },
   { path: '/platform/users/:id', component: UserDetailPage, props: true, meta: { domain: 'users', title: 'User Detail' } },
@@ -50,11 +55,15 @@ const routes = [
   { path: '/platform/tenants/:id', component: TenantDetailPage, props: true, meta: { domain: 'tenants', title: 'Tenant Detail' } },
   { path: '/platform/endpoint-permissions', component: EndpointPermissionsPage, meta: { domain: 'endpoint-permissions', title: 'Endpoint Permissions' } },
   { path: '/platform/endpoint-permissions/:id', component: EndpointPermissionDetailPage, props: true, meta: { domain: 'endpoint-permissions', title: 'Endpoint Permission Detail' } },
+  { path: '/idm/overview', component: IdentityHomePage, meta: { domain: 'idm_home', title: 'Identity Overview', showCommandBar: false } },
+  { path: '/idm/home', redirect: '/idm/overview' },
   { path: '/idm/people', component: IdmPeoplePage, meta: { domain: 'idm_people', title: 'People' } },
   { path: '/idm/identities', component: IdmIdentitiesPage, meta: { domain: 'idm_identities', title: 'Identities' } },
   { path: '/idm/users', component: IdmUsersPage, meta: { domain: 'idm_users', title: 'Users' } },
   { path: '/idm/groups', component: IdmGroupsPage, meta: { domain: 'idm_groups', title: 'Groups' } },
   { path: '/idm/group-memberships', component: IdmGroupMembershipsPage, meta: { domain: 'idm_group_memberships', title: 'Group Memberships' } },
+  { path: '/customization/overview', component: CustomizationHomePage, meta: { domain: 'customization_home', title: 'Customization Overview', showCommandBar: false } },
+  { path: '/customization/home', redirect: '/customization/overview' },
   { path: '/customization/workspaces', component: WorkspacesPage, meta: { domain: 'workspaces', title: 'Workspaces' } },
   { path: '/customization/workspaces/:id', component: WorkspaceDetailPage, props: true, meta: { domain: 'workspaces', title: 'Workspace Detail' } },
   { path: '/customization/namespaces', component: NamespacesPage, meta: { domain: 'namespaces', title: 'Namespaces' } },

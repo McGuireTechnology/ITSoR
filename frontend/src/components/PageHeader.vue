@@ -12,15 +12,18 @@ const groupCrumbLabel = ref('')
 const contextSearch = ref(String(route.query.q || ''))
 
 const namespaceLabelByDomain = {
+  platform_home: 'Overview',
   users: 'Users',
   groups: 'Groups',
   tenants: 'Tenants',
   'endpoint-permissions': 'Endpoint Permissions',
+  idm_home: 'Overview',
   idm_people: 'People',
   idm_identities: 'Identities',
   idm_users: 'Users',
   idm_groups: 'Groups',
   idm_group_memberships: 'Group Memberships',
+  customization_home: 'Overview',
   workspaces: 'Workspaces',
   namespaces: 'Namespaces',
   'entity-types': 'Entity Types',
@@ -163,7 +166,11 @@ const breadcrumbs = computed(() => {
     return chain
   }
 
-  chain.push({ label: 'Home', to: '/' })
+  if (route.path === '/home' || route.path === '/') {
+    return [{ label: 'Home', to: '/home' }]
+  }
+
+  chain.push({ label: 'Home', to: '/home' })
   for (const matched of route.matched) {
     if (!matched.path || matched.path === '/') {
       continue

@@ -241,7 +241,6 @@ button {
 .panel,
 .dash-card,
 .admin-workspace,
-.admin-section-nav,
 .admin-inspector,
 .admin-rail {
   box-shadow: 0 12px 24px rgba(31, 42, 122, 0.08);
@@ -320,7 +319,7 @@ a:hover {
 
 .admin-shell {
   display: grid;
-  grid-template-columns: var(--rail-width, 220px) var(--section-width, 220px) minmax(0, 1fr) var(--inspector-width, 280px);
+  grid-template-columns: var(--rail-width, 220px) minmax(0, 1fr) var(--inspector-width, 280px);
   gap: 0;
   flex: 1;
   min-height: 0;
@@ -333,20 +332,11 @@ a:hover {
   height: 100vh;
   overflow: hidden;
   --rail-width: 220px;
-  --section-width: 220px;
   --inspector-width: 280px;
 }
 
 .admin-root.rail-collapsed {
   --rail-width: 48px;
-}
-
-.admin-root.section-collapsed {
-  --section-width: 48px;
-}
-
-.admin-root.section-unavailable {
-  --section-width: 0px;
 }
 
 .admin-root.inspector-collapsed {
@@ -362,6 +352,8 @@ a:hover {
   grid-template-columns: 360px minmax(0, 1fr) 280px;
   gap: 8px;
   align-items: center;
+  position: relative;
+  z-index: 1100;
   background: linear-gradient(90deg, var(--itsor-deep-blue) 0%, var(--itsor-purple) 56%, var(--itsor-hot-pink) 100%);
   color: #f3f2f1;
   border: 1px solid color-mix(in srgb, var(--itsor-deep-blue) 60%, #312e81);
@@ -470,6 +462,11 @@ a:hover {
   background: transparent;
 }
 
+.app-launcher.dropdown-toggle::after,
+.user-menu-trigger.dropdown-toggle::after {
+  display: none;
+}
+
 .app-drawer-icon {
   width: 19px;
   height: 19px;
@@ -478,16 +475,14 @@ a:hover {
 }
 
 .app-menu {
-  position: absolute;
-  top: 36px;
-  left: 0;
   width: 260px;
   padding: 10px;
   background: #ffffff;
   border: 1px solid #d2d0ce;
   border-radius: 2px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-  z-index: 30;
+  z-index: 1110;
+  margin-top: 6px;
 }
 
 .app-menu-title {
@@ -600,16 +595,14 @@ a:hover {
 }
 
 .user-menu {
-  position: absolute;
-  right: 0;
-  top: 36px;
   min-width: 180px;
   padding: 6px;
   background: #ffffff;
   border: 1px solid #d2d0ce;
   border-radius: 2px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-  z-index: 30;
+  z-index: 1110;
+  margin-top: 6px;
 }
 
 .user-menu-link {
@@ -649,7 +642,6 @@ a:hover {
 }
 
 .admin-rail,
-.admin-section-nav,
 .admin-inspector,
 .admin-workspace {
   background: #ffffff;
@@ -664,20 +656,20 @@ a:hover {
 .admin-rail {
   grid-column: 1;
   border-right-width: 0;
+  overflow: visible;
 }
 
-.admin-section-nav {
+.admin-rail.admin-pane {
+  overflow: visible;
+}
+
+.admin-workspace {
   grid-column: 2;
   border-right-width: 0;
 }
 
-.admin-workspace {
-  grid-column: 3;
-  border-right-width: 0;
-}
-
 .admin-inspector {
-  grid-column: 4;
+  grid-column: 3;
 }
 
 .admin-pane {
@@ -691,7 +683,6 @@ a:hover {
 }
 
 .admin-root.rail-collapsed .admin-rail.admin-pane,
-.admin-root.section-collapsed .admin-section-nav.admin-pane,
 .admin-root.inspector-collapsed .admin-inspector.admin-pane {
   padding: 10px 6px;
 }
@@ -741,7 +732,6 @@ a:hover {
 }
 
 .admin-root.rail-collapsed .admin-rail .pane-bottom-toggle,
-.admin-root.section-collapsed .admin-section-nav .pane-bottom-toggle,
 .admin-root.inspector-collapsed .admin-inspector .pane-bottom-toggle {
   width: auto;
   min-width: 34px;
@@ -1090,6 +1080,7 @@ a:hover {
 .rail-nav.collapsed .rail-scroll,
 .rail-nav.collapsed .pane-scroll-body {
   width: 100%;
+  overflow: visible;
 }
 
 .rail-nav.collapsed .rail-link {
@@ -1147,9 +1138,8 @@ a:hover {
 }
 
 .admin-rail .pane-link,
-.admin-section-nav .pane-link,
 .admin-rail .pane-bottom-toggle,
-.admin-section-nav .pane-bottom-toggle {
+.admin-rail .pane-bottom-toggle {
   font-size: 0.86rem;
 }
 
@@ -1161,6 +1151,33 @@ a:hover {
   display: inline-flex;
   gap: 8px;
   align-items: center;
+}
+
+.rail-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+}
+
+.rail-primary-link {
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rail-nav.collapsed .rail-primary-link {
+  justify-content: space-between;
+  padding-right: 6px;
+}
+
+.rail-primary-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
 }
 
 .rail-icon {
@@ -1194,6 +1211,64 @@ a:hover {
 .rail-link.workspace-link-active {
   background: color-mix(in srgb, var(--itsor-deep-blue) 10%, #ffffff);
   color: var(--itsor-deep-blue);
+}
+
+.rail-submenu {
+  background: color-mix(in srgb, var(--itsor-deep-blue) 8%, #eef2ff);
+  border: 1px solid color-mix(in srgb, var(--itsor-deep-blue) 16%, #cbd5e1);
+  border-radius: 4px;
+  padding: 4px;
+  margin: 0 0 4px;
+}
+
+.rail-popup-submenu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  min-width: 232px;
+  margin: 0;
+  z-index: 1200;
+  padding: 6px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.24);
+}
+
+.rail-popup-group-name {
+  margin: 0 0 4px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--itsor-deep-blue) 80%, #1f2937);
+}
+
+.rail-nav.collapsed .rail-popup-submenu .rail-link,
+.rail-nav.collapsed .rail-popup-submenu .pane-link {
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 8px;
+}
+
+.rail-nav.collapsed .rail-popup-submenu .rail-link .pane-icon,
+.rail-nav.collapsed .rail-popup-submenu .pane-icon {
+  margin: 0;
+  width: 16px;
+  flex: 0 0 16px;
+}
+
+.rail-nav.collapsed .rail-popup-submenu .rail-sub-link {
+  padding-left: 8px;
+}
+
+.rail-popup-submenu .pane-link.router-link-active {
+  background: color-mix(in srgb, var(--itsor-deep-blue) 13%, #ffffff);
+}
+
+.rail-sub-link {
+  padding-left: 20px;
+}
+
+.rail-nav.collapsed .rail-sub-link {
+  padding-left: 6px;
 }
 
 .rail-collapse-toggle {
@@ -1284,24 +1359,10 @@ a:hover {
   color: var(--itsor-deep-blue);
 }
 
-.rail-nav.collapsed .pane-link,
-.admin-root.section-collapsed .section-link.pane-link {
+.rail-nav.collapsed .pane-link {
   justify-content: center;
   padding-left: 6px;
   padding-right: 6px;
-}
-
-.admin-root.section-collapsed .section-nav-body .pane-title {
-  display: none;
-}
-
-.admin-root.section-collapsed .section-link.pane-link span:last-child {
-  display: none;
-}
-
-.admin-root.section-collapsed .section-link.pane-link .pane-icon {
-  display: inline-flex;
-  justify-content: center;
 }
 
 .pane-toggle {
@@ -1462,7 +1523,6 @@ a:hover {
 
   .admin-root {
     --rail-width: 180px;
-    --section-width: 48px;
     --inspector-width: 0px;
   }
 
@@ -1477,7 +1537,6 @@ a:hover {
   }
 
   .admin-rail,
-  .admin-section-nav,
   .admin-workspace,
   .admin-inspector {
     grid-column: 1;
@@ -1487,8 +1546,7 @@ a:hover {
     grid-template-columns: 1fr;
   }
 
-  .admin-rail,
-  .admin-section-nav {
+  .admin-rail {
     max-height: 220px;
   }
 
