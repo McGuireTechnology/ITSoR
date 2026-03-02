@@ -204,8 +204,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Cursor  
-#  Cursor is an AI-powered code editor.`.cursorignore` specifies files/directories to 
+# Cursor
+#  Cursor is an AI-powered code editor.`.cursorignore` specifies files/directories to
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
@@ -257,6 +257,21 @@ jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
+
+# Xcode / Apple platform
+DerivedData/
+.build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xcworkspace/xcuserdata/
+*.xcuserdatad/
+*.xcuserstate
 
 # TypeScript cache
 *.tsbuildinfo
