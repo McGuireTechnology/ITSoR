@@ -227,7 +227,20 @@ def create_permission(
     current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
-    pass
+    _authz(current_user, authz, "permissions", "write")
+    model = PlatformPermissionModel(
+        name=body.name,
+        resource=body.resource,
+        action=body.action.value,
+    )
+    db.add(model)
+    try:
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    db.refresh(model)
+    return model
 
 
 @router.get("/permissions/{permission_id}", response_model=PlatformPermissionResponse)
@@ -267,7 +280,7 @@ def put_permission(
 
     row.name = body.name
     row.resource = body.resource
-    row.action = body.action.to_verb()
+    row.action = body.action.value
     try:
         db.commit()
     except Exception as exc:
@@ -299,7 +312,7 @@ def patch_permission(
     if body.resource is not None:
         row.resource = body.resource
     if body.action is not None:
-        row.action = body.action.to_verb()
+        row.action = body.action.value
 
     try:
         db.commit()

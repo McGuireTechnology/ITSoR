@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+import ulid
 
 from itsor.api.deps import get_current_user
 from itsor.api.schemas.platform_group_memberships_schemas import (
@@ -56,6 +57,7 @@ def create_group_membership(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group cannot directly contain itself")
 
     membership = PlatformGroupMembershipModel(
+        id=str(ulid.new()),
         group_id=body.group_id,
         member_type=body.member_type,
         member_user_id=body.member_user_id,

@@ -66,11 +66,12 @@ class GroupUseCases(BaseUseCase):
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
             raise ValueError("Group name already registered")
-        group = Group(
-            name=name,
-            tenant_id=tenant_id,
-            owner_id=creator_user_id,
-            platform_endpoint_permissions=platform_endpoint_permissions or self._default_platform_permissions(),
+        group = Group(name=name, tenant_id=tenant_id)
+        group.owner_id = creator_user_id
+        group.group_id = None
+        group.permissions = None
+        group.platform_endpoint_permissions = (
+            platform_endpoint_permissions or self._default_platform_permissions()
         )
         return self._repo.create(group)
 
@@ -132,23 +133,24 @@ class TenantUseCases(BaseUseCase):
         existing = self._repo.get_by_name(name)
         if existing:
             raise ValueError("Tenant name already registered")
-        tenant = Tenant(id=str(ulid.new()), name=name, owner_id=creator_user_id)
+        tenant = Tenant(name=name)
+        tenant.owner_id = creator_user_id
+        tenant.group_id = None
+        tenant.permissions = None
         created_tenant = self._repo.create(tenant)
 
-        admins_group = Group(
-            id=str(ulid.new()),
-            name="Tenant Admins",
-            tenant_id=created_tenant.id,
-            owner_id=creator_user_id,
-        )
+        admins_group = Group(name="Tenant Admins", tenant_id=created_tenant.id)
+        admins_group.owner_id = creator_user_id
+        admins_group.group_id = None
+        admins_group.permissions = None
+        admins_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         self._group_repo.create(admins_group)
 
-        users_group = Group(
-            id=str(ulid.new()),
-            name="Tenant Users",
-            tenant_id=created_tenant.id,
-            owner_id=creator_user_id,
-        )
+        users_group = Group(name="Tenant Users", tenant_id=created_tenant.id)
+        users_group.owner_id = creator_user_id
+        users_group.group_id = None
+        users_group.permissions = None
+        users_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         created_users_group = self._group_repo.create(users_group)
 
         if creator_user_id:
@@ -220,23 +222,24 @@ class UserUseCases(BaseUseCase):
         if existing_tenant:
             raise ValueError("Tenant name already registered")
 
-        tenant = Tenant(id=str(ulid.new()), name=tenant_name, owner_id=user.id)
+        tenant = Tenant(name=tenant_name)
+        tenant.owner_id = user.id
+        tenant.group_id = None
+        tenant.permissions = None
         created_tenant = self._tenant_repo.create(tenant)
 
-        admins_group = Group(
-            id=str(ulid.new()),
-            name="Tenant Admins",
-            tenant_id=created_tenant.id,
-            owner_id=user.id,
-        )
+        admins_group = Group(name="Tenant Admins", tenant_id=created_tenant.id)
+        admins_group.owner_id = user.id
+        admins_group.group_id = None
+        admins_group.permissions = None
+        admins_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         self._group_repo.create(admins_group)
 
-        users_group = Group(
-            id=str(ulid.new()),
-            name="Tenant Users",
-            tenant_id=created_tenant.id,
-            owner_id=user.id,
-        )
+        users_group = Group(name="Tenant Users", tenant_id=created_tenant.id)
+        users_group.owner_id = user.id
+        users_group.group_id = None
+        users_group.permissions = None
+        users_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         created_users_group = self._group_repo.create(users_group)
 
         user.group_id = created_users_group.id
@@ -266,13 +269,12 @@ class UserUseCases(BaseUseCase):
         if existing_by_email:
             raise ValueError("Email already registered")
         user = User(
-            id=str(ulid.new()),
             name=username,
             username=username,
             email=email,
             password_hash=hash_password(password),
-            platform_endpoint_permissions=self._default_platform_permissions(),
         )
+        user.platform_endpoint_permissions = self._default_platform_permissions()
         self._assign_signup_group(user, invite_group_id)
         created = self._repo.create(user)
         token = create_access_token(str(created.id))
@@ -315,12 +317,13 @@ class UserUseCases(BaseUseCase):
         if existing_by_email:
             raise ValueError("Email already registered")
         user = User(
-            id=str(ulid.new()),
             name=username,
             username=username,
             email=email,
             password_hash=hash_password(password),
-            platform_endpoint_permissions=platform_endpoint_permissions or self._default_platform_permissions(),
+        )
+        user.platform_endpoint_permissions = (
+            platform_endpoint_permissions or self._default_platform_permissions()
         )
         self._assign_user_group(user, username, invite_group_id, create_tenant_name)
         return self._repo.create(user)

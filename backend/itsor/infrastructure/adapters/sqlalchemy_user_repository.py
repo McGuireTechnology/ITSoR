@@ -17,19 +17,20 @@ class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[User, UserModel], UserRe
         super().__init__(db, "User")
 
     def _to_domain(self, record: UserModel) -> User:
-        return User(
-            id=record.id,
+        user = User(
             name=record.name,
             username=record.username,
             email=record.email,
             password_hash=record.password_hash,
-            group_id=record.group_id,
-            platform_endpoint_permissions=fetch_platform_endpoint_permissions(
-                self._db,
-                principal_type="user",
-                principal_id=record.id,
-            ),
         )
+        user.id = record.id
+        user.group_id = record.group_id
+        user.platform_endpoint_permissions = fetch_platform_endpoint_permissions(
+            self._db,
+            principal_type="user",
+            principal_id=record.id,
+        )
+        return user
 
     def _to_model(self, user: User) -> UserModel:
         return UserModel(
@@ -38,7 +39,7 @@ class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[User, UserModel], UserRe
             username=user.username,
             email=user.email,
             password_hash=user.password_hash,
-            group_id=user.group_id,
+            group_id=getattr(user, "group_id", None),
         )
 
     def _apply_updates(self, record: UserModel, user: User) -> None:
@@ -46,7 +47,7 @@ class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[User, UserModel], UserRe
         record.username = user.username
         record.email = user.email
         record.password_hash = user.password_hash
-        record.group_id = user.group_id
+        record.group_id = getattr(user, "group_id", None)
 
     def create(self, entity: User) -> User:
         created = super().create(entity)
@@ -54,7 +55,7 @@ class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[User, UserModel], UserRe
             self._db,
             principal_type="user",
             principal_id=created.id,
-            permissions=entity.platform_endpoint_permissions,
+            permissions=getattr(entity, "platform_endpoint_permissions", None),
         )
         return self.get_by_id(created.id) or created
 
@@ -64,7 +65,7 @@ class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[User, UserModel], UserRe
             self._db,
             principal_type="user",
             principal_id=updated.id,
-            permissions=entity.platform_endpoint_permissions,
+            permissions=getattr(entity, "platform_endpoint_permissions", None),
         )
         return self.get_by_id(updated.id) or updated
 
