@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntEnum
 
-from itsor.domain.ids import generate_ulid
+import ulid
 
 
 OWNER_PERMISSIONS_SHIFT = 6

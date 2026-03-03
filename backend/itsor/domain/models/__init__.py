@@ -1,3 +1,5 @@
+# Domain Models Layer
+
 from itsor.domain.models.base_model import (
     DEFAULT_CONTROL_FLAGS,
     DEFAULT_GROUP_PERMISSIONS,
@@ -24,6 +26,8 @@ from itsor.domain.models.idm_models import (
 from itsor.domain.models.platform_models import (
     GroupId,
     PermissionId,
+    PlatformResourceType,
+    PlatformResourceValidActions,
     PlatformGroup,
     PlatformGroupMembership,
     PlatformGroupRole,
@@ -40,6 +44,7 @@ from itsor.domain.models.platform_models import (
     RoleId,
     TenantId,
     UserId,
+    valid_actions_for_resource,
 )
 
 Group = PlatformGroup
@@ -74,7 +79,10 @@ __all__ = [
     "PlatformPermission",
     "PlatformPermissionEffect",
     "PlatformResource",
+    "PlatformResourceType",
+    "PlatformResourceValidActions",
     "PlatformResourceAction",
+    "valid_actions_for_resource",
     "PlatformRole",
     "PlatformRolePermission",
     "PlatformUserTenant",

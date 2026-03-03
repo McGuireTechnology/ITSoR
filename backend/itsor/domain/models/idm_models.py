@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-
-from itsor.domain.ids import generate_ulid
+import ulid
 
 
 @dataclass

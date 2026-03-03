@@ -1,19 +1,13 @@
-# Platform Domain Models
+from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import NewType
 
-from itsor.domain.ids import generate_ulid
+import ulid
 
-UserId = NewType("UserId", str)
-TenantId = NewType("TenantId", str)
-GroupId = NewType("GroupId", str)
-RoleId = NewType("RoleId", str)
-PermissionId = NewType("PermissionId", str)
-
-
-class PlatformResource(str, Enum):
+class Resource(str, Enum):
     USER = "user"
     TENANT = "tenant"
     GROUP = "group"
@@ -26,92 +20,206 @@ class PlatformResource(str, Enum):
     ROLE_PERMISSION = "role_permission"
 
 
-class PlatformResourceAction(str, Enum):
+class ResourceAction(str, Enum):
     CREATE = "create"
     READ = "read"
     UPDATE = "update"
     DELETE = "delete"
+    EXECUTE = "execute"
 
 
-class PlatformPermissionEffect(str, Enum):
-    ALLOW = "allow"
-    DENY = "deny"
+class ResourceActionContract(ABC):
+    @classmethod
+    @abstractmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        ...
+
+    @classmethod
+    def allows(cls, action: ResourceAction) -> bool:
+        return action in cls.allowed_actions()
 
 
-# Core
+UserId = NewType("UserId", str)
 
 
-# User (Global)
 @dataclass
-class PlatformUser:
-    id: UserId = field(default_factory=lambda: UserId(generate_ulid()), init=False)
-    name: str
+class User(ResourceActionContract):
+    id: UserId = field(default_factory=lambda: UserId(str(ulid.new())), init=False)
     username: str
     email: str
     password_hash: str
 
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+
+TenantId = NewType("TenantId", str)
+
 
 @dataclass
-class PlatformTenant:
-    id: TenantId = field(default_factory=lambda: TenantId(generate_ulid()), init=False)
-    name: str
+class  Tenant(ResourceActionContract):
+    id: TenantId = field(default_factory=lambda: TenantId(str(ulid.new())), init=False)
 
-# Group (Scoped to Tenant)
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+
+GroupId = NewType("GroupId", str)
+
+
 @dataclass
-class PlatformGroup:
-    id: GroupId = field(default_factory=lambda: GroupId(generate_ulid()), init=False)
-    name: str
-    tenant_id: TenantId
+class  Group(ResourceActionContract):
+    id: GroupId = field(default_factory=lambda: GroupId(str(ulid.new())), init=False)
+    tenant_id: str | None = None
+
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
 
 
-# Role (Scoped to Tenant)
+RoleId = NewType("RoleId", str)
+
+
 @dataclass
-class PlatformRole:
-    id: RoleId = field(default_factory=lambda: RoleId(generate_ulid()), init=False)
-    name: str
-    tenant_id: TenantId
+class  Role(ResourceActionContract):
+    id: RoleId = field(default_factory=lambda: RoleId(str(ulid.new())), init=False)
+    tenant_id: str | None = None
     description: str = ""
 
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+PermissionId = NewType("PermissionId", str)
+
 
 @dataclass
-class PlatformPermission:
-    id: PermissionId = field(default_factory=lambda: PermissionId(generate_ulid()), init=False)
-    name: str
-    resource: PlatformResource
-    action: PlatformResourceAction
-    effect: PlatformPermissionEffect
+class  Permission(ResourceActionContract):
+    id: PermissionId = field(default_factory=lambda: PermissionId(str(ulid.new())), init=False)
+    resource:  Resource =  Resource.USER
+    action:  ResourceAction =  ResourceAction.READ
+
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+
+UserTenantId = NewType("UserTenantId", str)
 
 
 @dataclass
-class PlatformUserTenant:
-    id: str = field(default_factory=generate_ulid, init=False)
+class  UserTenant(ResourceActionContract):
+    id: UserTenantId = field(default_factory=lambda: UserTenantId(str(ulid.new())), init=False)
     user_id: UserId
     tenant_id: TenantId
 
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+GroupMembershipId = NewType("GroupMembershipId", str)
+
 
 @dataclass
-class PlatformGroupMembership:
-    id: str = field(default_factory=generate_ulid, init=False)
+class  GroupMembership(ResourceActionContract):
+    id: GroupMembershipId = field(default_factory=lambda: GroupMembershipId(str(ulid.new())), init=False)
     group_id: GroupId
     user_id: UserId
 
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+
+UserRoleId = NewType("UserRoleId", str)
+
 
 @dataclass
-class PlatformUserRole:
-    id: str = field(default_factory=generate_ulid, init=False)
+class  UserRole(ResourceActionContract):
+    id: UserRoleId = field(default_factory=lambda: UserRoleId(str(ulid.new())), init=False)
     user_id: UserId
     role_id: RoleId
 
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+
+GroupRoleId = NewType("GroupRoleId", str)
+
 
 @dataclass
-class PlatformGroupRole:
-    id: str = field(default_factory=generate_ulid, init=False)
+class  GroupRole(ResourceActionContract):
+    id: GroupRoleId = field(default_factory=lambda: GroupRoleId(str(ulid.new())), init=False)
     group_id: GroupId
     role_id: RoleId
 
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
+
+
+RolePermissionId = NewType("RolePermissionId", str)
+
 
 @dataclass
-class PlatformRolePermission:
-    id: str = field(default_factory=generate_ulid, init=False)
+class  RolePermission(ResourceActionContract):
+    id: RolePermissionId = field(default_factory=lambda: RolePermissionId(str(ulid.new())), init=False)
     role_id: RoleId
     permission_id: PermissionId
+
+    @classmethod
+    def allowed_actions(cls) -> tuple[ResourceAction, ...]:
+        return (
+            ResourceAction.CREATE,
+            ResourceAction.READ,
+            ResourceAction.UPDATE,
+            ResourceAction.DELETE,
+        )
