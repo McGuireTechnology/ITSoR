@@ -4,10 +4,10 @@ from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 import bcrypt
+import ulid
 from jose import JWTError, jwt
 
-from backend.itsor.domain.models.ids import generate_ulid
-from itsor.domain.models import PlatformGroup, PlatformResourceAction, PlatformTenant, PlatformUser
+from itsor.domain.models import Group, ResourceAction, Tenant, User
 from itsor.domain.ports.platform_ports import GroupRepository, TenantRepository, UserRepository
 from itsor.domain.use_cases.base_use_case import BaseUseCase
 
@@ -44,16 +44,16 @@ def decode_access_token(token: str) -> Optional[str]:
 
 class GroupUseCases(BaseUseCase):
     @staticmethod
-    def _default_platform_permissions() -> dict[str, list[PlatformResourceAction | str]]:
-        return {"*": [PlatformResourceAction.READ, "write"]}
+    def _default_platform_permissions() -> dict[str, list[ResourceAction | str]]:
+        return {"*": [ResourceAction.READ, "write"]}
 
     def __init__(self, repo: GroupRepository) -> None:
         self._repo = repo
 
-    def list_groups(self) -> List[PlatformGroup]:
+    def list_groups(self) -> List[Group]:
         return self._repo.list()
 
-    def get_group(self, group_id: str) -> Optional[PlatformGroup]:
+    def get_group(self, group_id: str) -> Optional[Group]:
         return self._repo.get_by_id(group_id)
 
     def create_group(
@@ -61,12 +61,12 @@ class GroupUseCases(BaseUseCase):
         name: str,
         tenant_id: str | None = None,
         creator_user_id: str | None = None,
-        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
-    ) -> PlatformGroup:
+        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+    ) -> Group:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
             raise ValueError("Group name already registered")
-        group = PlatformGroup(
+        group = Group(
             name=name,
             tenant_id=tenant_id,
             owner_id=creator_user_id,
@@ -78,8 +78,8 @@ class GroupUseCases(BaseUseCase):
         self,
         group_id: str,
         name: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
-    ) -> PlatformGroup:
+        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+    ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
             raise ValueError("Group not found")
@@ -96,8 +96,8 @@ class GroupUseCases(BaseUseCase):
         self,
         group_id: str,
         name: str,
-        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
-    ) -> PlatformGroup:
+        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+    ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
             raise ValueError("Group not found")
@@ -122,20 +122,20 @@ class TenantUseCases(BaseUseCase):
         self._group_repo = group_repo
         self._user_repo = user_repo
 
-    def list_tenants(self) -> List[PlatformTenant]:
+    def list_tenants(self) -> List[Tenant]:
         return self._repo.list()
 
-    def get_tenant(self, tenant_id: str) -> Optional[PlatformTenant]:
+    def get_tenant(self, tenant_id: str) -> Optional[Tenant]:
         return self._repo.get_by_id(tenant_id)
 
-    def create_tenant(self, name: str, creator_user_id: str | None = None) -> PlatformTenant:
+    def create_tenant(self, name: str, creator_user_id: str | None = None) -> Tenant:
         existing = self._repo.get_by_name(name)
         if existing:
             raise ValueError("Tenant name already registered")
-        tenant = PlatformTenant(id=str(ulid.new()), name=name, owner_id=creator_user_id)
+        tenant = Tenant(id=str(ulid.new()), name=name, owner_id=creator_user_id)
         created_tenant = self._repo.create(tenant)
 
-        admins_group = PlatformGroup(
+        admins_group = Group(
             id=str(ulid.new()),
             name="Tenant Admins",
             tenant_id=created_tenant.id,
@@ -143,7 +143,7 @@ class TenantUseCases(BaseUseCase):
         )
         self._group_repo.create(admins_group)
 
-        users_group = PlatformGroup(
+        users_group = Group(
             id=str(ulid.new()),
             name="Tenant Users",
             tenant_id=created_tenant.id,
@@ -159,7 +159,7 @@ class TenantUseCases(BaseUseCase):
 
         return created_tenant
 
-    def update_tenant(self, tenant_id: str, name: Optional[str] = None) -> PlatformTenant:
+    def update_tenant(self, tenant_id: str, name: Optional[str] = None) -> Tenant:
         tenant = self._repo.get_by_id(tenant_id)
         if not tenant:
             raise ValueError("Tenant not found")
@@ -170,7 +170,7 @@ class TenantUseCases(BaseUseCase):
             tenant.name = name
         return self._repo.update(tenant)
 
-    def replace_tenant(self, tenant_id: str, name: str) -> PlatformTenant:
+    def replace_tenant(self, tenant_id: str, name: str) -> Tenant:
         tenant = self._repo.get_by_id(tenant_id)
         if not tenant:
             raise ValueError("Tenant not found")
@@ -190,8 +190,8 @@ class TenantUseCases(BaseUseCase):
 
 class UserUseCases(BaseUseCase):
     @staticmethod
-    def _default_platform_permissions() -> dict[str, list[PlatformResourceAction | str]]:
-        return {"*": [PlatformResourceAction.READ, "write"]}
+    def _default_platform_permissions() -> dict[str, list[ResourceAction | str]]:
+        return {"*": [ResourceAction.READ, "write"]}
 
     def __init__(self, repo: UserRepository, tenant_repo: TenantRepository, group_repo: GroupRepository) -> None:
         self._repo = repo
@@ -200,7 +200,7 @@ class UserUseCases(BaseUseCase):
 
     def _assign_user_group(
         self,
-        user: PlatformUser,
+        user: User,
         username: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
@@ -220,10 +220,10 @@ class UserUseCases(BaseUseCase):
         if existing_tenant:
             raise ValueError("Tenant name already registered")
 
-        tenant = PlatformTenant(id=str(ulid.new()), name=tenant_name, owner_id=user.id)
+        tenant = Tenant(id=str(ulid.new()), name=tenant_name, owner_id=user.id)
         created_tenant = self._tenant_repo.create(tenant)
 
-        admins_group = PlatformGroup(
+        admins_group = Group(
             id=str(ulid.new()),
             name="Tenant Admins",
             tenant_id=created_tenant.id,
@@ -231,7 +231,7 @@ class UserUseCases(BaseUseCase):
         )
         self._group_repo.create(admins_group)
 
-        users_group = PlatformGroup(
+        users_group = Group(
             id=str(ulid.new()),
             name="Tenant Users",
             tenant_id=created_tenant.id,
@@ -241,7 +241,7 @@ class UserUseCases(BaseUseCase):
 
         user.group_id = created_users_group.id
 
-    def _assign_signup_group(self, user: PlatformUser, invite_group_id: str | None = None) -> None:
+    def _assign_signup_group(self, user: User, invite_group_id: str | None = None) -> None:
         if not invite_group_id:
             user.group_id = None
             return
@@ -258,14 +258,14 @@ class UserUseCases(BaseUseCase):
         password: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
-    ) -> tuple[PlatformUser, str]:
+    ) -> tuple[User, str]:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
             raise ValueError("Username already registered")
         existing_by_email = self._repo.get_by_email(email)
         if existing_by_email:
             raise ValueError("Email already registered")
-        user = PlatformUser(
+        user = User(
             id=str(ulid.new()),
             name=username,
             username=username,
@@ -278,7 +278,7 @@ class UserUseCases(BaseUseCase):
         token = create_access_token(str(created.id))
         return created, token
 
-    def login(self, identifier: str, password: str) -> tuple[PlatformUser, str]:
+    def login(self, identifier: str, password: str) -> tuple[User, str]:
         user = self._repo.get_by_email(identifier)
         if not user:
             user = self._repo.get_by_username(identifier)
@@ -287,16 +287,16 @@ class UserUseCases(BaseUseCase):
         token = create_access_token(str(user.id))
         return user, token
 
-    def get_current_user(self, token: str) -> Optional[PlatformUser]:
+    def get_current_user(self, token: str) -> Optional[User]:
         user_id = decode_access_token(token)
         if not user_id:
             return None
         return self._repo.get_by_id(user_id)
 
-    def list_users(self) -> List[PlatformUser]:
+    def list_users(self) -> List[User]:
         return self._repo.list()
 
-    def get_user(self, user_id: str) -> Optional[PlatformUser]:
+    def get_user(self, user_id: str) -> Optional[User]:
         return self._repo.get_by_id(user_id)
 
     def create_user(
@@ -306,15 +306,15 @@ class UserUseCases(BaseUseCase):
         password: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
-        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
-    ) -> PlatformUser:
+        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+    ) -> User:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
             raise ValueError("Username already registered")
         existing_by_email = self._repo.get_by_email(email)
         if existing_by_email:
             raise ValueError("Email already registered")
-        user = PlatformUser(
+        user = User(
             id=str(ulid.new()),
             name=username,
             username=username,
@@ -331,8 +331,8 @@ class UserUseCases(BaseUseCase):
         username: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
-    ) -> PlatformUser:
+        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+    ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")
@@ -361,8 +361,8 @@ class UserUseCases(BaseUseCase):
         username: str,
         email: str,
         password: str,
-        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
-    ) -> PlatformUser:
+        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+    ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")

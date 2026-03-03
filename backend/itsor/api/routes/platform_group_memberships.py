@@ -7,7 +7,7 @@ from itsor.api.schemas.platform_group_memberships_schemas import (
     PlatformGroupMembershipResponse,
     PlatformGroupMembershipUpdate,
 )
-from itsor.domain.models import PlatformUser
+from itsor.domain.models import User
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_group_model import GroupModel
 from itsor.infrastructure.models.sqlalchemy_platform_group_membership_model import PlatformGroupMembershipModel
@@ -36,7 +36,7 @@ def _validate_member_ref(db: Session, member_type: str, member_user_id: str | No
 
 
 @router.get("", response_model=list[PlatformGroupMembershipResponse])
-def list_group_memberships(db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
+def list_group_memberships(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return db.query(PlatformGroupMembershipModel).all()
 
 
@@ -44,7 +44,7 @@ def list_group_memberships(db: Session = Depends(get_db), _: PlatformUser = Depe
 def create_group_membership(
     body: PlatformGroupMembershipCreate,
     db: Session = Depends(get_db),
-    _: PlatformUser = Depends(get_current_user),
+    _: User = Depends(get_current_user),
 ):
     group = db.query(GroupModel).filter(GroupModel.id == body.group_id).first()
     if not group:
@@ -68,7 +68,7 @@ def create_group_membership(
 
 
 @router.get("/{membership_id}", response_model=PlatformGroupMembershipResponse)
-def get_group_membership(membership_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
+def get_group_membership(membership_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     membership = db.query(PlatformGroupMembershipModel).filter(PlatformGroupMembershipModel.id == membership_id).first()
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
@@ -80,7 +80,7 @@ def update_group_membership(
     membership_id: str,
     body: PlatformGroupMembershipUpdate,
     db: Session = Depends(get_db),
-    _: PlatformUser = Depends(get_current_user),
+    _: User = Depends(get_current_user),
 ):
     membership = db.query(PlatformGroupMembershipModel).filter(PlatformGroupMembershipModel.id == membership_id).first()
     if not membership:
@@ -108,7 +108,7 @@ def update_group_membership(
 
 
 @router.delete("/{membership_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_group_membership(membership_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
+def delete_group_membership(membership_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     membership = db.query(PlatformGroupMembershipModel).filter(PlatformGroupMembershipModel.id == membership_id).first()
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")

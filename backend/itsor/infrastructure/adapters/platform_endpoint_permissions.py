@@ -1,20 +1,20 @@
 from sqlalchemy.orm import Session
 
-from itsor.domain.models import PlatformResourceAction
+from itsor.domain.models import ResourceAction
 from itsor.infrastructure.models.sqlalchemy_platform_endpoint_permission_model import PlatformEndpointPermissionModel
 
 
-def _normalize_action(value: str | PlatformResourceAction) -> str:
-    if isinstance(value, PlatformResourceAction):
+def _normalize_action(value: str | ResourceAction) -> str:
+    if isinstance(value, ResourceAction):
         return value.value
     candidate = str(value).strip().lower()
     return candidate
 
 
-def _to_action(value: str) -> PlatformResourceAction | str:
+def _to_action(value: str) -> ResourceAction | str:
     candidate = str(value).strip().lower()
     try:
-        return PlatformResourceAction(candidate)
+        return ResourceAction(candidate)
     except ValueError:
         return candidate
 
@@ -24,7 +24,7 @@ def fetch_platform_endpoint_permissions(
     *,
     principal_type: str,
     principal_id: str | None,
-) -> dict[str, list[PlatformResourceAction | str]]:
+) -> dict[str, list[ResourceAction | str]]:
     if not principal_id:
         return {}
 
@@ -37,7 +37,7 @@ def fetch_platform_endpoint_permissions(
         .all()
     )
 
-    mapped: dict[str, list[PlatformResourceAction | str]] = {}
+    mapped: dict[str, list[ResourceAction | str]] = {}
     for row in rows:
         endpoint = str(row.endpoint_name)
         action = _to_action(str(row.action))
@@ -52,7 +52,7 @@ def replace_platform_endpoint_permissions(
     *,
     principal_type: str,
     principal_id: str | None,
-    permissions: dict[str, list[PlatformResourceAction | str]] | None,
+    permissions: dict[str, list[ResourceAction | str]] | None,
 ) -> None:
     if not principal_id:
         return

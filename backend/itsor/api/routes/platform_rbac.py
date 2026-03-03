@@ -27,7 +27,7 @@ from itsor.api.schemas.platform_rbac_schemas import (
     PlatformUserTenantResponse,
     PlatformUserTenantUpdate,
 )
-from itsor.domain.models import PlatformUser
+from itsor.domain.models import User
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_group_model import GroupModel
 from itsor.infrastructure.models.sqlalchemy_platform_rbac_models import (
@@ -45,7 +45,7 @@ router = APIRouter(tags=["platform-rbac"])
 
 
 def _authz(
-    current_user: PlatformUser,
+    current_user: User,
     authz: AuthorizationService,
     endpoint_name: str,
     action: Literal["read", "write"],
@@ -89,7 +89,7 @@ def _ensure_permission_exists(db, permission_id: str) -> None:
 @router.get("/roles", response_model=list[PlatformRoleResponse])
 def list_roles(
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "roles", "read")
@@ -100,7 +100,7 @@ def list_roles(
 def create_role(
     body: PlatformRoleCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "roles", "write")
@@ -126,7 +126,7 @@ def create_role(
 def get_role(
     role_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "roles", "read")
@@ -141,7 +141,7 @@ def put_role(
     role_id: str,
     body: PlatformRoleCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "roles", "write")
@@ -168,7 +168,7 @@ def patch_role(
     role_id: str,
     body: PlatformRoleUpdate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "roles", "write")
@@ -197,7 +197,7 @@ def patch_role(
 def delete_role(
     role_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "roles", "write")
@@ -211,7 +211,7 @@ def delete_role(
 @router.get("/permissions", response_model=list[PlatformPermissionResponse])
 def list_permissions(
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "permissions", "read")
@@ -224,7 +224,7 @@ def list_permissions(
 def create_permission(
     body: PlatformPermissionCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     pass
@@ -234,7 +234,7 @@ def create_permission(
 def get_permission(
     permission_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "permissions", "read")
@@ -253,7 +253,7 @@ def put_permission(
     permission_id: str,
     body: PlatformPermissionCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "permissions", "write")
@@ -282,7 +282,7 @@ def patch_permission(
     permission_id: str,
     body: PlatformPermissionUpdate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "permissions", "write")
@@ -314,7 +314,7 @@ def patch_permission(
 def delete_permission(
     permission_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "permissions", "write")
@@ -332,7 +332,7 @@ def delete_permission(
 @router.get("/user-tenants", response_model=list[PlatformUserTenantResponse])
 def list_user_tenants(
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-tenants", "read")
@@ -345,7 +345,7 @@ def list_user_tenants(
 def create_user_tenant(
     body: PlatformUserTenantCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-tenants", "write")
@@ -368,7 +368,7 @@ def create_user_tenant(
 def get_user_tenant(
     user_tenant_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-tenants", "read")
@@ -389,7 +389,7 @@ def put_user_tenant(
     user_tenant_id: str,
     body: PlatformUserTenantCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-tenants", "write")
@@ -421,7 +421,7 @@ def patch_user_tenant(
     user_tenant_id: str,
     body: PlatformUserTenantUpdate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-tenants", "write")
@@ -455,7 +455,7 @@ def patch_user_tenant(
 def delete_user_tenant(
     user_tenant_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-tenants", "write")
@@ -475,7 +475,7 @@ def delete_user_tenant(
 @router.get("/user-roles", response_model=list[PlatformUserRoleResponse])
 def list_user_roles(
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-roles", "read")
@@ -488,7 +488,7 @@ def list_user_roles(
 def create_user_role(
     body: PlatformUserRoleCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-roles", "write")
@@ -509,7 +509,7 @@ def create_user_role(
 def get_user_role(
     user_role_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-roles", "read")
@@ -526,7 +526,7 @@ def put_user_role(
     user_role_id: str,
     body: PlatformUserRoleCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-roles", "write")
@@ -554,7 +554,7 @@ def patch_user_role(
     user_role_id: str,
     body: PlatformUserRoleUpdate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-roles", "write")
@@ -584,7 +584,7 @@ def patch_user_role(
 def delete_user_role(
     user_role_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "user-roles", "write")
@@ -600,7 +600,7 @@ def delete_user_role(
 @router.get("/group-roles", response_model=list[PlatformGroupRoleResponse])
 def list_group_roles(
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "group-roles", "read")
@@ -613,7 +613,7 @@ def list_group_roles(
 def create_group_role(
     body: PlatformGroupRoleCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "group-roles", "write")
@@ -634,7 +634,7 @@ def create_group_role(
 def get_group_role(
     group_role_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "group-roles", "read")
@@ -653,7 +653,7 @@ def put_group_role(
     group_role_id: str,
     body: PlatformGroupRoleCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "group-roles", "write")
@@ -683,7 +683,7 @@ def patch_group_role(
     group_role_id: str,
     body: PlatformGroupRoleUpdate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "group-roles", "write")
@@ -715,7 +715,7 @@ def patch_group_role(
 def delete_group_role(
     group_role_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "group-roles", "write")
@@ -733,7 +733,7 @@ def delete_group_role(
 @router.get("/role-permissions", response_model=list[PlatformRolePermissionResponse])
 def list_role_permissions(
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "role-permissions", "read")
@@ -748,7 +748,7 @@ def list_role_permissions(
 def create_role_permission(
     body: PlatformRolePermissionCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "role-permissions", "write")
@@ -772,7 +772,7 @@ def create_role_permission(
 def get_role_permission(
     role_permission_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "role-permissions", "read")
@@ -793,7 +793,7 @@ def put_role_permission(
     role_permission_id: str,
     body: PlatformRolePermissionCreate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "role-permissions", "write")
@@ -827,7 +827,7 @@ def patch_role_permission(
     role_permission_id: str,
     body: PlatformRolePermissionUpdate,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "role-permissions", "write")
@@ -861,7 +861,7 @@ def patch_role_permission(
 def delete_role_permission(
     role_permission_id: str,
     db=Depends(get_db),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     _authz(current_user, authz, "role-permissions", "write")

@@ -72,11 +72,13 @@ def merge_resource_catalogs(
     policy: MergePolicy = "error_on_conflict",
 ) -> ResourceCatalog:
     merged: ResourceCatalog = {}
+    key_sources: dict[ResourceKey, type[ResourceProvider]] = {}
 
     for provider in providers:
         for resource_key, actions in provider.catalog().items():
             if resource_key not in merged:
                 merged[resource_key] = actions
+                key_sources[resource_key] = provider
                 continue
 
             if policy == "error_on_conflict" and merged[resource_key] != actions:
@@ -86,7 +88,19 @@ def merge_resource_catalogs(
 
             if policy == "union_actions":
                 merged[resource_key] = frozenset((*merged[resource_key], *actions))
+                continue
+
+            if policy == "platform_overrides_idm":
+                current_name = provider.__name__.lower()
+                previous_name = key_sources[resource_key].__name__.lower()
+                current_is_platform = "platform" in current_name
+                previous_is_platform = "platform" in previous_name
+
+                if current_is_platform or not previous_is_platform:
+                    merged[resource_key] = actions
+                    key_sources[resource_key] = provider
             else:
                 merged[resource_key] = actions
+                key_sources[resource_key] = provider
 
     return merged

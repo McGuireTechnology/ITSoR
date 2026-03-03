@@ -5,7 +5,7 @@ from typing import Literal
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
-from itsor.domain.models import BaseModel, PermissionLevel, PlatformResourceAction, PlatformTenant, PlatformUser
+from itsor.domain.models import BaseModel, PermissionLevel, ResourceAction, Tenant, User
 from itsor.domain.use_cases.custom_use_cases import EntityRecordUseCases, EntityTypeUseCases, NamespaceUseCases, WorkspaceUseCases
 from itsor.domain.use_cases.platform_use_cases import GroupUseCases, TenantUseCases, UserUseCases
 from itsor.domain.ports.custom_ports import EntityRecordRepository, EntityTypeRepository, NamespaceRepository, WorkspaceRepository
@@ -26,7 +26,7 @@ ROOT_TENANT_NAME = os.getenv("ROOT_TENANT_NAME", "Root").strip().lower()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 
-Action = PlatformResourceAction | Literal["read", "write"]
+Action = ResourceAction | Literal["read", "write"]
 
 
 @dataclass
@@ -42,7 +42,7 @@ class AuthorizationService:
     def authorize_resource_action(
         self,
         *,
-        current_user: PlatformUser,
+        current_user: User,
         resource: BaseModel,
         action: Action,
         endpoint_name: str,
@@ -68,7 +68,7 @@ class AuthorizationService:
     def authorize_tenant_scope(
         self,
         *,
-        current_user: PlatformUser,
+        current_user: User,
         tenant_id: str,
         action: Action,
         endpoint_name: str,
@@ -102,7 +102,7 @@ class AuthorizationService:
                 detail="Insufficient tenant permissions for this action",
             )
 
-    def authorize_platform_endpoint(self, *, current_user: PlatformUser, endpoint_name: str, action: Action) -> None:
+    def authorize_platform_endpoint(self, *, current_user: User, endpoint_name: str, action: Action) -> None:
         if self._is_root_tenant_operator(current_user):
             return
         if not self._endpoint_permission_allows(current_user, endpoint_name, action):
@@ -160,7 +160,7 @@ class AuthorizationService:
             return None
         return self.resolve_tenant_id_for_resource(workspace)
 
-    def _is_root_tenant_operator(self, current_user: PlatformUser) -> bool:
+    def _is_root_tenant_operator(self, current_user: User) -> bool:
         root_tenant_id = self._resolve_root_tenant_id()
         if not root_tenant_id:
             return False
@@ -178,7 +178,7 @@ class AuthorizationService:
                 return str(tenant.id)
         return None
 
-    def _resolve_user_tenant_id(self, current_user: PlatformUser) -> str | None:
+    def _resolve_user_tenant_id(self, current_user: User) -> str | None:
         if not current_user.group_id:
             return None
         group = self.group_repo.get_by_id(str(current_user.group_id))
@@ -186,14 +186,14 @@ class AuthorizationService:
             return None
         return str(group.tenant_id)
 
-    def _resource_permission_allows(self, resource: BaseModel | PlatformTenant, current_user: PlatformUser, action: Action) -> bool:
+    def _resource_permission_allows(self, resource: BaseModel | Tenant, current_user: User, action: Action) -> bool:
         granted = self._granted_permission_level(resource, current_user)
         required = int(PermissionLevel.READ if action == "read" else PermissionLevel.WRITE)
         return (int(granted) & required) == required
 
-    def _endpoint_permission_allows(self, current_user: PlatformUser, endpoint_name: str, action: Action) -> bool:
+    def _endpoint_permission_allows(self, current_user: User, endpoint_name: str, action: Action) -> bool:
         endpoint = str(endpoint_name).strip().lower()
-        op = action.value if isinstance(action, PlatformResourceAction) else str(action).strip().lower()
+        op = action.value if isinstance(action, ResourceAction) else str(action).strip().lower()
 
         policies: list[dict[str, list[str]]] = []
 
@@ -225,14 +225,14 @@ class AuthorizationService:
             if not isinstance(allowed, list):
                 continue
             normalized = {
-                item.value if isinstance(item, PlatformResourceAction) else str(item).strip().lower()
+                item.value if isinstance(item, ResourceAction) else str(item).strip().lower()
                 for item in allowed
             }
             if "*" in normalized or action in normalized:
                 return True
         return False
 
-    def _granted_permission_level(self, resource: BaseModel | PlatformTenant, current_user: PlatformUser) -> int:
+    def _granted_permission_level(self, resource: BaseModel | Tenant, current_user: User) -> int:
         if resource.owner_id and str(resource.owner_id) == str(current_user.id):
             return int(resource.owner_permissions)
         if resource.group_id and current_user.group_id and str(resource.group_id) == str(current_user.group_id):
@@ -327,7 +327,7 @@ def get_current_user(
     request: Request,
     token: str | None = Depends(oauth2_scheme),
     use_cases: UserUseCases = Depends(get_user_use_cases),
-) -> PlatformUser:
+) -> User:
     auth_token = request.cookies.get(SESSION_COOKIE_NAME) or token
     if not auth_token:
         raise HTTPException(

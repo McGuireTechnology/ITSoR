@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from backend.itsor.domain.models.ids import generate_ulid
+import ulid
 from itsor.domain.models import CustomEntityRecord, CustomEntityType, CustomNamespace, CustomWorkspace
 from itsor.domain.ports.custom_ports import EntityRecordRepository, EntityTypeRepository, NamespaceRepository, WorkspaceRepository
 from itsor.domain.use_cases.base_use_case import BaseUseCase

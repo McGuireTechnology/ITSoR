@@ -9,7 +9,7 @@ from itsor.api.schemas.namespace_schamas import (
     NamespaceResponse,
     NamespaceUpdate,
 )
-from itsor.domain.models import PlatformUser
+from itsor.domain.models import User
 from itsor.domain.use_cases.custom_use_cases import NamespaceUseCases
 
 router = APIRouter(prefix="/namespaces", tags=["namespaces"])
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/namespaces", tags=["namespaces"])
 def list_namespaces(
     workspace_id: str | None = None,
     use_cases: NamespaceUseCases = Depends(get_namespace_use_cases),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     if workspace_id:
@@ -38,7 +38,7 @@ def list_namespaces(
 def create_namespace(
     body: NamespaceCreate,
     use_cases: NamespaceUseCases = Depends(get_namespace_use_cases),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     tenant_id = authz.resolve_tenant_id_for_workspace(body.workspace_id)
@@ -63,7 +63,7 @@ def create_namespace(
 def get_namespace(
     namespace_id: str,
     use_cases: NamespaceUseCases = Depends(get_namespace_use_cases),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     namespace = use_cases.get_namespace(namespace_id)
@@ -78,7 +78,7 @@ def update_namespace(
     namespace_id: str,
     body: NamespaceUpdate,
     use_cases: NamespaceUseCases = Depends(get_namespace_use_cases),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     namespace = use_cases.get_namespace(namespace_id)
@@ -100,7 +100,7 @@ def replace_namespace(
     namespace_id: str,
     body: NamespaceReplace,
     use_cases: NamespaceUseCases = Depends(get_namespace_use_cases),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     namespace = use_cases.get_namespace(namespace_id)
@@ -121,7 +121,7 @@ def replace_namespace(
 def delete_namespace(
     namespace_id: str,
     use_cases: NamespaceUseCases = Depends(get_namespace_use_cases),
-    current_user: PlatformUser = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
     namespace = use_cases.get_namespace(namespace_id)

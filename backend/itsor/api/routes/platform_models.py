@@ -9,16 +9,16 @@ router = APIRouter(prefix="/models", tags=["platform-models"])
 
 
 PLATFORM_MODEL_CLASSES = {
-    "PlatformUser": platform_models.PlatformUser,
-    "PlatformTenant": platform_models.PlatformTenant,
-    "PlatformGroup": platform_models.PlatformGroup,
-    "PlatformRole": platform_models.PlatformRole,
-    "PlatformPermission": platform_models.PlatformPermission,
-    "PlatformUserTenant": platform_models.PlatformUserTenant,
-    "PlatformGroupMembership": platform_models.PlatformGroupMembership,
-    "PlatformUserRole": platform_models.PlatformUserRole,
-    "PlatformGroupRole": platform_models.PlatformGroupRole,
-    "PlatformRolePermission": platform_models.PlatformRolePermission,
+    "User": platform_models.User,
+    "Tenant": platform_models.Tenant,
+    "Group": platform_models.Group,
+    "Role": platform_models.Role,
+    "Permission": platform_models.Permission,
+    "UserTenant": platform_models.UserTenant,
+    "UserGroupMembership": platform_models.UserGroupMembership,
+    "UserRole": platform_models.UserRole,
+    "GroupRole": platform_models.GroupRole,
+    "RolePermission": platform_models.RolePermission,
 }
 
 

@@ -7,7 +7,7 @@ from itsor.api.schemas.idm_group_memberships_schemas import (
     IdmGroupMembershipResponse,
     IdmGroupMembershipUpdate,
 )
-from itsor.domain.models import PlatformUser
+from itsor.domain.models import User
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_group_membership_model import IdmGroupMembershipModel
 from itsor.infrastructure.models.sqlalchemy_idm_group_model import IdmGroupModel
@@ -36,12 +36,12 @@ def _validate_member_ref(db: Session, member_type: str, member_user_id: str | No
 
 
 @router.get("", response_model=list[IdmGroupMembershipResponse])
-def list_group_memberships(db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
+def list_group_memberships(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return db.query(IdmGroupMembershipModel).all()
 
 
 @router.post("", response_model=IdmGroupMembershipResponse, status_code=status.HTTP_201_CREATED)
-def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
+def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     group = db.query(IdmGroupModel).filter(IdmGroupModel.id == body.group_id).first()
     if not group:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group not found")
@@ -64,7 +64,7 @@ def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depend
 
 
 @router.get("/{membership_id}", response_model=IdmGroupMembershipResponse)
-def get_group_membership(membership_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
+def get_group_membership(membership_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
@@ -76,7 +76,7 @@ def update_group_membership(
     membership_id: str,
     body: IdmGroupMembershipUpdate,
     db: Session = Depends(get_db),
-    _: PlatformUser = Depends(get_current_user),
+    _: User = Depends(get_current_user),
 ):
     membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
     if not membership:
@@ -104,7 +104,7 @@ def update_group_membership(
 
 
 @router.delete("/{membership_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_group_membership(membership_id: str, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
+def delete_group_membership(membership_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")

@@ -52,7 +52,7 @@ class BaseModel:
     owner_id: str | None = None
     group_id: str | None = None
     permissions: int = DEFAULT_PERMISSIONS
-    id: str = field(default_factory=generate_ulid)
+    id: str = field(default_factory=lambda: str(ulid.new()))
 
     def __post_init__(self) -> None:
         if not 0 <= self.permissions <= 0xFF:
