@@ -9,7 +9,6 @@ dist/
 build/
 
 # SQLite databases
-*.db
 *.db-wal
 *.db-shm
 
@@ -371,3 +370,4 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+apple/ITSoR/ITSoR.xcodeproj/project.xcworkspace/xcuserdata/nathan.xcuserdatad/UserInterfaceState.xcuserstate
