@@ -1,3 +1,21 @@
-from itsor.domain.use_cases.base_use_case import BaseUseCase
+# Domain Use Cases Layer
 
-__all__ = ["BaseUseCase"]
+from itsor.domain.use_cases.base_use_case import BaseUseCase
+from itsor.domain.use_cases.custom_use_cases import (
+	EntityRecordUseCases,
+	EntityTypeUseCases,
+	NamespaceUseCases,
+	WorkspaceUseCases,
+)
+from itsor.domain.use_cases.platform_use_cases import GroupUseCases, TenantUseCases, UserUseCases
+
+__all__ = [
+	"BaseUseCase",
+	"EntityRecordUseCases",
+	"EntityTypeUseCases",
+	"NamespaceUseCases",
+	"WorkspaceUseCases",
+	"GroupUseCases",
+	"TenantUseCases",
+	"UserUseCases",
+]

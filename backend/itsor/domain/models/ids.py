@@ -1,5 +1,5 @@
 import ulid
 
 
-def generate_ulid() -> str:
+def str(ulid.new()) -> str:
     return str(ulid.new())

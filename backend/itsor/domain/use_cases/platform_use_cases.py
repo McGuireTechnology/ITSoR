@@ -6,11 +6,9 @@ from typing import List, Optional
 import bcrypt
 from jose import JWTError, jwt
 
-from itsor.domain.ids import generate_ulid
+from backend.itsor.domain.models.ids import generate_ulid
 from itsor.domain.models import PlatformGroup, PlatformResourceAction, PlatformTenant, PlatformUser
-from itsor.domain.ports.group_repository import GroupRepository
-from itsor.domain.ports.tenant_repository import TenantRepository
-from itsor.domain.ports.user_repository import UserRepository
+from itsor.domain.ports.platform_ports import GroupRepository, TenantRepository, UserRepository
 from itsor.domain.use_cases.base_use_case import BaseUseCase
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
@@ -42,6 +40,152 @@ def decode_access_token(token: str) -> Optional[str]:
         return payload.get("sub")
     except JWTError:
         return None
+
+
+class GroupUseCases(BaseUseCase):
+    @staticmethod
+    def _default_platform_permissions() -> dict[str, list[PlatformResourceAction | str]]:
+        return {"*": [PlatformResourceAction.READ, "write"]}
+
+    def __init__(self, repo: GroupRepository) -> None:
+        self._repo = repo
+
+    def list_groups(self) -> List[PlatformGroup]:
+        return self._repo.list()
+
+    def get_group(self, group_id: str) -> Optional[PlatformGroup]:
+        return self._repo.get_by_id(group_id)
+
+    def create_group(
+        self,
+        name: str,
+        tenant_id: str | None = None,
+        creator_user_id: str | None = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
+    ) -> PlatformGroup:
+        existing = self._repo.get_by_name(name, tenant_id)
+        if existing:
+            raise ValueError("Group name already registered")
+        group = PlatformGroup(
+            name=name,
+            tenant_id=tenant_id,
+            owner_id=creator_user_id,
+            platform_endpoint_permissions=platform_endpoint_permissions or self._default_platform_permissions(),
+        )
+        return self._repo.create(group)
+
+    def update_group(
+        self,
+        group_id: str,
+        name: Optional[str] = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
+    ) -> PlatformGroup:
+        group = self._repo.get_by_id(group_id)
+        if not group:
+            raise ValueError("Group not found")
+        if name is not None and name != group.name:
+            existing = self._repo.get_by_name(name, group.tenant_id)
+            if existing:
+                raise ValueError("Group name already in use")
+            group.name = name
+        if platform_endpoint_permissions is not None:
+            group.platform_endpoint_permissions = platform_endpoint_permissions
+        return self._repo.update(group)
+
+    def replace_group(
+        self,
+        group_id: str,
+        name: str,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
+    ) -> PlatformGroup:
+        group = self._repo.get_by_id(group_id)
+        if not group:
+            raise ValueError("Group not found")
+        if name != group.name:
+            existing = self._repo.get_by_name(name, group.tenant_id)
+            if existing:
+                raise ValueError("Group name already in use")
+        group.name = name
+        group.platform_endpoint_permissions = platform_endpoint_permissions or self._default_platform_permissions()
+        return self._repo.update(group)
+
+    def delete_group(self, group_id: str) -> None:
+        group = self._repo.get_by_id(group_id)
+        if not group:
+            raise ValueError("Group not found")
+        self._repo.delete(group_id)
+
+
+class TenantUseCases(BaseUseCase):
+    def __init__(self, repo: TenantRepository, group_repo: GroupRepository, user_repo: UserRepository) -> None:
+        self._repo = repo
+        self._group_repo = group_repo
+        self._user_repo = user_repo
+
+    def list_tenants(self) -> List[PlatformTenant]:
+        return self._repo.list()
+
+    def get_tenant(self, tenant_id: str) -> Optional[PlatformTenant]:
+        return self._repo.get_by_id(tenant_id)
+
+    def create_tenant(self, name: str, creator_user_id: str | None = None) -> PlatformTenant:
+        existing = self._repo.get_by_name(name)
+        if existing:
+            raise ValueError("Tenant name already registered")
+        tenant = PlatformTenant(id=str(ulid.new()), name=name, owner_id=creator_user_id)
+        created_tenant = self._repo.create(tenant)
+
+        admins_group = PlatformGroup(
+            id=str(ulid.new()),
+            name="Tenant Admins",
+            tenant_id=created_tenant.id,
+            owner_id=creator_user_id,
+        )
+        self._group_repo.create(admins_group)
+
+        users_group = PlatformGroup(
+            id=str(ulid.new()),
+            name="Tenant Users",
+            tenant_id=created_tenant.id,
+            owner_id=creator_user_id,
+        )
+        created_users_group = self._group_repo.create(users_group)
+
+        if creator_user_id:
+            creator = self._user_repo.get_by_id(creator_user_id)
+            if creator:
+                creator.group_id = created_users_group.id
+                self._user_repo.update(creator)
+
+        return created_tenant
+
+    def update_tenant(self, tenant_id: str, name: Optional[str] = None) -> PlatformTenant:
+        tenant = self._repo.get_by_id(tenant_id)
+        if not tenant:
+            raise ValueError("Tenant not found")
+        if name is not None and name != tenant.name:
+            existing = self._repo.get_by_name(name)
+            if existing:
+                raise ValueError("Tenant name already in use")
+            tenant.name = name
+        return self._repo.update(tenant)
+
+    def replace_tenant(self, tenant_id: str, name: str) -> PlatformTenant:
+        tenant = self._repo.get_by_id(tenant_id)
+        if not tenant:
+            raise ValueError("Tenant not found")
+        if name != tenant.name:
+            existing = self._repo.get_by_name(name)
+            if existing:
+                raise ValueError("Tenant name already in use")
+        tenant.name = name
+        return self._repo.update(tenant)
+
+    def delete_tenant(self, tenant_id: str) -> None:
+        tenant = self._repo.get_by_id(tenant_id)
+        if not tenant:
+            raise ValueError("Tenant not found")
+        self._repo.delete(tenant_id)
 
 
 class UserUseCases(BaseUseCase):
@@ -76,11 +220,11 @@ class UserUseCases(BaseUseCase):
         if existing_tenant:
             raise ValueError("Tenant name already registered")
 
-        tenant = PlatformTenant(id=generate_ulid(), name=tenant_name, owner_id=user.id)
+        tenant = PlatformTenant(id=str(ulid.new()), name=tenant_name, owner_id=user.id)
         created_tenant = self._tenant_repo.create(tenant)
 
         admins_group = PlatformGroup(
-            id=generate_ulid(),
+            id=str(ulid.new()),
             name="Tenant Admins",
             tenant_id=created_tenant.id,
             owner_id=user.id,
@@ -88,7 +232,7 @@ class UserUseCases(BaseUseCase):
         self._group_repo.create(admins_group)
 
         users_group = PlatformGroup(
-            id=generate_ulid(),
+            id=str(ulid.new()),
             name="Tenant Users",
             tenant_id=created_tenant.id,
             owner_id=user.id,
@@ -122,7 +266,7 @@ class UserUseCases(BaseUseCase):
         if existing_by_email:
             raise ValueError("Email already registered")
         user = PlatformUser(
-            id=generate_ulid(),
+            id=str(ulid.new()),
             name=username,
             username=username,
             email=email,
@@ -171,7 +315,7 @@ class UserUseCases(BaseUseCase):
         if existing_by_email:
             raise ValueError("Email already registered")
         user = PlatformUser(
-            id=generate_ulid(),
+            id=str(ulid.new()),
             name=username,
             username=username,
             email=email,
@@ -244,3 +388,14 @@ class UserUseCases(BaseUseCase):
         if not user:
             raise ValueError("User not found")
         self._repo.delete(user_id)
+
+
+__all__ = [
+    "GroupUseCases",
+    "TenantUseCases",
+    "UserUseCases",
+    "hash_password",
+    "verify_password",
+    "create_access_token",
+    "decode_access_token",
+]
