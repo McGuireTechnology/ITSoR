@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from itsor.domain.models import CustomEntityType
-from itsor.domain.ports.entity_type_repository import EntityTypeRepository
+from itsor.domain.ports.custom_ports import EntityTypeRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.models.sqlalchemy_entity_type_model import EntityTypeModel
 

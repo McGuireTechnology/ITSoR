@@ -10,7 +10,7 @@ from itsor.api.schemas.namespace_schamas import (
     NamespaceUpdate,
 )
 from itsor.domain.models import PlatformUser
-from itsor.domain.use_cases.namespace_use_cases import NamespaceUseCases
+from itsor.domain.use_cases.custom_use_cases import NamespaceUseCases
 
 router = APIRouter(prefix="/namespaces", tags=["namespaces"])
 

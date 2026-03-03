@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 
 from itsor.api.deps import get_current_user
 from itsor.api.schemas.idm_groups_schemas import IdmGroupCreate, IdmGroupResponse, IdmGroupUpdate
-from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_group_model import IdmGroupModel
@@ -20,7 +19,6 @@ def list_idm_groups(db: Session = Depends(get_db), _: PlatformUser = Depends(get
 @router.post("", response_model=IdmGroupResponse, status_code=status.HTTP_201_CREATED)
 def create_idm_group(body: IdmGroupCreate, db: Session = Depends(get_db), _: PlatformUser = Depends(get_current_user)):
     group = IdmGroupModel(
-        id=generate_ulid(),
         name=body.name,
         description=body.description,
     )

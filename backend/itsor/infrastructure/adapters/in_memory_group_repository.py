@@ -1,5 +1,5 @@
 from itsor.domain.models import PlatformGroup
-from itsor.domain.ports.group_repository import GroupRepository
+from itsor.domain.ports.platform_ports import GroupRepository
 from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 

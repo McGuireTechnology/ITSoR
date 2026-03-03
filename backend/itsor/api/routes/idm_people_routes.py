@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 
 from itsor.api.deps import get_current_user
 from itsor.api.schemas.idm_people_schemas import IdmPersonCreate, IdmPersonResponse, IdmPersonUpdate
-from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_identity_model import IdmIdentityModel
@@ -26,7 +25,6 @@ def create_person(body: IdmPersonCreate, db: Session = Depends(get_db), _: Platf
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Current identity not found")
 
     person = IdmPersonModel(
-        id=generate_ulid(),
         display_name=body.display_name,
         current_identity_id=body.current_identity_id,
     )

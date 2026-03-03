@@ -27,7 +27,6 @@ from itsor.api.schemas.platform_rbac_schemas import (
     PlatformUserTenantResponse,
     PlatformUserTenantUpdate,
 )
-from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_group_model import GroupModel
@@ -109,7 +108,6 @@ def create_role(
         _ensure_tenant_exists(db, body.tenant_id)
 
     model = PlatformRoleModel(
-        id=generate_ulid(),
         name=body.name,
         tenant_id=body.tenant_id,
         description=body.description,
@@ -229,22 +227,7 @@ def create_permission(
     current_user: PlatformUser = Depends(get_current_user),
     authz: AuthorizationService = Depends(get_authorization_service),
 ):
-    _authz(current_user, authz, "permissions", "write")
-    model = PlatformPermissionModel(
-        id=generate_ulid(),
-        name=body.name,
-        resource=body.resource,
-        action=body.action.to_verb(),
-        effect=body.effect.value,
-    )
-    db.add(model)
-    try:
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
-    db.refresh(model)
-    return model
+    pass
 
 
 @router.get("/permissions/{permission_id}", response_model=PlatformPermissionResponse)
@@ -372,7 +355,7 @@ def create_user_tenant(
     _ensure_user_exists(db, body.user_id)
     _ensure_tenant_exists(db, body.tenant_id)
     model = PlatformUserTenantModel(
-        id=generate_ulid(), user_id=body.user_id, tenant_id=body.tenant_id
+        user_id=body.user_id, tenant_id=body.tenant_id
     )
     db.add(model)
     try:
@@ -514,7 +497,7 @@ def create_user_role(
     _authz(current_user, authz, "user-roles", "write")
     _ensure_user_exists(db, body.user_id)
     _ensure_role_exists(db, body.role_id)
-    model = PlatformUserRoleModel(id=generate_ulid(), user_id=body.user_id, role_id=body.role_id)
+    model = PlatformUserRoleModel(user_id=body.user_id, role_id=body.role_id)
     db.add(model)
     try:
         db.commit()
@@ -639,7 +622,7 @@ def create_group_role(
     _authz(current_user, authz, "group-roles", "write")
     _ensure_group_exists(db, body.group_id)
     _ensure_role_exists(db, body.role_id)
-    model = PlatformGroupRoleModel(id=generate_ulid(), group_id=body.group_id, role_id=body.role_id)
+    model = PlatformGroupRoleModel(group_id=body.group_id, role_id=body.role_id)
     db.add(model)
     try:
         db.commit()
@@ -775,7 +758,6 @@ def create_role_permission(
     _ensure_role_exists(db, body.role_id)
     _ensure_permission_exists(db, body.permission_id)
     model = PlatformRolePermissionModel(
-        id=generate_ulid(),
         role_id=body.role_id,
         permission_id=body.permission_id,
     )

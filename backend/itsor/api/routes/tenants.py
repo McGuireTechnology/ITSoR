@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_tenant_use_cases
 from itsor.api.schemas.tenant_schamas import TenantCreate, TenantUpdate, TenantReplace, TenantResponse
 from itsor.domain.models import PlatformUser
-from itsor.domain.use_cases.tenant_use_cases import TenantUseCases
+from itsor.domain.use_cases.platform_use_cases import TenantUseCases
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
 

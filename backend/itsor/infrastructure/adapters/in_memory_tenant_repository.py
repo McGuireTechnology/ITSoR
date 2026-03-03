@@ -1,5 +1,5 @@
 from itsor.domain.models import PlatformTenant
-from itsor.domain.ports.tenant_repository import TenantRepository
+from itsor.domain.ports.platform_ports import TenantRepository
 from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 

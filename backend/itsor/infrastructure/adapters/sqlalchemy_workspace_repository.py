@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from itsor.domain.models import CustomWorkspace
-from itsor.domain.ports.workspace_repository import WorkspaceRepository
+from itsor.domain.ports.custom_ports import WorkspaceRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.models.sqlalchemy_workspace_model import WorkspaceModel
 

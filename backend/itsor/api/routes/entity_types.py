@@ -10,7 +10,7 @@ from itsor.api.schemas.entity_type_schamas import (
     EntityTypeUpdate,
 )
 from itsor.domain.models import PlatformUser
-from itsor.domain.use_cases.entity_type_use_cases import EntityTypeUseCases
+from itsor.domain.use_cases.custom_use_cases import EntityTypeUseCases
 
 router = APIRouter(prefix="/entity-types", tags=["entity-types"])
 

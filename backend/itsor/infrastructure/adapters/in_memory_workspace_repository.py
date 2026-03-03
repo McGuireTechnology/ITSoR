@@ -1,5 +1,5 @@
 from itsor.domain.models import CustomWorkspace
-from itsor.domain.ports.workspace_repository import WorkspaceRepository
+from itsor.domain.ports.custom_ports import WorkspaceRepository
 from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 

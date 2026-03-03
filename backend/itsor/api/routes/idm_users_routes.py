@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from itsor.api.deps import get_current_user
 from itsor.api.schemas.idm_users_schemas import IdmUserCreate, IdmUserResponse, IdmUserUpdate
-from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_person_model import IdmPersonModel
@@ -24,7 +23,6 @@ def create_idm_user(body: IdmUserCreate, db: Session = Depends(get_db), _: Platf
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Person not found")
 
     user = IdmUserModel(
-        id=generate_ulid(),
         person_id=body.person_id,
         username=body.username,
         account_status=body.account_status,

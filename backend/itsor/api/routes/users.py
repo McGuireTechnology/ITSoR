@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_user_use_cases
 from itsor.api.schemas.user_schamas import UserCreate, UserUpdate, UserReplace, UserResponse
 from itsor.domain.models import PlatformUser
-from itsor.domain.use_cases.user_use_cases import UserUseCases
+from itsor.domain.use_cases.platform_use_cases import UserUseCases
 
 router = APIRouter(prefix="/users", tags=["users"])
 

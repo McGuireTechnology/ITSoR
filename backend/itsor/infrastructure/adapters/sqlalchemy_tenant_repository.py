@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from itsor.domain.models import PlatformTenant
-from itsor.domain.ports.tenant_repository import TenantRepository
+from itsor.domain.ports.platform_ports import TenantRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.models.sqlalchemy_tenant_model import TenantModel
 

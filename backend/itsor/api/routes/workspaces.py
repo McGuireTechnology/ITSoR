@@ -10,7 +10,7 @@ from itsor.api.schemas.workspace_schamas import (
     WorkspaceUpdate,
 )
 from itsor.domain.models import PlatformUser
-from itsor.domain.use_cases.workspace_use_cases import WorkspaceUseCases
+from itsor.domain.use_cases.custom_use_cases import WorkspaceUseCases
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 

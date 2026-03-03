@@ -1,5 +1,5 @@
 from itsor.domain.models import PlatformUser
-from itsor.domain.ports.user_repository import UserRepository
+from itsor.domain.ports.platform_ports import UserRepository
 from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 

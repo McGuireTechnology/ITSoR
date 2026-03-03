@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from itsor.api.deps import get_current_user, get_user_use_cases
 from itsor.api.schemas.auth_schamas import LoginRequest, SignupRequest, TokenResponse
 from itsor.domain.models import PlatformUser
-from itsor.domain.use_cases.user_use_cases import UserUseCases
+from itsor.domain.use_cases.platform_use_cases import UserUseCases
 
 router = APIRouter(tags=["auth"])
 

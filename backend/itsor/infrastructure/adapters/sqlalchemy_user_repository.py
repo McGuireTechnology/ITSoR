@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from itsor.domain.models import PlatformUser
-from itsor.domain.ports.user_repository import UserRepository
+from itsor.domain.ports.platform_ports import UserRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.adapters.platform_endpoint_permissions import (
     fetch_platform_endpoint_permissions,

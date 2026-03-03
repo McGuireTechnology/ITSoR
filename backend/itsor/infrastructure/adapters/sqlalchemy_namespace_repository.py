@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from itsor.domain.models import CustomNamespace
-from itsor.domain.ports.namespace_repository import NamespaceRepository
+from itsor.domain.ports.custom_ports import NamespaceRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.models.sqlalchemy_namespace_model import NamespaceModel
 

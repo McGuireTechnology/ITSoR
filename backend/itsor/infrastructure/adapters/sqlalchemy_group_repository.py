@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from itsor.domain.models import PlatformGroup
-from itsor.domain.ports.group_repository import GroupRepository
+from itsor.domain.ports.platform_ports import GroupRepository
 from itsor.infrastructure.adapters.platform_endpoint_permissions import (
     fetch_platform_endpoint_permissions,
     replace_platform_endpoint_permissions,

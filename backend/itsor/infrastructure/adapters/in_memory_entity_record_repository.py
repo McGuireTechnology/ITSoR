@@ -1,5 +1,5 @@
 from itsor.domain.models import CustomEntityRecord
-from itsor.domain.ports.entity_record_repository import EntityRecordRepository
+from itsor.domain.ports.custom_ports import EntityRecordRepository
 from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 

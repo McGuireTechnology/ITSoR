@@ -6,20 +6,10 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
 from itsor.domain.models import BaseModel, PermissionLevel, PlatformResourceAction, PlatformTenant, PlatformUser
-from itsor.domain.use_cases.entity_record_use_cases import EntityRecordUseCases
-from itsor.domain.use_cases.entity_type_use_cases import EntityTypeUseCases
-from itsor.domain.use_cases.group_use_cases import GroupUseCases
-from itsor.domain.use_cases.namespace_use_cases import NamespaceUseCases
-from itsor.domain.use_cases.tenant_use_cases import TenantUseCases
-from itsor.domain.use_cases.user_use_cases import UserUseCases
-from itsor.domain.use_cases.workspace_use_cases import WorkspaceUseCases
-from itsor.domain.ports.entity_record_repository import EntityRecordRepository
-from itsor.domain.ports.entity_type_repository import EntityTypeRepository
-from itsor.domain.ports.group_repository import GroupRepository
-from itsor.domain.ports.namespace_repository import NamespaceRepository
-from itsor.domain.ports.tenant_repository import TenantRepository
-from itsor.domain.ports.user_repository import UserRepository
-from itsor.domain.ports.workspace_repository import WorkspaceRepository
+from itsor.domain.use_cases.custom_use_cases import EntityRecordUseCases, EntityTypeUseCases, NamespaceUseCases, WorkspaceUseCases
+from itsor.domain.use_cases.platform_use_cases import GroupUseCases, TenantUseCases, UserUseCases
+from itsor.domain.ports.custom_ports import EntityRecordRepository, EntityTypeRepository, NamespaceRepository, WorkspaceRepository
+from itsor.domain.ports.platform_ports import GroupRepository, TenantRepository, UserRepository
 from itsor.infrastructure.container.repositories import (
     get_entity_record_repository,
     get_entity_type_repository,

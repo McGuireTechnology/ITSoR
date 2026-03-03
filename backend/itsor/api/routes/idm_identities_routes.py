@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from itsor.api.deps import get_current_user
 from itsor.api.schemas.idm_identities_schemas import IdmIdentityCreate, IdmIdentityResponse, IdmIdentityUpdate
-from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_identity_model import IdmIdentityModel
@@ -50,7 +49,6 @@ def create_identity(body: IdmIdentityCreate, db: Session = Depends(get_db), _: P
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Person not found")
 
     identity = IdmIdentityModel(
-        id=generate_ulid(),
         person_id=body.person_id,
         source_system=body.source_system,
         source_record_id=body.source_record_id,

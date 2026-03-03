@@ -10,7 +10,7 @@ from itsor.api.schemas.entity_record_schamas import (
     EntityRecordUpdate,
 )
 from itsor.domain.models import PlatformUser
-from itsor.domain.use_cases.entity_record_use_cases import EntityRecordUseCases
+from itsor.domain.use_cases.custom_use_cases import EntityRecordUseCases
 
 router = APIRouter(prefix="/entity-records", tags=["entity-records"])
 

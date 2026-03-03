@@ -7,7 +7,6 @@ from itsor.api.schemas.platform_group_memberships_schemas import (
     PlatformGroupMembershipResponse,
     PlatformGroupMembershipUpdate,
 )
-from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_group_model import GroupModel
@@ -57,7 +56,6 @@ def create_group_membership(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group cannot directly contain itself")
 
     membership = PlatformGroupMembershipModel(
-        id=generate_ulid(),
         group_id=body.group_id,
         member_type=body.member_type,
         member_user_id=body.member_user_id,

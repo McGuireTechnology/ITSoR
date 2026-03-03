@@ -7,7 +7,6 @@ from itsor.api.schemas.idm_group_memberships_schemas import (
     IdmGroupMembershipResponse,
     IdmGroupMembershipUpdate,
 )
-from itsor.domain.ids import generate_ulid
 from itsor.domain.models import PlatformUser
 from itsor.infrastructure.container.database import get_db
 from itsor.infrastructure.models.sqlalchemy_idm_group_membership_model import IdmGroupMembershipModel
@@ -53,7 +52,6 @@ def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depend
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group cannot directly contain itself")
 
     membership = IdmGroupMembershipModel(
-        id=generate_ulid(),
         group_id=body.group_id,
         member_type=body.member_type,
         member_user_id=body.member_user_id,

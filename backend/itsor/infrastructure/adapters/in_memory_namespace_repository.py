@@ -1,5 +1,5 @@
 from itsor.domain.models import CustomNamespace
-from itsor.domain.ports.namespace_repository import NamespaceRepository
+from itsor.domain.ports.custom_ports import NamespaceRepository
 from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 
