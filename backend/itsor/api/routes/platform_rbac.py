@@ -268,7 +268,6 @@ def put_permission(
     row.name = body.name
     row.resource = body.resource
     row.action = body.action.to_verb()
-    row.effect = body.effect.value
     try:
         db.commit()
     except Exception as exc:
@@ -301,8 +300,6 @@ def patch_permission(
         row.resource = body.resource
     if body.action is not None:
         row.action = body.action.to_verb()
-    if body.effect is not None:
-        row.effect = body.effect.value
 
     try:
         db.commit()
