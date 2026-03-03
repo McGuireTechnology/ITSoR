@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Callable, NewType, TypeVar
+from typing import NewType
 
 import ulid
 
@@ -18,14 +17,6 @@ from itsor.domain.authorization.resources import (
     ResourceProvider,
     merge_resource_catalogs,
 )
-
-
-
-TId = TypeVar("TId")
-
-
-def _new_id(caster: Callable[[str], TId]) -> TId:
-    return caster(str(ulid.new()))
 
 
 def build_resource_catalog(
@@ -59,74 +50,79 @@ RolePermissionId = NewType("RolePermissionId", str)
 
 @dataclass
 class PlatformUser:
-    id: UserId = field(default_factory=lambda: _new_id(UserId))
-    name: str = ""
-    username: str = ""
-    email: str = ""
-    password_hash: str = ""
+    id: UserId = field(default_factory=lambda: UserId(str(ulid.new())), init=False)
+    name: str
+    username: str
+    email: str
+    password_hash: str
 
 
 @dataclass
 class PlatformTenant:
-    id: TenantId = field(default_factory=lambda: _new_id(TenantId))
-    name: str = ""
+    id: TenantId = field(default_factory=lambda: TenantId(str(ulid.new())), init=False)
+    name: str
 
 
 @dataclass
 class PlatformGroup:
-    id: GroupId = field(default_factory=lambda: _new_id(GroupId))
-    tenant_id: TenantId | None = None
-    name: str = ""
+    id: GroupId = field(default_factory=lambda: GroupId(str(ulid.new())), init=False)
+    tenant_id: TenantId
+    name: str
 
 
 @dataclass
 class PlatformRole:
-    id: RoleId = field(default_factory=lambda: _new_id(RoleId))
-    name: str = ""
-    tenant_id: TenantId | None = None
-    description: str = ""
+    id: RoleId = field(default_factory=lambda: RoleId(str(ulid.new())), init=False)
+    name: str
+    tenant_id: TenantId
+    description: str
 
 
 @dataclass
 class PlatformPermission:
-    id: PermissionId = field(default_factory=lambda: _new_id(PermissionId))
-    name: str = ""
-    resource: str = PlatformResource.USER.value
-    action: PlatformResourceAction = PlatformResourceAction.READ
+    id: PermissionId = field(default_factory=lambda: PermissionId(str(ulid.new())), init=False)
+    name: str
+    resource: PlatformResource
+    action: PlatformResourceAction
 
 
 @dataclass
 class PlatformUserTenant:
-    id: UserTenantId = field(default_factory=lambda: _new_id(UserTenantId))
-    user_id: UserId = UserId("")
-    tenant_id: TenantId = TenantId("")
+    id: UserTenantId = field(default_factory=lambda: UserTenantId(str(ulid.new())), init=False)
+    user_id: UserId
+    tenant_id: TenantId
 
 
 @dataclass
-class PlatformGroupMembership:
-    id: GroupMembershipId = field(default_factory=lambda: _new_id(GroupMembershipId))
-    group_id: GroupId = GroupId("")
-    member_type: str = "user"
-    member_user_id: UserId | None = None
-    member_group_id: GroupId | None = None
+class GroupMemberUser:
+    id: GroupMembershipId = field(default_factory=lambda: GroupMembershipId(str(ulid.new())), init=False)
+    group_id: GroupId
+    member_user_id: UserId
+
+@dataclass
+class GroupMembershipGroup:
+    id: GroupMembershipId = field(default_factory=lambda: GroupMembershipId(str(ulid.new())), init=False)
+    group_id: GroupId
+    member_group_id: GroupId
+
 
 
 @dataclass
 class PlatformUserRole:
-    id: UserRoleId = field(default_factory=lambda: _new_id(UserRoleId))
-    user_id: UserId = UserId("")
-    role_id: RoleId = RoleId("")
+    id: UserRoleId = field(default_factory=lambda: UserRoleId(str(ulid.new())), init=False)
+    user_id: UserId
+    role_id: RoleId
 
 
 @dataclass
 class PlatformGroupRole:
-    id: GroupRoleId = field(default_factory=lambda: _new_id(GroupRoleId))
-    group_id: GroupId = GroupId("")
-    role_id: RoleId = RoleId("")
+    id: GroupRoleId = field(default_factory=lambda: GroupRoleId(str(ulid.new())), init=False)
+    group_id: GroupId
+    role_id: RoleId
 
 
 @dataclass
 class PlatformRolePermission:
-    id: RolePermissionId = field(default_factory=lambda: _new_id(RolePermissionId))
-    role_id: RoleId = RoleId("")
-    permission_id: PermissionId = PermissionId("")
+    id: RolePermissionId = field(default_factory=lambda: RolePermissionId(str(ulid.new())), init=False)
+    role_id: RoleId
+    permission_id: PermissionId
