@@ -24,13 +24,13 @@ class EntityRecordUseCases(BaseUseCase):
         field: str,
         value: str,
         operator: str = "eq",
-    ) -> List[EntityRecord]:
+    ) -> List[CustomEntityRecord]:
         items = self.list_entity_records(entity_type_id)
         normalized_operator = operator.lower().strip()
         if normalized_operator not in {"eq", "neq", "contains"}:
             raise ValueError("Unsupported operator")
 
-        matched: List[EntityRecord] = []
+        matched: List[CustomEntityRecord] = []
         for item in items:
             field_value = item.values_json.get(field)
             field_value_text = "" if field_value is None else str(field_value)

@@ -1,6 +1,22 @@
 from sqlalchemy.orm import Session
 
+from itsor.domain.models import PlatformResourceAction
 from itsor.infrastructure.models.sqlalchemy_platform_endpoint_permission_model import PlatformEndpointPermissionModel
+
+
+def _normalize_action(value: str | PlatformResourceAction) -> str:
+    if isinstance(value, PlatformResourceAction):
+        return value.value
+    candidate = str(value).strip().lower()
+    return candidate
+
+
+def _to_action(value: str) -> PlatformResourceAction | str:
+    candidate = str(value).strip().lower()
+    try:
+        return PlatformResourceAction(candidate)
+    except ValueError:
+        return candidate
 
 
 def fetch_platform_endpoint_permissions(
@@ -8,7 +24,7 @@ def fetch_platform_endpoint_permissions(
     *,
     principal_type: str,
     principal_id: str | None,
-) -> dict[str, list[str]]:
+) -> dict[str, list[PlatformResourceAction | str]]:
     if not principal_id:
         return {}
 
@@ -21,10 +37,10 @@ def fetch_platform_endpoint_permissions(
         .all()
     )
 
-    mapped: dict[str, list[str]] = {}
+    mapped: dict[str, list[PlatformResourceAction | str]] = {}
     for row in rows:
         endpoint = str(row.endpoint_name)
-        action = str(row.action)
+        action = _to_action(str(row.action))
         actions = mapped.setdefault(endpoint, [])
         if action not in actions:
             actions.append(action)
@@ -36,7 +52,7 @@ def replace_platform_endpoint_permissions(
     *,
     principal_type: str,
     principal_id: str | None,
-    permissions: dict[str, list[str]] | None,
+    permissions: dict[str, list[PlatformResourceAction | str]] | None,
 ) -> None:
     if not principal_id:
         return
@@ -60,7 +76,7 @@ def replace_platform_endpoint_permissions(
                     principal_type=principal_type,
                     principal_id=principal_id,
                     endpoint_name=str(endpoint_name),
-                    action=str(action),
+                    action=_normalize_action(action),
                 )
             )
 

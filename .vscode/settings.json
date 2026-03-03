@@ -35,5 +35,8 @@
   "git.blame.editorDecoration.enabled": true,
   "files.exclude": {
   "**/.git": false
-}
+},
+"cSpell.words": [
+  "itsor"
+]
 }

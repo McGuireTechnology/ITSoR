@@ -1,12 +1,16 @@
 from typing import List, Optional
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import PlatformGroup
+from itsor.domain.models import PlatformGroup, PlatformResourceAction
 from itsor.domain.ports.group_repository import GroupRepository
 from itsor.domain.use_cases.base_use_case import BaseUseCase
 
 
 class GroupUseCases(BaseUseCase):
+    @staticmethod
+    def _default_platform_permissions() -> dict[str, list[PlatformResourceAction | str]]:
+        return {"*": [PlatformResourceAction.READ, "write"]}
+
     def __init__(self, repo: GroupRepository) -> None:
         self._repo = repo
 
@@ -21,7 +25,7 @@ class GroupUseCases(BaseUseCase):
         name: str,
         tenant_id: str | None = None,
         creator_user_id: str | None = None,
-        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
     ) -> PlatformGroup:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
@@ -31,7 +35,7 @@ class GroupUseCases(BaseUseCase):
             name=name,
             tenant_id=tenant_id,
             owner_id=creator_user_id,
-            platform_endpoint_permissions=platform_endpoint_permissions or {"*": ["read", "write"]},
+            platform_endpoint_permissions=platform_endpoint_permissions or self._default_platform_permissions(),
         )
         return self._repo.create(group)
 
@@ -39,7 +43,7 @@ class GroupUseCases(BaseUseCase):
         self,
         group_id: str,
         name: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
     ) -> PlatformGroup:
         group = self._repo.get_by_id(group_id)
         if not group:
@@ -57,7 +61,7 @@ class GroupUseCases(BaseUseCase):
         self,
         group_id: str,
         name: str,
-        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
     ) -> PlatformGroup:
         group = self._repo.get_by_id(group_id)
         if not group:
@@ -67,7 +71,7 @@ class GroupUseCases(BaseUseCase):
             if existing:
                 raise ValueError("Group name already in use")
         group.name = name
-        group.platform_endpoint_permissions = platform_endpoint_permissions or {"*": ["read", "write"]}
+        group.platform_endpoint_permissions = platform_endpoint_permissions or self._default_platform_permissions()
         return self._repo.update(group)
 
     def delete_group(self, group_id: str) -> None:

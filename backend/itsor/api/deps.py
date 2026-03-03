@@ -5,7 +5,7 @@ from typing import Literal
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
-from itsor.domain.models import BaseModel, PermissionLevel, PlatformTenant, PlatformUser
+from itsor.domain.models import BaseModel, PermissionLevel, PlatformResourceAction, PlatformTenant, PlatformUser
 from itsor.domain.use_cases.entity_record_use_cases import EntityRecordUseCases
 from itsor.domain.use_cases.entity_type_use_cases import EntityTypeUseCases
 from itsor.domain.use_cases.group_use_cases import GroupUseCases
@@ -36,7 +36,7 @@ ROOT_TENANT_NAME = os.getenv("ROOT_TENANT_NAME", "Root").strip().lower()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
 
-Action = Literal["read", "write"]
+Action = PlatformResourceAction | Literal["read", "write"]
 
 
 @dataclass
@@ -203,7 +203,7 @@ class AuthorizationService:
 
     def _endpoint_permission_allows(self, current_user: PlatformUser, endpoint_name: str, action: Action) -> bool:
         endpoint = str(endpoint_name).strip().lower()
-        op = str(action).strip().lower()
+        op = action.value if isinstance(action, PlatformResourceAction) else str(action).strip().lower()
 
         policies: list[dict[str, list[str]]] = []
 
@@ -234,7 +234,10 @@ class AuthorizationService:
             allowed = policy.get(key)
             if not isinstance(allowed, list):
                 continue
-            normalized = {str(item).strip().lower() for item in allowed}
+            normalized = {
+                item.value if isinstance(item, PlatformResourceAction) else str(item).strip().lower()
+                for item in allowed
+            }
             if "*" in normalized or action in normalized:
                 return True
         return False

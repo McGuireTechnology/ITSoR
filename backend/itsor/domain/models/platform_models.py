@@ -1,12 +1,42 @@
 # Platform Domain Models
 
-# Essential objects for platform management
-# Role Based Access Control (RBAC) Support
-
-
 from dataclasses import dataclass, field
+from enum import Enum
+from typing import NewType
+
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models.base_model import BaseModel
+
+UserId = NewType("UserId", str)
+TenantId = NewType("TenantId", str)
+GroupId = NewType("GroupId", str)
+RoleId = NewType("RoleId", str)
+PermissionId = NewType("PermissionId", str)
+
+
+class PlatformResource(str, Enum):
+    USER = "user"
+    TENANT = "tenant"
+    GROUP = "group"
+    ROLE = "role"
+    PERMISSION = "permission"
+    USER_TENANT = "user_tenant"
+    GROUP_MEMBERSHIP = "group_membership"
+    USER_ROLE = "user_role"
+    GROUP_ROLE = "group_role"
+    ROLE_PERMISSION = "role_permission"
+
+
+class PlatformResourceAction(str, Enum):
+    CREATE = "create"
+    READ = "read"
+    UPDATE = "update"
+    DELETE = "delete"
+
+
+class PlatformPermissionEffect(str, Enum):
+    ALLOW = "allow"
+    DENY = "deny"
+
 
 # Core
 
@@ -14,86 +44,74 @@ from itsor.domain.models.base_model import BaseModel
 # User (Global)
 @dataclass
 class PlatformUser:
-    id: str = field(default_factory=generate_ulid)
-    username: str = ""
-    email: str = ""
-    password_hash: str = ""
+    id: UserId = field(default_factory=lambda: UserId(generate_ulid()), init=False)
+    name: str
+    username: str
+    email: str
+    password_hash: str
 
-# Tenant
+
 @dataclass
 class PlatformTenant:
-    id: str = field(default_factory=generate_ulid)
-    name: str = ""
+    id: TenantId = field(default_factory=lambda: TenantId(generate_ulid()), init=False)
+    name: str
 
-# Group (Scoped to Tenant)  
+# Group (Scoped to Tenant)
 @dataclass
 class PlatformGroup:
-    id: str = field(default_factory=generate_ulid)
-    name: str = ""
-    tenant_id: str | None = None
+    id: GroupId = field(default_factory=lambda: GroupId(generate_ulid()), init=False)
+    name: str
+    tenant_id: TenantId
+
 
 # Role (Scoped to Tenant)
 @dataclass
 class PlatformRole:
-    id: str = field(default_factory=generate_ulid)
-    name: str = ""
-    tenant_id: str | None = None
+    id: RoleId = field(default_factory=lambda: RoleId(generate_ulid()), init=False)
+    name: str
+    tenant_id: TenantId
     description: str = ""
 
-# Permission (Global)
+
 @dataclass
 class PlatformPermission:
-    """
-    Invariant:
-        (resource, action, effect) must be unique across all permissions.
-    """
-    id: str = field(default_factory=generate_ulid)
-    name: str = ""
-    resource: str = ""
-    action: str = ""
-    effect: str = "allow"
+    id: PermissionId = field(default_factory=lambda: PermissionId(generate_ulid()), init=False)
+    name: str
+    resource: PlatformResource
+    action: PlatformResourceAction
+    effect: PlatformPermissionEffect
 
 
-# Junctions
-
-# Every junction must enforce uniqueness at the DB layer:
-
-# User-Tenant Junction
 @dataclass
 class PlatformUserTenant:
-    id: str = field(default_factory=generate_ulid)
-    user_id: str = ""
-    tenant_id: str = ""
+    id: str = field(default_factory=generate_ulid, init=False)
+    user_id: UserId
+    tenant_id: TenantId
 
-# Group-User Junction (Tenant Implied by Group)
+
 @dataclass
 class PlatformGroupMembership:
-    id: str = field(default_factory=generate_ulid)
-    group_id: str = ""
-    user_id: str = ""
+    id: str = field(default_factory=generate_ulid, init=False)
+    group_id: GroupId
+    user_id: UserId
 
-# User-Role Junction
+
 @dataclass
 class PlatformUserRole:
-    id: str = field(default_factory=generate_ulid)
-    user_id: str = ""
-    role_id: str = ""
+    id: str = field(default_factory=generate_ulid, init=False)
+    user_id: UserId
+    role_id: RoleId
 
-# Group-Role Junction (Tenant Implied by Group)
+
 @dataclass
 class PlatformGroupRole:
-    id: str = field(default_factory=generate_ulid)
-    group_id: str = ""
-    role_id: str = ""
+    id: str = field(default_factory=generate_ulid, init=False)
+    group_id: GroupId
+    role_id: RoleId
 
-# Role-Permission Junction (Tenant Implied by Role)
+
 @dataclass
 class PlatformRolePermission:
-    id: str = field(default_factory=generate_ulid)
-    role_id: str = ""
-    permission_id: str = ""
-
-
-
-
-
+    id: str = field(default_factory=generate_ulid, init=False)
+    role_id: RoleId
+    permission_id: PermissionId

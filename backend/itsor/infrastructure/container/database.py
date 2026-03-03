@@ -17,6 +17,7 @@ from itsor.infrastructure.models import sqlalchemy_idm_user_model as idm_user_mo
 from itsor.infrastructure.models import sqlalchemy_namespace_model as namespace_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_platform_endpoint_permission_model as platform_endpoint_permission_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_tenant_model as tenant_models  # noqa: F401
+from itsor.infrastructure.models import sqlalchemy_platform_rbac_models as platform_rbac_models  # noqa: F401
 from itsor.infrastructure.models import sqlalchemy_workspace_model as workspace_models  # noqa: F401
 from itsor.infrastructure.models.sqlalchemy_user_model import Base
 

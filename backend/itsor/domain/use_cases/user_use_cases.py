@@ -7,7 +7,7 @@ import bcrypt
 from jose import JWTError, jwt
 
 from itsor.domain.ids import generate_ulid
-from itsor.domain.models import PlatformGroup, PlatformTenant, PlatformUser
+from itsor.domain.models import PlatformGroup, PlatformResourceAction, PlatformTenant, PlatformUser
 from itsor.domain.ports.group_repository import GroupRepository
 from itsor.domain.ports.tenant_repository import TenantRepository
 from itsor.domain.ports.user_repository import UserRepository
@@ -45,6 +45,10 @@ def decode_access_token(token: str) -> Optional[str]:
 
 
 class UserUseCases(BaseUseCase):
+    @staticmethod
+    def _default_platform_permissions() -> dict[str, list[PlatformResourceAction | str]]:
+        return {"*": [PlatformResourceAction.READ, "write"]}
+
     def __init__(self, repo: UserRepository, tenant_repo: TenantRepository, group_repo: GroupRepository) -> None:
         self._repo = repo
         self._tenant_repo = tenant_repo
@@ -123,7 +127,7 @@ class UserUseCases(BaseUseCase):
             username=username,
             email=email,
             password_hash=hash_password(password),
-            platform_endpoint_permissions={"*": ["read", "write"]},
+            platform_endpoint_permissions=self._default_platform_permissions(),
         )
         self._assign_signup_group(user, invite_group_id)
         created = self._repo.create(user)
@@ -158,7 +162,7 @@ class UserUseCases(BaseUseCase):
         password: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
-        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
     ) -> PlatformUser:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
@@ -172,7 +176,7 @@ class UserUseCases(BaseUseCase):
             username=username,
             email=email,
             password_hash=hash_password(password),
-            platform_endpoint_permissions=platform_endpoint_permissions or {"*": ["read", "write"]},
+            platform_endpoint_permissions=platform_endpoint_permissions or self._default_platform_permissions(),
         )
         self._assign_user_group(user, username, invite_group_id, create_tenant_name)
         return self._repo.create(user)
@@ -183,7 +187,7 @@ class UserUseCases(BaseUseCase):
         username: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
     ) -> PlatformUser:
         user = self._repo.get_by_id(user_id)
         if not user:
@@ -213,7 +217,7 @@ class UserUseCases(BaseUseCase):
         username: str,
         email: str,
         password: str,
-        platform_endpoint_permissions: dict[str, list[str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[PlatformResourceAction | str]] | None = None,
     ) -> PlatformUser:
         user = self._repo.get_by_id(user_id)
         if not user:
@@ -232,7 +236,7 @@ class UserUseCases(BaseUseCase):
             user.name = username
         user.email = email
         user.password_hash = hash_password(password)
-        user.platform_endpoint_permissions = platform_endpoint_permissions or {"*": ["read", "write"]}
+        user.platform_endpoint_permissions = platform_endpoint_permissions or self._default_platform_permissions()
         return self._repo.update(user)
 
     def delete_user(self, user_id: str) -> None:
