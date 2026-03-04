@@ -15,9 +15,8 @@ PLATFORM_MODEL_CLASSES = {
     "Role": platform_models.Role,
     "Permission": platform_models.Permission,
     "UserTenant": platform_models.UserTenant,
-    "UserGroupMembership": platform_models.UserGroupMembership,
-    "UserRole": platform_models.UserRole,
-    "GroupRole": platform_models.GroupRole,
+    "GroupMembership": platform_models.GroupMembership,
+    "RoleAssignment": platform_models.RoleAssignment,
     "RolePermission": platform_models.RolePermission,
 }
 
@@ -39,10 +38,15 @@ def list_platform_models() -> list[str]:
 def get_platform_model_details(model_name: str) -> dict[str, Any]:
     model_class = PLATFORM_MODEL_CLASSES.get(model_name)
     if not model_class:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Platform model not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Platform model not found"
+        )
 
     if not is_dataclass(model_class):
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Configured class is not a dataclass")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Configured class is not a dataclass",
+        )
 
     model_fields: list[dict[str, Any]] = []
     for field_info in fields(model_class):
@@ -54,7 +58,9 @@ def get_platform_model_details(model_name: str) -> dict[str, Any]:
             default_value = _render_default(field_info.default)
 
         if field_info.default_factory is not MISSING:
-            factory_name = getattr(field_info.default_factory, "__name__", str(field_info.default_factory))
+            factory_name = getattr(
+                field_info.default_factory, "__name__", str(field_info.default_factory)
+            )
         else:
             factory_name = None
 
@@ -69,7 +75,7 @@ def get_platform_model_details(model_name: str) -> dict[str, Any]:
         )
 
     return {
-        "name": model_class.__name__,
+        "name": getattr(model_class, "__name__", model_name),
         "module": model_class.__module__,
         "fields": model_fields,
     }

@@ -1,25 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Literal
 
 import ulid
 
-
+from itsor.domain.authz.authz import ResourceAction
+from itsor.domain.authz.platform_authz import PlatformResource as Resource
 from itsor.domain.models.ids import (
     GroupId,
     GroupMembershipId,
-    GroupRoleId,
     PermissionId,
+    RoleAssignmentId,
     RoleId,
     RolePermissionId,
     TenantId,
     UserId,
-    UserRoleId,
     UserTenantId,
 )
-
-from itsor.domain.authz.platform_resource_authz import PlatformResource as Resource
-from itsor.domain.authz.resource_authz import ResourceAction
 
 
 @dataclass
@@ -68,42 +66,70 @@ class UserTenant:
 
 
 @dataclass
-class UserGroupMembership:
-    id: GroupMembershipId = field(default_factory=lambda: GroupMembershipId(str(ulid.new())), init=False)
+class GroupMembership:
+    id: GroupMembershipId = field(
+        default_factory=lambda: GroupMembershipId(str(ulid.new())), init=False
+    )
     group_id: GroupId
-    member_user_id: UserId
+    member_type: Literal["user", "group"]
+    member_user_id: UserId | None = None
+    member_group_id: GroupId | None = None
+
+    def __post_init__(self) -> None:
+        if self.member_type == "user":
+            if self.member_user_id is None or self.member_group_id is not None:
+                raise ValueError("user membership requires member_user_id only")
+            return
+
+        if self.member_type == "group":
+            if self.member_group_id is None or self.member_user_id is not None:
+                raise ValueError("group membership requires member_group_id only")
+            return
+
+        raise ValueError("member_type must be 'user' or 'group'")
 
 
 @dataclass
-class GroupGroupMembership:
-    id: GroupMembershipId = field(default_factory=lambda: GroupMembershipId(str(ulid.new())), init=False)
-    group_id: GroupId
-    member_group_id: GroupId
-
-
-
-
-@dataclass
-class UserRole:
-    id: UserRoleId = field(default_factory=lambda: UserRoleId(str(ulid.new())), init=False)
-    user_id: UserId
+class RoleAssignment:
+    id: RoleAssignmentId = field(
+        default_factory=lambda: RoleAssignmentId(str(ulid.new())),
+        init=False,
+    )
     role_id: RoleId
+    assignee_type: Literal["user", "group"] | None = None
+    user_id: UserId | None = None
+    group_id: GroupId | None = None
+
+    def __post_init__(self) -> None:
+        if self.assignee_type is None:
+            if self.user_id is not None and self.group_id is None:
+                self.assignee_type = "user"
+            elif self.group_id is not None and self.user_id is None:
+                self.assignee_type = "group"
+            else:
+                raise ValueError("role assignment requires exactly one assignee identifier")
+
+        if self.assignee_type == "user":
+            if self.user_id is None or self.group_id is not None:
+                raise ValueError("user role assignment requires user_id only")
+            return
+
+        if self.assignee_type == "group":
+            if self.group_id is None or self.user_id is not None:
+                raise ValueError("group role assignment requires group_id only")
+            return
+
+        raise ValueError("assignee_type must be 'user' or 'group'")
 
 
-@dataclass
-class GroupRole:
-    id: GroupRoleId = field(default_factory=lambda: GroupRoleId(str(ulid.new())), init=False)
-    group_id: GroupId
-    role_id: RoleId
+UserRole = RoleAssignment
+GroupRole = RoleAssignment
 
 
 @dataclass
 class RolePermission:
-    id: RolePermissionId = field(default_factory=lambda: RolePermissionId(str(ulid.new())), init=False)
+    id: RolePermissionId = field(
+        default_factory=lambda: RolePermissionId(str(ulid.new())), init=False
+    )
     role_id: RoleId
     permission_id: PermissionId
-
-
-
-
-

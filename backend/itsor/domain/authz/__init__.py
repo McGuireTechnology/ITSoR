@@ -1,9 +1,9 @@
-from itsor.domain.authz.platform_resource_authz import (
+from itsor.domain.authz.platform_authz import (
     PLATFORM_RESOURCE_CATALOG,
     PlatformResource,
     PlatformResourceProvider,
 )
-from itsor.domain.authz.resource_authz import (
+from itsor.domain.authz.authz import (
     MergePolicy,
     ResourceAction,
     ResourceCatalog,

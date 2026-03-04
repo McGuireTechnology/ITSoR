@@ -9,8 +9,9 @@ RoleId = NewType("RoleId", str)
 PermissionId = NewType("PermissionId", str)
 UserTenantId = NewType("UserTenantId", str)
 GroupMembershipId = NewType("GroupMembershipId", str)
-UserRoleId = NewType("UserRoleId", str)
-GroupRoleId = NewType("GroupRoleId", str)
+RoleAssignmentId = NewType("RoleAssignmentId", str)
+UserRoleId = RoleAssignmentId
+GroupRoleId = RoleAssignmentId
 RolePermissionId = NewType("RolePermissionId", str)
 
 
@@ -22,6 +23,7 @@ __all__ = [
     "PermissionId",
     "UserTenantId",
     "GroupMembershipId",
+    "RoleAssignmentId",
     "UserRoleId",
     "GroupRoleId",
     "RolePermissionId",

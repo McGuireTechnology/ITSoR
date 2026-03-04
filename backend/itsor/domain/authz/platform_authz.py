@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 
-from itsor.domain.authz.resource_authz import ResourceAction, ResourceCatalog, ResourceProvider
+from itsor.domain.authz.authz import ResourceAction, ResourceCatalog, ResourceProvider
 
 
 class PlatformResource(str, Enum):

@@ -5,8 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from itsor.api.apps.idm import app as idm_app
-from itsor.api.apps.platform import app as platform_app
+from itsor.api.apps.idm_app import app as idm_app
+from itsor.api.apps.platform_app import app as platform_app
 from itsor.api.routes.auth import router as auth_router
 from itsor.api.routes.entity_records import router as entity_records_router
 from itsor.api.routes.entity_types import router as entity_types_router

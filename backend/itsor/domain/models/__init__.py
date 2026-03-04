@@ -26,21 +26,21 @@ from itsor.domain.models.idm_models import (
 from itsor.domain.models.ids import GroupId, PermissionId, RoleId, TenantId, UserId
 from itsor.domain.models.platform_models import (
     Group,
-    GroupGroupMembership,
-    GroupRole,
+    GroupMembership,
     Permission,
     Resource,
     ResourceAction,
     Role,
+    RoleAssignment,
     RolePermission,
     Tenant,
     User,
-    UserGroupMembership,
-    UserRole,
     UserTenant,
 )
 
-GroupMember = UserGroupMembership
+GroupMember = GroupMembership
+UserRole = RoleAssignment
+GroupRole = RoleAssignment
 Namespace = CustomNamespace
 EntityType = CustomEntityType
 EntityRecord = CustomEntityRecord
@@ -56,8 +56,7 @@ __all__ = [
     "DEFAULT_CONTROL_FLAGS",
     "DEFAULT_PERMISSIONS",
     "Group",
-    "UserGroupMembership",
-    "GroupGroupMembership",
+    "GroupMembership",
     "GroupMember",
     "UserId",
     "TenantId",
@@ -68,6 +67,7 @@ __all__ = [
     "Resource",
     "ResourceAction",
     "Role",
+    "RoleAssignment",
     "RolePermission",
     "UserTenant",
     "UserRole",
