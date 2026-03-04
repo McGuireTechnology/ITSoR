@@ -1,0 +1,28 @@
+{
+    "recommendations": [
+        "mermaidchart.vscode-mermaid-chart",
+        "fastapilabs.fastapi-vscode",
+        "vue.volar",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-playwright.playwright",
+        "github.vscode-pull-request-github",
+        "pkief.material-icon-theme",
+        "batyan-soft.fast-tasks",
+        "github.copilot-chat",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.vscode-python-envs",
+        "qwtel.sqlite-viewer",
+        "swiftlang.swift-vscode",
+        "usernamehw.errorlens",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers",
+        "bradlc.vscode-tailwindcss",
+        "aaron-bond.better-comments",
+        "gruntfuggly.todo-tree",
+        "mhutchie.git-graph",
+        "yzhang.markdown-all-in-one"
+    ]
+}

@@ -24,6 +24,8 @@
 - [ ] [P1][Owner: Frontend] Add generated frontend API client and replace manual API wiring incrementally.
 - [ ] [P1][Owner: Security] Add secret scanning and dependency review checks to pull request workflows.
 - [ ] [P1][Owner: Backend] Move route-level ORM logic in auth handlers to application-layer use cases.
+- [ ] [P1][Owner: Backend] Move authorization policy/service logic from API dependencies into application use cases with transport-only HTTP error mapping.
+- [ ] [P1][Owner: Backend] Remove direct domain model typing/imports from API routes and use API-level principal protocol/DTOs.
 - [ ] [P1][Owner: Backend] Enforce non-default `JWT_SECRET` outside local development and fail startup on insecure defaults.
 - [ ] [P1][Owner: Backend] Replace runtime `ensure_user_role_column()` patch with Alembic-managed migrations.
 - [ ] [P1][Owner: Frontend] Extract auth API/session logic from `App.vue` into dedicated module/store.
@@ -46,6 +48,7 @@
 - [ ] [P2][Owner: Docs] Document posture scoring formula and data dependencies.
 - [ ] [P2][Owner: DevOps] Add backend coverage reporting in CI and enforce minimum threshold.
 - [ ] [P2][Owner: DevOps] Add integration smoke test validating signup -> login -> `/auth/me` against running stack.
+- [ ] [P2][Owner: DevOps] Add architecture boundary checks to block disallowed layer imports (`api -> domain/infrastructure`, `domain -> api/infrastructure`).
 - [ ] [P2][Owner: Frontend] Expand frontend stack to TypeScript-based modules and typed contracts.
 - [ ] [P2][Owner: Frontend] Add authenticated route guard pattern for dashboard views.
 - [ ] [P2][Owner: Frontend] Add global sign-out on 401 responses from protected API calls.
