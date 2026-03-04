@@ -1,31 +1,23 @@
 from sqlalchemy.orm import Session
+from typing import Any
 
-from itsor.domain.models import CustomEntityType
-from itsor.domain.ports.custom_ports import EntityTypeRepository
+from itsor.application.ports.custom_ports import EntityTypeRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
-from itsor.infrastructure.models.sqlalchemy_entity_type_model import EntityTypeModel
+from itsor.infrastructure.persistence_models.sqlalchemy_entity_type_model import EntityTypeModel
 
 
 class SQLAlchemyEntityTypeRepository(
-    SQLAlchemyBaseRepository[CustomEntityType, EntityTypeModel], EntityTypeRepository
+    SQLAlchemyBaseRepository[Any, EntityTypeModel], EntityTypeRepository
 ):
     model_class = EntityTypeModel
 
     def __init__(self, db: Session) -> None:
         super().__init__(db, "EntityType")
 
-    def _to_domain(self, record: EntityTypeModel) -> CustomEntityType:
-        return CustomEntityType(
-            id=record.id,
-            namespace_id=record.namespace_id,
-            name=record.name,
-            attributes_json=record.attributes_json,
-            owner_id=record.owner_id,
-            group_id=record.group_id,
-            permissions=record.permissions,
-        )
+    def _to_domain(self, record: EntityTypeModel) -> Any:
+        return record
 
-    def _to_model(self, entity_type: CustomEntityType) -> EntityTypeModel:
+    def _to_model(self, entity_type: Any) -> EntityTypeModel:
         return EntityTypeModel(
             id=entity_type.id,
             namespace_id=entity_type.namespace_id,
@@ -36,7 +28,7 @@ class SQLAlchemyEntityTypeRepository(
             permissions=entity_type.permissions,
         )
 
-    def _apply_updates(self, record: EntityTypeModel, entity: CustomEntityType) -> None:
+    def _apply_updates(self, record: EntityTypeModel, entity: Any) -> None:
         record.name = entity.name
         record.namespace_id = entity.namespace_id
         record.attributes_json = entity.attributes_json
@@ -44,7 +36,7 @@ class SQLAlchemyEntityTypeRepository(
         record.group_id = entity.group_id
         record.permissions = entity.permissions
 
-    def get_by_name(self, name: str, namespace_id: str) -> CustomEntityType | None:
+    def get_by_name(self, name: str, namespace_id: str) -> Any | None:
         record = (
             self._db.query(EntityTypeModel)
             .filter(EntityTypeModel.name == name, EntityTypeModel.namespace_id == namespace_id)

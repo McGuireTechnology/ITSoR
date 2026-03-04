@@ -1,67 +1,52 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
-from itsor.api.deps import get_current_user
+from itsor.api.deps import CurrentUser as User, get_current_user, get_idm_user_use_cases
 from itsor.api.schemas.idm_users_schemas import IdmUserCreate, IdmUserResponse, IdmUserUpdate
-from itsor.domain.models import User
-from itsor.infrastructure.container.database import get_db
-from itsor.infrastructure.models.sqlalchemy_idm_person_model import IdmPersonModel
-from itsor.infrastructure.models.sqlalchemy_idm_user_model import IdmUserModel
+from itsor.application.use_cases.identity_use_cases import IdmUserUseCases
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("", response_model=list[IdmUserResponse])
-def list_idm_users(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return db.query(IdmUserModel).all()
+def list_idm_users(_: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+    return use_cases.list_users()
 
 
 @router.post("", response_model=IdmUserResponse, status_code=status.HTTP_201_CREATED)
-def create_idm_user(body: IdmUserCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    person = db.query(IdmPersonModel).filter(IdmPersonModel.id == body.person_id).first()
-    if not person:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Person not found")
-
-    user = IdmUserModel(
-        person_id=body.person_id,
-        username=body.username,
-        account_status=body.account_status,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+def create_idm_user(body: IdmUserCreate, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+    try:
+        return use_cases.create_user(
+            person_id=body.person_id,
+            username=body.username,
+            account_status=body.account_status,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
 
 @router.get("/{user_id}", response_model=IdmUserResponse)
-def get_idm_user(user_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    user = db.query(IdmUserModel).filter(IdmUserModel.id == user_id).first()
+def get_idm_user(user_id: str, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+    user = use_cases.get_user(user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IDM user not found")
     return user
 
 
 @router.patch("/{user_id}", response_model=IdmUserResponse)
-def update_idm_user(user_id: str, body: IdmUserUpdate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    user = db.query(IdmUserModel).filter(IdmUserModel.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IDM user not found")
-
-    if body.username is not None:
-        setattr(user, "username", body.username)
-    if body.account_status is not None:
-        setattr(user, "account_status", body.account_status)
-
-    db.commit()
-    db.refresh(user)
-    return user
+def update_idm_user(user_id: str, body: IdmUserUpdate, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+    try:
+        return use_cases.update_user(
+            user_id=user_id,
+            username=body.username,
+            account_status=body.account_status,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_idm_user(user_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    user = db.query(IdmUserModel).filter(IdmUserModel.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IDM user not found")
-
-    db.delete(user)
-    db.commit()
+def delete_idm_user(user_id: str, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+    try:
+        use_cases.delete_user(user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))

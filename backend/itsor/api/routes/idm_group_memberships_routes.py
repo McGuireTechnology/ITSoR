@@ -1,71 +1,37 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
-from itsor.api.deps import get_current_user
+from itsor.api.deps import CurrentUser as User, get_current_user, get_idm_group_membership_use_cases
 from itsor.api.schemas.idm_group_memberships_schemas import (
     IdmGroupMembershipCreate,
     IdmGroupMembershipResponse,
     IdmGroupMembershipUpdate,
 )
-from itsor.domain.models import User
-from itsor.infrastructure.container.database import get_db
-from itsor.infrastructure.models.sqlalchemy_idm_group_membership_model import IdmGroupMembershipModel
-from itsor.infrastructure.models.sqlalchemy_idm_group_model import IdmGroupModel
-from itsor.infrastructure.models.sqlalchemy_idm_user_model import IdmUserModel
+from itsor.application.use_cases.identity_use_cases import IdmGroupMembershipUseCases
 
 router = APIRouter(prefix="/group-memberships", tags=["group-memberships"])
 
 
-def _validate_member_ref(db: Session, member_type: str, member_user_id: str | None, member_group_id: str | None):
-    if member_type not in {"user", "group"}:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="member_type must be 'user' or 'group'")
-
-    if member_type == "user":
-        if not member_user_id or member_group_id:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="user membership requires member_user_id only")
-        user = db.query(IdmUserModel).filter(IdmUserModel.id == member_user_id).first()
-        if not user:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Member user not found")
-        return
-
-    if not member_group_id or member_user_id:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="group membership requires member_group_id only")
-    group = db.query(IdmGroupModel).filter(IdmGroupModel.id == member_group_id).first()
-    if not group:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Member group not found")
-
-
 @router.get("", response_model=list[IdmGroupMembershipResponse])
-def list_group_memberships(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return db.query(IdmGroupMembershipModel).all()
+def list_group_memberships(_: User = Depends(get_current_user), use_cases: IdmGroupMembershipUseCases = Depends(get_idm_group_membership_use_cases)):
+    return use_cases.list_group_memberships()
 
 
 @router.post("", response_model=IdmGroupMembershipResponse, status_code=status.HTTP_201_CREATED)
-def create_group_membership(body: IdmGroupMembershipCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    group = db.query(IdmGroupModel).filter(IdmGroupModel.id == body.group_id).first()
-    if not group:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group not found")
-
-    _validate_member_ref(db, body.member_type, body.member_user_id, body.member_group_id)
-
-    if body.member_type == "group" and body.member_group_id == body.group_id:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group cannot directly contain itself")
-
-    membership = IdmGroupMembershipModel(
-        group_id=body.group_id,
-        member_type=body.member_type,
-        member_user_id=body.member_user_id,
-        member_group_id=body.member_group_id,
-    )
-    db.add(membership)
-    db.commit()
-    db.refresh(membership)
-    return membership
+def create_group_membership(body: IdmGroupMembershipCreate, _: User = Depends(get_current_user), use_cases: IdmGroupMembershipUseCases = Depends(get_idm_group_membership_use_cases)):
+    try:
+        return use_cases.create_group_membership(
+            group_id=body.group_id,
+            member_type=body.member_type,
+            member_user_id=body.member_user_id,
+            member_group_id=body.member_group_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
 
 @router.get("/{membership_id}", response_model=IdmGroupMembershipResponse)
-def get_group_membership(membership_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
+def get_group_membership(membership_id: str, _: User = Depends(get_current_user), use_cases: IdmGroupMembershipUseCases = Depends(get_idm_group_membership_use_cases)):
+    membership = use_cases.get_group_membership(membership_id)
     if not membership:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
     return membership
@@ -75,39 +41,25 @@ def get_group_membership(membership_id: str, db: Session = Depends(get_db), _: U
 def update_group_membership(
     membership_id: str,
     body: IdmGroupMembershipUpdate,
-    db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
+    use_cases: IdmGroupMembershipUseCases = Depends(get_idm_group_membership_use_cases),
 ):
-    membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
-    if not membership:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
-
-    next_member_type = body.member_type if body.member_type is not None else str(getattr(membership, "member_type", ""))
-    next_member_user_id = body.member_user_id if body.member_user_id is not None else getattr(membership, "member_user_id", None)
-    next_member_group_id = body.member_group_id if body.member_group_id is not None else getattr(membership, "member_group_id", None)
-
-    _validate_member_ref(db, next_member_type, next_member_user_id, next_member_group_id)
-
-    if next_member_type == "group" and str(next_member_group_id) == str(getattr(membership, "group_id", "")):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Group cannot directly contain itself")
-
-    if body.member_type is not None:
-        setattr(membership, "member_type", body.member_type)
-    if body.member_user_id is not None:
-        setattr(membership, "member_user_id", body.member_user_id)
-    if body.member_group_id is not None:
-        setattr(membership, "member_group_id", body.member_group_id)
-
-    db.commit()
-    db.refresh(membership)
-    return membership
+    try:
+        return use_cases.update_group_membership(
+            membership_id=membership_id,
+            member_type=body.member_type,
+            member_user_id=body.member_user_id,
+            member_group_id=body.member_group_id,
+        )
+    except ValueError as exc:
+        detail = str(exc)
+        status_code = status.HTTP_404_NOT_FOUND if detail == "Group membership not found" else status.HTTP_409_CONFLICT
+        raise HTTPException(status_code=status_code, detail=detail)
 
 
 @router.delete("/{membership_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_group_membership(membership_id: str, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    membership = db.query(IdmGroupMembershipModel).filter(IdmGroupMembershipModel.id == membership_id).first()
-    if not membership:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group membership not found")
-
-    db.delete(membership)
-    db.commit()
+def delete_group_membership(membership_id: str, _: User = Depends(get_current_user), use_cases: IdmGroupMembershipUseCases = Depends(get_idm_group_membership_use_cases)):
+    try:
+        use_cases.delete_group_membership(membership_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))

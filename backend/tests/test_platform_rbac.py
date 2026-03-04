@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 from itsor.api.apps.platform_app import app as platform_app
-from itsor.infrastructure.container.database import get_db
-from itsor.infrastructure.models.sqlalchemy_user_model import Base
+from itsor.infrastructure.database.sqlalchemy import get_db
+from itsor.infrastructure.persistence_models.sqlalchemy_user_model import Base
 from itsor.main import app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

@@ -12,7 +12,7 @@ from itsor.api.routes.entity_records import router as entity_records_router
 from itsor.api.routes.entity_types import router as entity_types_router
 from itsor.api.routes.namespaces import router as namespaces_router
 from itsor.api.routes.workspaces import router as workspaces_router
-from itsor.infrastructure.container.database import create_tables
+from itsor.infrastructure.database.sqlalchemy import create_tables
 
 
 @asynccontextmanager

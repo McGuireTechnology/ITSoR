@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from itsor.api.apps.platform_app import app as platform_app
-from itsor.infrastructure.container.database import get_db
-from itsor.infrastructure.models.sqlalchemy_user_model import Base
+from itsor.infrastructure.database.sqlalchemy import get_db
+from itsor.infrastructure.persistence_models.sqlalchemy_user_model import Base
 from itsor.main import app
 
 TEST_DATABASE_URL = "sqlite:///./test_itsor.db"

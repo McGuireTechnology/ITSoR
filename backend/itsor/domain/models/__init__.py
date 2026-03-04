@@ -23,7 +23,7 @@ from itsor.domain.models.idm_models import (
     IdmPerson,
     IdmUser,
 )
-from itsor.domain.models.ids import GroupId, PermissionId, RoleId, TenantId, UserId
+from itsor.domain.ids import GroupId, PermissionId, RoleId, TenantId, UserId
 from itsor.domain.models.platform_models import (
     Group,
     GroupMembership,

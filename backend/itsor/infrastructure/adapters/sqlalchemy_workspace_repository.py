@@ -1,28 +1,21 @@
 from sqlalchemy.orm import Session
+from typing import Any
 
-from itsor.domain.models import CustomWorkspace
-from itsor.domain.ports.custom_ports import WorkspaceRepository
+from itsor.application.ports.custom_ports import WorkspaceRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
-from itsor.infrastructure.models.sqlalchemy_workspace_model import WorkspaceModel
+from itsor.infrastructure.persistence_models.sqlalchemy_workspace_model import WorkspaceModel
 
 
-class SQLAlchemyWorkspaceRepository(SQLAlchemyBaseRepository[CustomWorkspace, WorkspaceModel], WorkspaceRepository):
+class SQLAlchemyWorkspaceRepository(SQLAlchemyBaseRepository[Any, WorkspaceModel], WorkspaceRepository):
     model_class = WorkspaceModel
 
     def __init__(self, db: Session) -> None:
         super().__init__(db, "Workspace")
 
-    def _to_domain(self, record: WorkspaceModel) -> CustomWorkspace:
-        return CustomWorkspace(
-            id=record.id,
-            tenant_id=record.tenant_id,
-            name=record.name,
-            owner_id=record.owner_id,
-            group_id=record.group_id,
-            permissions=record.permissions,
-        )
+    def _to_domain(self, record: WorkspaceModel) -> Any:
+        return record
 
-    def _to_model(self, workspace: CustomWorkspace) -> WorkspaceModel:
+    def _to_model(self, workspace: Any) -> WorkspaceModel:
         return WorkspaceModel(
             id=workspace.id,
             tenant_id=workspace.tenant_id,
@@ -32,14 +25,14 @@ class SQLAlchemyWorkspaceRepository(SQLAlchemyBaseRepository[CustomWorkspace, Wo
             permissions=workspace.permissions,
         )
 
-    def _apply_updates(self, record: WorkspaceModel, entity: CustomWorkspace) -> None:
+    def _apply_updates(self, record: WorkspaceModel, entity: Any) -> None:
         record.name = entity.name
         record.tenant_id = entity.tenant_id
         record.owner_id = entity.owner_id
         record.group_id = entity.group_id
         record.permissions = entity.permissions
 
-    def get_by_name(self, name: str, tenant_id: str | None = None) -> CustomWorkspace | None:
+    def get_by_name(self, name: str, tenant_id: str | None = None) -> Any | None:
         record = (
             self._db.query(WorkspaceModel)
             .filter(WorkspaceModel.name == name, WorkspaceModel.tenant_id == tenant_id)

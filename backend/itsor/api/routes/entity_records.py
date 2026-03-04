@@ -2,15 +2,14 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_entity_record_use_cases
+from itsor.api.deps import AuthorizationService, CurrentUser as User, get_authorization_service, get_current_user, get_entity_record_use_cases
 from itsor.api.schemas.entity_record_schamas import (
     EntityRecordCreate,
     EntityRecordReplace,
     EntityRecordResponse,
     EntityRecordUpdate,
 )
-from itsor.domain.models import User
-from itsor.domain.use_cases.custom_use_cases import EntityRecordUseCases
+from itsor.application.use_cases.custom_use_cases import EntityRecordUseCases
 
 router = APIRouter(prefix="/entity-records", tags=["entity-records"])
 

@@ -2,15 +2,14 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import AuthorizationService, get_authorization_service, get_current_user, get_namespace_use_cases
+from itsor.api.deps import AuthorizationService, CurrentUser as User, get_authorization_service, get_current_user, get_namespace_use_cases
 from itsor.api.schemas.namespace_schamas import (
     NamespaceCreate,
     NamespaceReplace,
     NamespaceResponse,
     NamespaceUpdate,
 )
-from itsor.domain.models import User
-from itsor.domain.use_cases.custom_use_cases import NamespaceUseCases
+from itsor.application.use_cases.custom_use_cases import NamespaceUseCases
 
 router = APIRouter(prefix="/namespaces", tags=["namespaces"])
 

@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Generic, TypeVar
 
-from itsor.domain.ports.base_repository import BaseRepository as DomainBaseRepository
+from itsor.application.ports.base_repository import BaseRepository as DomainBaseRepository
 
 
 TEntity = TypeVar("TEntity")
