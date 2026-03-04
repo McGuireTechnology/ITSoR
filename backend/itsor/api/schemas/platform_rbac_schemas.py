@@ -3,6 +3,14 @@ from pydantic import BaseModel, field_validator
 from itsor.domain.models import ResourceAction
 
 
+_PLATFORM_PERMISSION_ACTIONS = {
+    ResourceAction.CREATE,
+    ResourceAction.READ,
+    ResourceAction.UPDATE,
+    ResourceAction.DELETE,
+}
+
+
 def _coerce_resource_action(value):
     if isinstance(value, ResourceAction):
         return value
@@ -45,7 +53,12 @@ class PlatformPermissionCreate(BaseModel):
     @field_validator("action", mode="before")
     @classmethod
     def validate_action(cls, value):
-        return _coerce_resource_action(value)
+        action = _coerce_resource_action(value)
+        if action not in _PLATFORM_PERMISSION_ACTIONS:
+            raise ValueError(
+                "Platform permission action must be one of: create, read, update, delete"
+            )
+        return action
 
 
 class PlatformPermissionUpdate(BaseModel):
@@ -58,7 +71,12 @@ class PlatformPermissionUpdate(BaseModel):
     def validate_action(cls, value):
         if value is None:
             return None
-        return _coerce_resource_action(value)
+        action = _coerce_resource_action(value)
+        if action not in _PLATFORM_PERMISSION_ACTIONS:
+            raise ValueError(
+                "Platform permission action must be one of: create, read, update, delete"
+            )
+        return action
 
 
 class PlatformPermissionResponse(BaseModel):

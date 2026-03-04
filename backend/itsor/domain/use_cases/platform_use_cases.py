@@ -1,19 +1,43 @@
 import logging
 import os
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import List, Optional, cast
 
 import bcrypt
 import ulid
 from jose import JWTError, jwt
 
-from itsor.domain.models import Group, ResourceAction, Tenant, User
-from itsor.domain.ports.platform_ports import GroupRepository, TenantRepository, UserRepository
+from itsor.domain.models import (
+    Group,
+    Permission,
+    Resource,
+    ResourceAction,
+    Role,
+    RoleAssignment,
+    RolePermission,
+    Tenant,
+    User,
+    UserTenant,
+)
+from itsor.domain.models.ids import GroupId, PermissionId, RoleId, TenantId, UserId
+from itsor.domain.ports.platform_ports import (
+    GroupRepository,
+    GroupRoleRepository,
+    PermissionRepository,
+    RolePermissionRepository,
+    RoleRepository,
+    TenantRepository,
+    UserRepository,
+    UserRoleRepository,
+    UserTenantRepository,
+)
 from itsor.domain.use_cases.base_use_case import BaseUseCase
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
 if SECRET_KEY == "change-me-in-production":
-    logging.warning("SECRET_KEY is using the default insecure value. Set SECRET_KEY env var in production.")
+    logging.warning(
+        "SECRET_KEY is using the default insecure value. Set SECRET_KEY env var in production."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -107,7 +131,9 @@ class GroupUseCases(BaseUseCase):
             if existing:
                 raise ValueError("Group name already in use")
         group.name = name
-        group.platform_endpoint_permissions = platform_endpoint_permissions or self._default_platform_permissions()
+        group.platform_endpoint_permissions = (
+            platform_endpoint_permissions or self._default_platform_permissions()
+        )
         return self._repo.update(group)
 
     def delete_group(self, group_id: str) -> None:
@@ -118,7 +144,9 @@ class GroupUseCases(BaseUseCase):
 
 
 class TenantUseCases(BaseUseCase):
-    def __init__(self, repo: TenantRepository, group_repo: GroupRepository, user_repo: UserRepository) -> None:
+    def __init__(
+        self, repo: TenantRepository, group_repo: GroupRepository, user_repo: UserRepository
+    ) -> None:
         self._repo = repo
         self._group_repo = group_repo
         self._user_repo = user_repo
@@ -195,7 +223,9 @@ class UserUseCases(BaseUseCase):
     def _default_platform_permissions() -> dict[str, list[ResourceAction | str]]:
         return {"*": [ResourceAction.READ, "write"]}
 
-    def __init__(self, repo: UserRepository, tenant_repo: TenantRepository, group_repo: GroupRepository) -> None:
+    def __init__(
+        self, repo: UserRepository, tenant_repo: TenantRepository, group_repo: GroupRepository
+    ) -> None:
         self._repo = repo
         self._tenant_repo = tenant_repo
         self._group_repo = group_repo
@@ -383,7 +413,9 @@ class UserUseCases(BaseUseCase):
             user.name = username
         user.email = email
         user.password_hash = hash_password(password)
-        user.platform_endpoint_permissions = platform_endpoint_permissions or self._default_platform_permissions()
+        user.platform_endpoint_permissions = (
+            platform_endpoint_permissions or self._default_platform_permissions()
+        )
         return self._repo.update(user)
 
     def delete_user(self, user_id: str) -> None:
@@ -393,8 +425,406 @@ class UserUseCases(BaseUseCase):
         self._repo.delete(user_id)
 
 
+class PlatformRbacUseCases(BaseUseCase):
+    def __init__(
+        self,
+        user_repo: UserRepository,
+        group_repo: GroupRepository,
+        tenant_repo: TenantRepository,
+        role_repo: RoleRepository,
+        permission_repo: PermissionRepository,
+        user_tenant_repo: UserTenantRepository,
+        user_role_repo: UserRoleRepository,
+        group_role_repo: GroupRoleRepository,
+        role_permission_repo: RolePermissionRepository,
+    ) -> None:
+        self._user_repo = user_repo
+        self._group_repo = group_repo
+        self._tenant_repo = tenant_repo
+        self._role_repo = role_repo
+        self._permission_repo = permission_repo
+        self._user_tenant_repo = user_tenant_repo
+        self._user_role_repo = user_role_repo
+        self._group_role_repo = group_role_repo
+        self._role_permission_repo = role_permission_repo
+
+    def _ensure_user_exists(self, user_id: str) -> None:
+        if not self._user_repo.get_by_id(user_id):
+            raise ValueError("User not found")
+
+    def _ensure_group_exists(self, group_id: str) -> None:
+        if not self._group_repo.get_by_id(group_id):
+            raise ValueError("Group not found")
+
+    def _ensure_tenant_exists(self, tenant_id: str) -> None:
+        if not self._tenant_repo.get_by_id(tenant_id):
+            raise ValueError("Tenant not found")
+
+    def _ensure_role_exists(self, role_id: str) -> None:
+        if not self._role_repo.get_by_id(role_id):
+            raise ValueError("Role not found")
+
+    def _ensure_permission_exists(self, permission_id: str) -> None:
+        if not self._permission_repo.get_by_id(permission_id):
+            raise ValueError("Permission not found")
+
+    @staticmethod
+    def _coerce_resource(resource: str) -> Resource:
+        try:
+            return Resource(resource)
+        except ValueError:
+            return cast(Resource, resource)
+
+    def list_roles(self) -> List[Role]:
+        return sorted(self._role_repo.list(), key=lambda role: str(role.name).lower())
+
+    def get_role(self, role_id: str) -> Optional[Role]:
+        return self._role_repo.get_by_id(role_id)
+
+    def create_role(self, name: str, tenant_id: str | None = None, description: str = "") -> Role:
+        if tenant_id:
+            self._ensure_tenant_exists(tenant_id)
+        role = Role(
+            name=name,
+            tenant_id=cast(TenantId, TenantId(tenant_id) if tenant_id is not None else None),
+            description=description,
+        )
+        return self._role_repo.create(role)
+
+    def replace_role(
+        self,
+        role_id: str,
+        name: str,
+        tenant_id: str | None = None,
+        description: str = "",
+    ) -> Role:
+        role = self._role_repo.get_by_id(role_id)
+        if not role:
+            raise ValueError("Role not found")
+        if tenant_id:
+            self._ensure_tenant_exists(tenant_id)
+
+        role.name = name
+        role.tenant_id = cast(TenantId, TenantId(tenant_id) if tenant_id is not None else None)
+        role.description = description
+        return self._role_repo.update(role)
+
+    def update_role(
+        self,
+        role_id: str,
+        name: str | None = None,
+        tenant_id: str | None = None,
+        description: str | None = None,
+    ) -> Role:
+        role = self._role_repo.get_by_id(role_id)
+        if not role:
+            raise ValueError("Role not found")
+
+        if tenant_id is not None:
+            self._ensure_tenant_exists(tenant_id)
+            role.tenant_id = TenantId(tenant_id)
+        if name is not None:
+            role.name = name
+        if description is not None:
+            role.description = description
+
+        return self._role_repo.update(role)
+
+    def delete_role(self, role_id: str) -> None:
+        role = self._role_repo.get_by_id(role_id)
+        if not role:
+            raise ValueError("Role not found")
+        self._role_repo.delete(role_id)
+
+    def list_permissions(self) -> List[Permission]:
+        return sorted(
+            self._permission_repo.list(), key=lambda permission: str(permission.name).lower()
+        )
+
+    def get_permission(self, permission_id: str) -> Optional[Permission]:
+        return self._permission_repo.get_by_id(permission_id)
+
+    def create_permission(self, name: str, resource: str, action) -> Permission:
+        permission = Permission(
+            name=name,
+            resource=self._coerce_resource(resource),
+            action=action,
+        )
+        return self._permission_repo.create(permission)
+
+    def replace_permission(
+        self,
+        permission_id: str,
+        name: str,
+        resource: str,
+        action,
+    ) -> Permission:
+        permission = self._permission_repo.get_by_id(permission_id)
+        if not permission:
+            raise ValueError("Permission not found")
+
+        permission.name = name
+        permission.resource = self._coerce_resource(resource)
+        permission.action = action
+        return self._permission_repo.update(permission)
+
+    def update_permission(
+        self,
+        permission_id: str,
+        name: str | None = None,
+        resource: str | None = None,
+        action=None,
+    ) -> Permission:
+        permission = self._permission_repo.get_by_id(permission_id)
+        if not permission:
+            raise ValueError("Permission not found")
+
+        if name is not None:
+            permission.name = name
+        if resource is not None:
+            permission.resource = self._coerce_resource(resource)
+        if action is not None:
+            permission.action = action
+
+        return self._permission_repo.update(permission)
+
+    def delete_permission(self, permission_id: str) -> None:
+        permission = self._permission_repo.get_by_id(permission_id)
+        if not permission:
+            raise ValueError("Permission not found")
+        self._permission_repo.delete(permission_id)
+
+    def list_user_tenants(self) -> List[UserTenant]:
+        return self._user_tenant_repo.list()
+
+    def get_user_tenant(self, user_tenant_id: str) -> Optional[UserTenant]:
+        return self._user_tenant_repo.get_by_id(user_tenant_id)
+
+    def create_user_tenant(self, user_id: str, tenant_id: str) -> UserTenant:
+        self._ensure_user_exists(user_id)
+        self._ensure_tenant_exists(tenant_id)
+        link = UserTenant(user_id=UserId(user_id), tenant_id=TenantId(tenant_id))
+        return self._user_tenant_repo.create(link)
+
+    def replace_user_tenant(
+        self,
+        user_tenant_id: str,
+        user_id: str,
+        tenant_id: str,
+    ) -> UserTenant:
+        link = self._user_tenant_repo.get_by_id(user_tenant_id)
+        if not link:
+            raise ValueError("User-tenant link not found")
+
+        self._ensure_user_exists(user_id)
+        self._ensure_tenant_exists(tenant_id)
+
+        link.user_id = UserId(user_id)
+        link.tenant_id = TenantId(tenant_id)
+        return self._user_tenant_repo.update(link)
+
+    def update_user_tenant(
+        self,
+        user_tenant_id: str,
+        user_id: str | None = None,
+        tenant_id: str | None = None,
+    ) -> UserTenant:
+        link = self._user_tenant_repo.get_by_id(user_tenant_id)
+        if not link:
+            raise ValueError("User-tenant link not found")
+
+        if user_id is not None:
+            self._ensure_user_exists(user_id)
+            link.user_id = UserId(user_id)
+        if tenant_id is not None:
+            self._ensure_tenant_exists(tenant_id)
+            link.tenant_id = TenantId(tenant_id)
+
+        return self._user_tenant_repo.update(link)
+
+    def delete_user_tenant(self, user_tenant_id: str) -> None:
+        link = self._user_tenant_repo.get_by_id(user_tenant_id)
+        if not link:
+            raise ValueError("User-tenant link not found")
+        self._user_tenant_repo.delete(user_tenant_id)
+
+    def list_user_roles(self) -> List[RoleAssignment]:
+        return self._user_role_repo.list()
+
+    def get_user_role(self, user_role_id: str) -> Optional[RoleAssignment]:
+        return self._user_role_repo.get_by_id(user_role_id)
+
+    def create_user_role(self, user_id: str, role_id: str) -> RoleAssignment:
+        self._ensure_user_exists(user_id)
+        self._ensure_role_exists(role_id)
+        link = RoleAssignment(
+            role_id=RoleId(role_id),
+            assignee_type="user",
+            user_id=UserId(user_id),
+        )
+        return self._user_role_repo.create(link)
+
+    def replace_user_role(self, user_role_id: str, user_id: str, role_id: str) -> RoleAssignment:
+        link = self._user_role_repo.get_by_id(user_role_id)
+        if not link:
+            raise ValueError("User-role link not found")
+
+        self._ensure_user_exists(user_id)
+        self._ensure_role_exists(role_id)
+
+        link.assignee_type = "user"
+        link.user_id = UserId(user_id)
+        link.group_id = None
+        link.role_id = RoleId(role_id)
+        return self._user_role_repo.update(link)
+
+    def update_user_role(
+        self,
+        user_role_id: str,
+        user_id: str | None = None,
+        role_id: str | None = None,
+    ) -> RoleAssignment:
+        link = self._user_role_repo.get_by_id(user_role_id)
+        if not link:
+            raise ValueError("User-role link not found")
+
+        link.assignee_type = "user"
+        if user_id is not None:
+            self._ensure_user_exists(user_id)
+            link.user_id = UserId(user_id)
+            link.group_id = None
+        if role_id is not None:
+            self._ensure_role_exists(role_id)
+            link.role_id = RoleId(role_id)
+
+        return self._user_role_repo.update(link)
+
+    def delete_user_role(self, user_role_id: str) -> None:
+        link = self._user_role_repo.get_by_id(user_role_id)
+        if not link:
+            raise ValueError("User-role link not found")
+        self._user_role_repo.delete(user_role_id)
+
+    def list_group_roles(self) -> List[RoleAssignment]:
+        return self._group_role_repo.list()
+
+    def get_group_role(self, group_role_id: str) -> Optional[RoleAssignment]:
+        return self._group_role_repo.get_by_id(group_role_id)
+
+    def create_group_role(self, group_id: str, role_id: str) -> RoleAssignment:
+        self._ensure_group_exists(group_id)
+        self._ensure_role_exists(role_id)
+        link = RoleAssignment(
+            role_id=RoleId(role_id),
+            assignee_type="group",
+            group_id=GroupId(group_id),
+        )
+        return self._group_role_repo.create(link)
+
+    def replace_group_role(
+        self,
+        group_role_id: str,
+        group_id: str,
+        role_id: str,
+    ) -> RoleAssignment:
+        link = self._group_role_repo.get_by_id(group_role_id)
+        if not link:
+            raise ValueError("Group-role link not found")
+
+        self._ensure_group_exists(group_id)
+        self._ensure_role_exists(role_id)
+
+        link.assignee_type = "group"
+        link.user_id = None
+        link.group_id = GroupId(group_id)
+        link.role_id = RoleId(role_id)
+        return self._group_role_repo.update(link)
+
+    def update_group_role(
+        self,
+        group_role_id: str,
+        group_id: str | None = None,
+        role_id: str | None = None,
+    ) -> RoleAssignment:
+        link = self._group_role_repo.get_by_id(group_role_id)
+        if not link:
+            raise ValueError("Group-role link not found")
+
+        link.assignee_type = "group"
+        if group_id is not None:
+            self._ensure_group_exists(group_id)
+            link.user_id = None
+            link.group_id = GroupId(group_id)
+        if role_id is not None:
+            self._ensure_role_exists(role_id)
+            link.role_id = RoleId(role_id)
+
+        return self._group_role_repo.update(link)
+
+    def delete_group_role(self, group_role_id: str) -> None:
+        link = self._group_role_repo.get_by_id(group_role_id)
+        if not link:
+            raise ValueError("Group-role link not found")
+        self._group_role_repo.delete(group_role_id)
+
+    def list_role_permissions(self) -> List[RolePermission]:
+        return self._role_permission_repo.list()
+
+    def get_role_permission(self, role_permission_id: str) -> Optional[RolePermission]:
+        return self._role_permission_repo.get_by_id(role_permission_id)
+
+    def create_role_permission(self, role_id: str, permission_id: str) -> RolePermission:
+        self._ensure_role_exists(role_id)
+        self._ensure_permission_exists(permission_id)
+        link = RolePermission(role_id=RoleId(role_id), permission_id=PermissionId(permission_id))
+        return self._role_permission_repo.create(link)
+
+    def replace_role_permission(
+        self,
+        role_permission_id: str,
+        role_id: str,
+        permission_id: str,
+    ) -> RolePermission:
+        link = self._role_permission_repo.get_by_id(role_permission_id)
+        if not link:
+            raise ValueError("Role-permission link not found")
+
+        self._ensure_role_exists(role_id)
+        self._ensure_permission_exists(permission_id)
+
+        link.role_id = RoleId(role_id)
+        link.permission_id = PermissionId(permission_id)
+        return self._role_permission_repo.update(link)
+
+    def update_role_permission(
+        self,
+        role_permission_id: str,
+        role_id: str | None = None,
+        permission_id: str | None = None,
+    ) -> RolePermission:
+        link = self._role_permission_repo.get_by_id(role_permission_id)
+        if not link:
+            raise ValueError("Role-permission link not found")
+
+        if role_id is not None:
+            self._ensure_role_exists(role_id)
+            link.role_id = RoleId(role_id)
+        if permission_id is not None:
+            self._ensure_permission_exists(permission_id)
+            link.permission_id = PermissionId(permission_id)
+
+        return self._role_permission_repo.update(link)
+
+    def delete_role_permission(self, role_permission_id: str) -> None:
+        link = self._role_permission_repo.get_by_id(role_permission_id)
+        if not link:
+            raise ValueError("Role-permission link not found")
+        self._role_permission_repo.delete(role_permission_id)
+
+
 __all__ = [
     "GroupUseCases",
+    "PlatformRbacUseCases",
     "TenantUseCases",
     "UserUseCases",
     "hash_password",
