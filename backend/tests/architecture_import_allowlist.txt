@@ -1,0 +1,6 @@
+# Baseline architecture boundary exceptions.
+# Format: rule | path | import
+# Goal: prevent new violations while existing boundaries are incrementally refactored.
+
+api_to_infrastructure | backend/itsor/api/deps.py | itsor.infrastructure.container
+api_to_infrastructure | backend/itsor/api/deps.py | itsor.infrastructure.database.sqlalchemy
