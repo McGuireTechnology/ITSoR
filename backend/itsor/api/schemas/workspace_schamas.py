@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 
-from itsor.api.schemas.base_schemas import WorkspaceBaseSchema
+
+class WorkspaceBaseSchema(BaseModel):
+    name: str
+    tenant_id: str | None = None
 
 
 class WorkspaceCreate(WorkspaceBaseSchema):

@@ -7,7 +7,7 @@ from itsor.application.use_cases.custom_use_cases import (
     NamespaceUseCases,
     WorkspaceUseCases,
 )
-from itsor.application.use_cases.platform_use_cases import (
+from itsor.application.use_cases.auth_admin_use_cases import (
     GroupUseCases,
     PlatformRbacUseCases,
     TenantUseCases,

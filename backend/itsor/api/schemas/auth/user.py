@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 
-from itsor.api.schemas.base_schemas import UserIdentitySchema
+
+class UserIdentitySchema(BaseModel):
+    username: str
+    email: str
 
 
 class UserCreate(UserIdentitySchema):
@@ -36,3 +39,9 @@ class SigninRequest(BaseModel):
 class AuthTokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-from itsor.infrastructure.adapters.memory.platform_repository import (
+from itsor.infrastructure.adapters.memory.auth_repository import (
     BcryptPasswordHasher,
     InMemoryGroupRepository,
     InMemoryTenantRepository,

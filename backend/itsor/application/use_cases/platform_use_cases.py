@@ -15,7 +15,7 @@ from itsor.domain.models import (
     platform_models,
 )
 from itsor.domain.ids import GroupId, PermissionId, RoleId, TenantId, UserId
-from itsor.application.ports.platform_ports import (
+from itsor.application.ports.auth.repositories import (
     GroupRepository,
     GroupRoleRepository,
     PasswordHasher,

@@ -3,7 +3,7 @@ from typing import Any
 
 from itsor.application.ports.custom_ports import EntityRecordRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
-from itsor.infrastructure.persistence_models.sqlalchemy_entity_record_model import EntityRecordModel
+from itsor.infrastructure.database.sqlalchemy.models.custom import EntityRecordModel
 
 
 class SQLAlchemyEntityRecordRepository(

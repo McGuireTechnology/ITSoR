@@ -4,11 +4,11 @@ from typing import Any, Protocol
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from itsor.infrastructure.persistence_models.sqlalchemy_idm_group_membership_model import IdmGroupMembershipModel
-from itsor.infrastructure.persistence_models.sqlalchemy_idm_group_model import IdmGroupModel
-from itsor.infrastructure.persistence_models.sqlalchemy_idm_identity_model import IdmIdentityModel
-from itsor.infrastructure.persistence_models.sqlalchemy_idm_person_model import IdmPersonModel
-from itsor.infrastructure.persistence_models.sqlalchemy_idm_user_model import IdmUserModel
+from itsor.infrastructure.database.sqlalchemy.models.idm import IdmGroupMembershipModel
+from itsor.infrastructure.database.sqlalchemy.models.idm import IdmGroupModel
+from itsor.infrastructure.database.sqlalchemy.models.idm import IdmIdentityModel
+from itsor.infrastructure.database.sqlalchemy.models.idm import IdmPersonModel
+from itsor.infrastructure.database.sqlalchemy.models.idm import IdmUserModel
 
 
 class IdmGroupGateway(Protocol):

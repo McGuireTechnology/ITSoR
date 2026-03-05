@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from itsor.api.apps import auth_app
+from itsor.infrastructure.database.sqlalchemy import create_tables
 
 
 @asynccontextmanager
@@ -52,10 +53,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.mount("/auth", auth_app)
-#app.mount("/platform", platform_app)
-#app.mount("/idm", idm_app)
-#app.mount("/custom", custom_app)
+
 
 @app.get("/")
 def read_root():

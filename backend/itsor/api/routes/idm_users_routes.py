@@ -10,6 +10,7 @@ _ACCOUNTS_PATH = "/accounts"
 _LEGACY_USERS_PATH = "/users"
 
 
+
 @router.get(_ACCOUNTS_PATH, response_model=list[IdmAccountResponse])
 @router.get(_LEGACY_USERS_PATH, response_model=list[IdmAccountResponse], include_in_schema=False)
 def list_idm_accounts(_: CurrentUser = Depends(get_current_user), use_cases: IdmAccountUseCases = Depends(get_idm_account_use_cases)):

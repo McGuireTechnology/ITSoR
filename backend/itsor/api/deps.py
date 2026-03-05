@@ -15,19 +15,29 @@ from itsor.application.use_cases.identity_use_cases import (
     IdmPersonUseCases,
     IdmUserUseCases,
 )
-from itsor.application.use_cases.platform_use_cases import (
-    GroupUseCases,
-    PlatformEndpointPermissionUseCases,
-    PlatformGroupMembershipUseCases,
-    PlatformModelCatalogUseCases,
-    PlatformRbacUseCases,
-    TenantUseCases,
-    UserUseCases,
+from itsor.application.use_cases.auth import (
+    GroupMembershipUseCases,
+    GroupRoleUseCases,
+    GroupUseCases as AuthGroupUseCases,
+    PermissionUseCases,
+    RolePermissionUseCases,
+    RoleUseCases,
+    TenantUseCases as AuthTenantUseCases,
+    UserRoleUseCases,
+    UserTenantUseCases,
+    UserUseCases as AuthUserUseCases,
+)
+from itsor.application.use_cases.auth_admin_use_cases import (
+    AuthEndpointPermissionUseCases,
+    AuthGroupMembershipUseCases,
+    AuthModelCatalogUseCases,
+    AuthRbacUseCases,
 )
 from itsor.infrastructure.database.sqlalchemy import get_db
 from itsor.infrastructure.container import (
     get_entity_record_repository as container_get_entity_record_repository,
     get_entity_type_repository as container_get_entity_type_repository,
+    get_group_membership_repository as container_get_group_membership_repository,
     get_group_repository as container_get_group_repository,
     get_group_role_repository as container_get_group_role_repository,
     get_idm_group_gateway as container_get_idm_group_gateway,
@@ -65,6 +75,10 @@ def get_tenant_repository(db=Depends(get_db)):
 
 def get_group_repository(db=Depends(get_db)):
     return container_get_group_repository(db)
+
+
+def get_group_membership_repository(db=Depends(get_db)):
+    return container_get_group_membership_repository(db)
 
 
 def get_workspace_repository(db=Depends(get_db)):
@@ -196,23 +210,49 @@ def get_user_use_cases(
     group_repo=Depends(get_group_repository),
     password_hasher=Depends(get_password_hasher),
     token_codec=Depends(get_token_codec),
-) -> UserUseCases:
-    return UserUseCases(repo, tenant_repo, group_repo, password_hasher, token_codec)
+) -> AuthUserUseCases:
+    return AuthUserUseCases(repo, tenant_repo, group_repo, password_hasher, token_codec)
 
 
 def get_tenant_use_cases(
     repo=Depends(get_tenant_repository),
-    group_repo=Depends(get_group_repository),
-    user_repo=Depends(get_user_repository),
-) -> TenantUseCases:
-    return TenantUseCases(repo, group_repo, user_repo)
+) -> AuthTenantUseCases:
+    return AuthTenantUseCases(repo)
 
 
-def get_group_use_cases(repo=Depends(get_group_repository)) -> GroupUseCases:
-    return GroupUseCases(repo)
+def get_group_use_cases(repo=Depends(get_group_repository)) -> AuthGroupUseCases:
+    return AuthGroupUseCases(repo)
 
 
-def get_platform_rbac_use_cases(
+def get_role_use_cases(repo=Depends(get_role_repository)) -> RoleUseCases:
+    return RoleUseCases(repo)
+
+
+def get_permission_use_cases(repo=Depends(get_permission_repository)) -> PermissionUseCases:
+    return PermissionUseCases(repo)
+
+
+def get_user_tenant_use_cases(repo=Depends(get_user_tenant_repository)) -> UserTenantUseCases:
+    return UserTenantUseCases(repo)
+
+
+def get_user_role_use_cases(repo=Depends(get_user_role_repository)) -> UserRoleUseCases:
+    return UserRoleUseCases(repo)
+
+
+def get_group_role_use_cases(repo=Depends(get_group_role_repository)) -> GroupRoleUseCases:
+    return GroupRoleUseCases(repo)
+
+
+def get_role_permission_use_cases(repo=Depends(get_role_permission_repository)) -> RolePermissionUseCases:
+    return RolePermissionUseCases(repo)
+
+
+def get_group_membership_use_cases(repo=Depends(get_group_membership_repository)) -> GroupMembershipUseCases:
+    return GroupMembershipUseCases(repo)
+
+
+def get_auth_rbac_use_cases(
     user_repo=Depends(get_user_repository),
     group_repo=Depends(get_group_repository),
     tenant_repo=Depends(get_tenant_repository),
@@ -222,8 +262,8 @@ def get_platform_rbac_use_cases(
     user_role_repo=Depends(get_user_role_repository),
     group_role_repo=Depends(get_group_role_repository),
     role_permission_repo=Depends(get_role_permission_repository),
-) -> PlatformRbacUseCases:
-    return PlatformRbacUseCases(
+) -> AuthRbacUseCases:
+    return AuthRbacUseCases(
         user_repo=user_repo,
         group_repo=group_repo,
         tenant_repo=tenant_repo,
@@ -236,32 +276,38 @@ def get_platform_rbac_use_cases(
     )
 
 
-def get_platform_endpoint_permission_use_cases(
+def get_auth_endpoint_permission_use_cases(
     gateway=Depends(get_platform_endpoint_permission_gateway),
     user_repo=Depends(get_user_repository),
     group_repo=Depends(get_group_repository),
-) -> PlatformEndpointPermissionUseCases:
-    return PlatformEndpointPermissionUseCases(
+) -> AuthEndpointPermissionUseCases:
+    return AuthEndpointPermissionUseCases(
         gateway=gateway,
         user_repo=user_repo,
         group_repo=group_repo,
     )
 
 
-def get_platform_group_membership_use_cases(
+def get_auth_group_membership_use_cases(
     gateway=Depends(get_platform_group_membership_gateway),
     user_repo=Depends(get_user_repository),
     group_repo=Depends(get_group_repository),
-) -> PlatformGroupMembershipUseCases:
-    return PlatformGroupMembershipUseCases(
+) -> AuthGroupMembershipUseCases:
+    return AuthGroupMembershipUseCases(
         gateway=gateway,
         user_repo=user_repo,
         group_repo=group_repo,
     )
 
 
-def get_platform_model_catalog_use_cases() -> PlatformModelCatalogUseCases:
-    return PlatformModelCatalogUseCases()
+def get_auth_model_catalog_use_cases() -> AuthModelCatalogUseCases:
+    return AuthModelCatalogUseCases()
+
+
+get_platform_rbac_use_cases = get_auth_rbac_use_cases
+get_platform_endpoint_permission_use_cases = get_auth_endpoint_permission_use_cases
+get_platform_group_membership_use_cases = get_auth_group_membership_use_cases
+get_platform_model_catalog_use_cases = get_auth_model_catalog_use_cases
 
 
 def get_idm_group_use_cases(
@@ -371,7 +417,7 @@ def get_authorization_service(
 def get_current_user(
     request: Request,
     token: str | None = Depends(oauth2_scheme),
-    use_cases: UserUseCases = Depends(get_user_use_cases),
+    use_cases: AuthUserUseCases = Depends(get_user_use_cases),
 ) -> CurrentUser:
     auth_token = request.cookies.get(SESSION_COOKIE_NAME) or token
     if not auth_token:

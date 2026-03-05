@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 
-from itsor.api.schemas.base_schemas import NamespaceBaseSchema
+
+class NamespaceBaseSchema(BaseModel):
+    workspace_id: str
+    name: str
 
 
 class NamespaceCreate(NamespaceBaseSchema):

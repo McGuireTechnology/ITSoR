@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from itsor.domain.models import (
+from itsor.application.ports.base_repository import BaseRepository
+from itsor.domain.ids import GroupId, TenantId
+from itsor.domain.models.auth_models import (
     Group,
+    GroupMembership,
     Permission,
     Role,
     RoleAssignment,
@@ -11,12 +14,14 @@ from itsor.domain.models import (
     User,
     UserTenant,
 )
-from itsor.application.ports.base_repository import BaseRepository
 
 
 class GroupRepository(BaseRepository[Group], ABC):
     @abstractmethod
-    def get_by_name(self, name: str, tenant_id: str | None = None) -> Optional[Group]: ...
+    def get_by_name(self, name: str, tenant_id: TenantId | None = None) -> Optional[Group]: ...
+
+
+class GroupMembershipRepository(BaseRepository[GroupMembership], ABC): ...
 
 
 class TenantRepository(BaseRepository[Tenant], ABC):
@@ -34,7 +39,7 @@ class UserRepository(BaseRepository[User], ABC):
 
 class RoleRepository(BaseRepository[Role], ABC):
     @abstractmethod
-    def get_by_name(self, name: str, tenant_id: str | None = None) -> Optional[Role]: ...
+    def get_by_name(self, name: str, tenant_id: TenantId | None = None) -> Optional[Role]: ...
 
 
 class PermissionRepository(BaseRepository[Permission], ABC): ...
@@ -43,7 +48,12 @@ class PermissionRepository(BaseRepository[Permission], ABC): ...
 class UserTenantRepository(BaseRepository[UserTenant], ABC): ...
 
 
-class RoleAssignmentRepository(BaseRepository[RoleAssignment], ABC): ...
+class RoleAssignmentRepository(BaseRepository[RoleAssignment], ABC):
+    @abstractmethod
+    def list_for_user(self, user_id: str) -> list[RoleAssignment]: ...
+
+    @abstractmethod
+    def list_for_group(self, group_id: GroupId) -> list[RoleAssignment]: ...
 
 
 class UserRoleRepository(RoleAssignmentRepository, ABC): ...
@@ -69,19 +79,3 @@ class TokenCodec(ABC):
 
     @abstractmethod
     def decode_access_token(self, token: str) -> str | None: ...
-
-
-__all__ = [
-    "GroupRepository",
-    "TenantRepository",
-    "UserRepository",
-    "RoleRepository",
-    "PermissionRepository",
-    "UserTenantRepository",
-    "RoleAssignmentRepository",
-    "UserRoleRepository",
-    "GroupRoleRepository",
-    "RolePermissionRepository",
-    "PasswordHasher",
-    "TokenCodec",
-]

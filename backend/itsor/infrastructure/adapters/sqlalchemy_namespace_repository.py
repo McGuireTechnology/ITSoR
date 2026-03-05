@@ -3,7 +3,7 @@ from typing import Any
 
 from itsor.application.ports.custom_ports import NamespaceRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
-from itsor.infrastructure.persistence_models.sqlalchemy_namespace_model import NamespaceModel
+from itsor.infrastructure.database.sqlalchemy.models.custom import NamespaceModel
 
 
 class SQLAlchemyNamespaceRepository(SQLAlchemyBaseRepository[Any, NamespaceModel], NamespaceRepository):

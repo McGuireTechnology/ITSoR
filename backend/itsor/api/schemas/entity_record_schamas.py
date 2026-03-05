@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
-from itsor.api.schemas.base_schemas import EntityRecordBaseSchema
+
+class EntityRecordBaseSchema(BaseModel):
+    entity_type_id: str
+    name: str = ""
+    values_json: dict[str, object]
 
 
 class EntityRecordCreate(EntityRecordBaseSchema):

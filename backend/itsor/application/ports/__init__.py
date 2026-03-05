@@ -7,7 +7,7 @@ from itsor.application.ports.custom_ports import (
     NamespaceRepository,
     WorkspaceRepository,
 )
-from itsor.application.ports.platform_ports import (
+from itsor.application.ports.auth.repositories import (
     GroupRepository,
     GroupRoleRepository,
     PermissionRepository,

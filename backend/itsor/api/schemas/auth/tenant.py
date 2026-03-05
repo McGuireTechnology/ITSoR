@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 
-from itsor.api.schemas.base_schemas import NameSchema
+
+class NameSchema(BaseModel):
+    name: str
 
 
 class TenantCreate(NameSchema):

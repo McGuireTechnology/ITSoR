@@ -6,7 +6,7 @@ from typing import Any
 import bcrypt
 from jose import JWTError, jwt
 
-from itsor.application.ports.platform_ports import (
+from itsor.application.ports.auth.repositories import (
     GroupRepository,
     PasswordHasher,
     TenantRepository,

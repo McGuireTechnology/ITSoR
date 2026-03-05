@@ -1,4 +1,4 @@
-from itsor.infrastructure.adapters.sqlalchemy.platform_repository import (
+from itsor.infrastructure.adapters.sqlalchemy.auth_repository import (
     BcryptPasswordHasher,
     JwtTokenCodec,
     SQLAlchemyGroupRepository,

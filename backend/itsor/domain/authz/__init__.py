@@ -1,4 +1,4 @@
-from itsor.domain.authz.platform_authz import (
+from itsor.domain.authz.auth_resource_catalog import (
     PLATFORM_RESOURCE_CATALOG,
     PlatformResource,
     PlatformResourceProvider,

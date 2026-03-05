@@ -3,7 +3,7 @@ from typing import Any
 
 from itsor.application.ports.custom_ports import WorkspaceRepository
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
-from itsor.infrastructure.persistence_models.sqlalchemy_workspace_model import WorkspaceModel
+from itsor.infrastructure.database.sqlalchemy.models.custom import WorkspaceModel
 
 
 class SQLAlchemyWorkspaceRepository(SQLAlchemyBaseRepository[Any, WorkspaceModel], WorkspaceRepository):

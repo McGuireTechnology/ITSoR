@@ -4,3 +4,16 @@
 
 api_to_infrastructure | backend/itsor/api/deps.py | itsor.infrastructure.container
 api_to_infrastructure | backend/itsor/api/deps.py | itsor.infrastructure.database.sqlalchemy
+
+# Intentional exception: auth route path params are strongly typed with domain ID NewTypes.
+# This is currently allowed until/if a dedicated API-layer ID alias module is introduced.
+api_to_domain | backend/itsor/api/routes/auth/group.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/group_membership.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/group_role.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/permission.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/role.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/role_permission.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/tenant.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/user.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/user_role.py | itsor.domain.ids
+api_to_domain | backend/itsor/api/routes/auth/user_tenant.py | itsor.domain.ids

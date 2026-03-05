@@ -1,8 +1,11 @@
 import os
 
 from itsor.application.ports.custom_ports import EntityRecordRepository, EntityTypeRepository, NamespaceRepository, WorkspaceRepository
-from itsor.application.ports.platform_ports import GroupRepository, TenantRepository, UserRepository
-from itsor.application.ports.platform_ports import (
+from itsor.application.ports.auth import (
+    GroupMembershipRepository,
+    GroupRepository,
+    TenantRepository,
+    UserRepository,
     GroupRoleRepository,
     PasswordHasher,
     PermissionRepository,
@@ -16,14 +19,15 @@ from itsor.infrastructure.adapters.in_memory_entity_record_repository import InM
 from itsor.infrastructure.adapters.in_memory_entity_type_repository import InMemoryEntityTypeRepository
 from itsor.infrastructure.adapters.in_memory_namespace_repository import InMemoryNamespaceRepository
 from itsor.infrastructure.adapters.in_memory_workspace_repository import InMemoryWorkspaceRepository
-from itsor.infrastructure.adapters.memory.platform_repository import (
+from itsor.infrastructure.adapters.memory.auth_repository import (
     InMemoryGroupRepository,
     InMemoryTenantRepository,
     InMemoryUserRepository,
 )
-from itsor.infrastructure.adapters.sqlalchemy.platform_repository import (
+from itsor.infrastructure.adapters.sqlalchemy.auth_repository import (
     BcryptPasswordHasher,
     JwtTokenCodec,
+    SQLAlchemyGroupMembershipRepository,
     SQLAlchemyGroupRepository,
     SQLAlchemyGroupRoleRepository,
     SQLAlchemyPermissionRepository,
@@ -68,6 +72,10 @@ def _get_tenant_repository_sqlalchemy(db=None) -> TenantRepository:
 
 def _get_group_repository_sqlalchemy(db=None) -> GroupRepository:
     return SQLAlchemyGroupRepository(db)
+
+
+def _get_group_membership_repository_sqlalchemy(db=None) -> GroupMembershipRepository:
+    return SQLAlchemyGroupMembershipRepository(db)
 
 
 def _get_workspace_repository_sqlalchemy(db=None) -> WorkspaceRepository:
@@ -151,6 +159,10 @@ def _get_group_repository_memory() -> GroupRepository:
     return _MEMORY_GROUP_REPOSITORY
 
 
+def _get_group_membership_repository_memory() -> GroupMembershipRepository:
+    raise _raise_platform_sqlalchemy_required()
+
+
 def _get_workspace_repository_memory() -> WorkspaceRepository:
     return _MEMORY_WORKSPACE_REPOSITORY
 
@@ -223,6 +235,10 @@ def _get_group_repository_unsupported() -> GroupRepository:
     raise _unsupported_backend()
 
 
+def _get_group_membership_repository_unsupported() -> GroupMembershipRepository:
+    raise _unsupported_backend()
+
+
 def _get_workspace_repository_unsupported() -> WorkspaceRepository:
     raise _unsupported_backend()
 
@@ -287,6 +303,7 @@ if BACKEND == "sqlalchemy":
     get_user_repository = _get_user_repository_sqlalchemy
     get_tenant_repository = _get_tenant_repository_sqlalchemy
     get_group_repository = _get_group_repository_sqlalchemy
+    get_group_membership_repository = _get_group_membership_repository_sqlalchemy
     get_workspace_repository = _get_workspace_repository_sqlalchemy
     get_namespace_repository = _get_namespace_repository_sqlalchemy
     get_entity_type_repository = _get_entity_type_repository_sqlalchemy
@@ -306,6 +323,7 @@ elif BACKEND == "memory":
     get_user_repository = _get_user_repository_memory
     get_tenant_repository = _get_tenant_repository_memory
     get_group_repository = _get_group_repository_memory
+    get_group_membership_repository = _get_group_membership_repository_memory
     get_workspace_repository = _get_workspace_repository_memory
     get_namespace_repository = _get_namespace_repository_memory
     get_entity_type_repository = _get_entity_type_repository_memory
@@ -325,6 +343,7 @@ else:
     get_user_repository = _get_user_repository_unsupported
     get_tenant_repository = _get_tenant_repository_unsupported
     get_group_repository = _get_group_repository_unsupported
+    get_group_membership_repository = _get_group_membership_repository_unsupported
     get_workspace_repository = _get_workspace_repository_unsupported
     get_namespace_repository = _get_namespace_repository_unsupported
     get_entity_type_repository = _get_entity_type_repository_unsupported
