@@ -1,21 +1,30 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import CurrentUser as User, get_current_user, get_idm_user_use_cases
-from itsor.api.schemas.idm_users_schemas import IdmUserCreate, IdmUserResponse, IdmUserUpdate
-from itsor.application.use_cases.identity_use_cases import IdmUserUseCases
+from itsor.api.deps import CurrentUser, get_current_user, get_idm_account_use_cases
+from itsor.api.schemas.idm_users_schemas import IdmAccountCreate, IdmAccountResponse, IdmAccountUpdate
+from itsor.application.use_cases.identity_use_cases import IdmAccountUseCases
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(tags=["accounts"])
 
-
-@router.get("", response_model=list[IdmUserResponse])
-def list_idm_users(_: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
-    return use_cases.list_users()
+_ACCOUNTS_PATH = "/accounts"
+_LEGACY_USERS_PATH = "/users"
 
 
-@router.post("", response_model=IdmUserResponse, status_code=status.HTTP_201_CREATED)
-def create_idm_user(body: IdmUserCreate, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+@router.get(_ACCOUNTS_PATH, response_model=list[IdmAccountResponse])
+@router.get(_LEGACY_USERS_PATH, response_model=list[IdmAccountResponse], include_in_schema=False)
+def list_idm_accounts(_: CurrentUser = Depends(get_current_user), use_cases: IdmAccountUseCases = Depends(get_idm_account_use_cases)):
+    return use_cases.list_accounts()
+
+
+@router.post(_ACCOUNTS_PATH, response_model=IdmAccountResponse, status_code=status.HTTP_201_CREATED)
+@router.post(_LEGACY_USERS_PATH, response_model=IdmAccountResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+def create_idm_account(
+    body: IdmAccountCreate,
+    _: CurrentUser = Depends(get_current_user),
+    use_cases: IdmAccountUseCases = Depends(get_idm_account_use_cases),
+):
     try:
-        return use_cases.create_user(
+        return use_cases.create_account(
             person_id=body.person_id,
             username=body.username,
             account_status=body.account_status,
@@ -24,19 +33,30 @@ def create_idm_user(body: IdmUserCreate, _: User = Depends(get_current_user), us
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
 
-@router.get("/{user_id}", response_model=IdmUserResponse)
-def get_idm_user(user_id: str, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
-    user = use_cases.get_user(user_id)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IDM user not found")
-    return user
+@router.get(f"{_ACCOUNTS_PATH}/{{account_id}}", response_model=IdmAccountResponse)
+@router.get(f"{_LEGACY_USERS_PATH}/{{account_id}}", response_model=IdmAccountResponse, include_in_schema=False)
+def get_idm_account(
+    account_id: str,
+    _: CurrentUser = Depends(get_current_user),
+    use_cases: IdmAccountUseCases = Depends(get_idm_account_use_cases),
+):
+    account = use_cases.get_account(account_id)
+    if not account:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="IDM account not found")
+    return account
 
 
-@router.patch("/{user_id}", response_model=IdmUserResponse)
-def update_idm_user(user_id: str, body: IdmUserUpdate, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+@router.patch(f"{_ACCOUNTS_PATH}/{{account_id}}", response_model=IdmAccountResponse)
+@router.patch(f"{_LEGACY_USERS_PATH}/{{account_id}}", response_model=IdmAccountResponse, include_in_schema=False)
+def update_idm_account(
+    account_id: str,
+    body: IdmAccountUpdate,
+    _: CurrentUser = Depends(get_current_user),
+    use_cases: IdmAccountUseCases = Depends(get_idm_account_use_cases),
+):
     try:
-        return use_cases.update_user(
-            user_id=user_id,
+        return use_cases.update_account(
+            account_id=account_id,
             username=body.username,
             account_status=body.account_status,
         )
@@ -44,9 +64,21 @@ def update_idm_user(user_id: str, body: IdmUserUpdate, _: User = Depends(get_cur
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_idm_user(user_id: str, _: User = Depends(get_current_user), use_cases: IdmUserUseCases = Depends(get_idm_user_use_cases)):
+@router.delete(f"{_ACCOUNTS_PATH}/{{account_id}}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(f"{_LEGACY_USERS_PATH}/{{account_id}}", status_code=status.HTTP_204_NO_CONTENT, include_in_schema=False)
+def delete_idm_account(
+    account_id: str,
+    _: CurrentUser = Depends(get_current_user),
+    use_cases: IdmAccountUseCases = Depends(get_idm_account_use_cases),
+):
     try:
-        use_cases.delete_user(user_id)
+        use_cases.delete_account(account_id)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+list_idm_users = list_idm_accounts
+create_idm_user = create_idm_account
+get_idm_user = get_idm_account
+update_idm_user = update_idm_account
+delete_idm_user = delete_idm_account

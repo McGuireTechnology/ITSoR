@@ -1,0 +1,21 @@
+from pydantic import BaseModel
+
+from itsor.api.schemas.base_schemas import NameSchema
+
+
+class TenantCreate(NameSchema):
+    pass
+
+
+class TenantReplace(NameSchema):
+    pass
+
+
+class TenantUpdate(BaseModel):
+    name: str | None = None
+
+
+class TenantResponse(NameSchema):
+    id: str
+
+    model_config = {"from_attributes": True}

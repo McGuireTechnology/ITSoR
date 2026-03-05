@@ -39,8 +39,11 @@ class IdmPerson:
 
 
 @dataclass
-class IdmUser:
+class IdmAccount:
     id: str = field(default_factory=lambda: str(ulid.new()))
     person_id: str = ""
     username: str = ""
     account_status: str = "active"
+
+
+IdmUser = IdmAccount

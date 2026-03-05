@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from itsor.application.use_cases.authorization_use_cases import Action, AuthorizationError, AuthorizationPrincipal, AuthorizationUseCases
 from itsor.application.use_cases.custom_use_cases import EntityRecordUseCases, EntityTypeUseCases, NamespaceUseCases, WorkspaceUseCases
 from itsor.application.use_cases.identity_use_cases import (
+    IdmAccountUseCases,
     IdmGroupMembershipUseCases,
     IdmGroupUseCases,
     IdmIdentityUseCases,
@@ -273,6 +274,12 @@ def get_idm_user_use_cases(
     gateway=Depends(get_idm_group_gateway),
 ) -> IdmUserUseCases:
     return IdmUserUseCases(gateway)
+
+
+def get_idm_account_use_cases(
+    gateway=Depends(get_idm_group_gateway),
+) -> IdmAccountUseCases:
+    return IdmAccountUseCases(gateway)
 
 
 def get_idm_person_use_cases(

@@ -37,6 +37,9 @@ class IdmUserGateway(Protocol):
 	def delete_user(self, user_id: str) -> None: ...
 
 
+IdmAccountGateway = IdmUserGateway
+
+
 class IdmPersonGateway(Protocol):
 	def list_people(self) -> list[Any]: ...
 
@@ -171,6 +174,65 @@ class IdmUserUseCases:
 
 	def delete_user(self, user_id: str) -> None:
 		self._gateway.delete_user(user_id)
+
+
+class IdmAccountUseCases:
+	def __init__(self, gateway: IdmAccountGateway) -> None:
+		self._user_use_cases = IdmUserUseCases(gateway)
+
+	def list_accounts(self) -> list[Any]:
+		return self._user_use_cases.list_users()
+
+	def create_account(self, *, person_id: str, username: str, account_status: str = "active") -> Any:
+		return self._user_use_cases.create_user(
+			person_id=person_id,
+			username=username,
+			account_status=account_status,
+		)
+
+	def get_account(self, account_id: str) -> Any | None:
+		return self._user_use_cases.get_user(account_id)
+
+	def update_account(
+		self,
+		*,
+		account_id: str,
+		username: str | None = None,
+		account_status: str | None = None,
+	) -> Any:
+		return self._user_use_cases.update_user(
+			user_id=account_id,
+			username=username,
+			account_status=account_status,
+		)
+
+	def delete_account(self, account_id: str) -> None:
+		self._user_use_cases.delete_user(account_id)
+
+	def list_users(self) -> list[Any]:
+		return self.list_accounts()
+
+	def create_user(self, *, person_id: str, username: str, account_status: str = "active") -> Any:
+		return self.create_account(person_id=person_id, username=username, account_status=account_status)
+
+	def get_user(self, user_id: str) -> Any | None:
+		return self.get_account(user_id)
+
+	def update_user(
+		self,
+		*,
+		user_id: str,
+		username: str | None = None,
+		account_status: str | None = None,
+	) -> Any:
+		return self.update_account(
+			account_id=user_id,
+			username=username,
+			account_status=account_status,
+		)
+
+	def delete_user(self, user_id: str) -> None:
+		self.delete_account(user_id)
 
 
 class IdmPersonUseCases:
@@ -313,6 +375,8 @@ __all__ = [
 	"IdmGroupMembershipUseCases",
 	"IdmIdentityGateway",
 	"IdmIdentityUseCases",
+	"IdmAccountGateway",
+	"IdmAccountUseCases",
 	"IdmPersonGateway",
 	"IdmPersonUseCases",
 	"IdmUserGateway",

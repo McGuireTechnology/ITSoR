@@ -3,16 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
 
-from itsor.api.apps.idm_app import app as idm_app
-from itsor.api.apps.platform_app import app as platform_app
-from itsor.api.routes.auth import router as auth_router
-from itsor.api.routes.entity_records import router as entity_records_router
-from itsor.api.routes.entity_types import router as entity_types_router
-from itsor.api.routes.namespaces import router as namespaces_router
-from itsor.api.routes.workspaces import router as workspaces_router
-from itsor.infrastructure.database.sqlalchemy import create_tables
+from itsor.api.apps import auth_app
 
 
 @asynccontextmanager
@@ -60,45 +52,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.include_router(auth_router)
-app.include_router(workspaces_router)
-app.include_router(namespaces_router)
-app.include_router(entity_types_router)
-app.include_router(entity_records_router)
-app.mount("/platform", platform_app)
-app.mount("/idm", idm_app)
-
-
-@app.api_route("/users", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-def redirect_users_root():
-    return RedirectResponse(url="/platform/users", status_code=307)
-
-
-@app.api_route("/users/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-def redirect_users_path(path: str):
-    return RedirectResponse(url=f"/platform/users/{path}", status_code=307)
-
-
-@app.api_route("/tenants", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-def redirect_tenants_root():
-    return RedirectResponse(url="/platform/tenants", status_code=307)
-
-
-@app.api_route("/tenants/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-def redirect_tenants_path(path: str):
-    return RedirectResponse(url=f"/platform/tenants/{path}", status_code=307)
-
-
-@app.api_route("/groups", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-def redirect_groups_root():
-    return RedirectResponse(url="/platform/groups", status_code=307)
-
-
-@app.api_route("/groups/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-def redirect_groups_path(path: str):
-    return RedirectResponse(url=f"/platform/groups/{path}", status_code=307)
-
+app.mount("/auth", auth_app)
+#app.mount("/platform", platform_app)
+#app.mount("/idm", idm_app)
+#app.mount("/custom", custom_app)
 
 @app.get("/")
 def read_root():

@@ -17,6 +17,7 @@ from itsor.domain.models.custom_models import (
     CustomWorkspace,
 )
 from itsor.domain.models.idm_models import (
+    IdmAccount,
     IdmGroup,
     IdmGroupMembership,
     IdmIdentity,
@@ -76,6 +77,7 @@ __all__ = [
     "IdmGroupMembership",
     "IdmIdentity",
     "IdmPerson",
+    "IdmAccount",
     "IdmUser",
     "CustomNamespace",
     "Namespace",
