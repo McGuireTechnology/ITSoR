@@ -108,7 +108,7 @@ async function handleDelete(row) {
 }
 
 function openPermission(row) {
-  router.push(`/platform/endpoint-permissions/${row.id}`)
+  router.push(`/auth/endpoint-permissions/${row.id}`)
 }
 
 onMounted(loadRows)

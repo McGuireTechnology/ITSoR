@@ -6,6 +6,9 @@ import { listTenants } from '../lib/api'
 import { clearCommandSurfaceMetrics, setCommandSurfaceMetrics } from '../lib/commandSurface'
 import { inspectorState, openTenantEditInspector } from '../lib/inspectorActions'
 
+const TENANT_STORAGE_KEY = 'itsor.activeTenantId'
+const TENANT_CONTEXT_CHANGED_EVENT = 'itsor:tenant-context-changed'
+
 const route = useRoute()
 const router = useRouter()
 
@@ -15,6 +18,7 @@ const error = ref('')
 const selectedIds = ref([])
 const sortKey = ref('name')
 const sortDir = ref('asc')
+const currentTenantContextId = ref('')
 
 const columns = [
   { key: 'name', label: 'Tenant Name', sortable: true },
@@ -63,14 +67,43 @@ function handleSortChange(nextKey) {
 }
 
 function navigateToTenant(tenant) {
-  router.push(`/platform/tenants/${tenant.id}`)
+  router.push(`/auth/tenants/${tenant.id}`)
 }
 
 function editTenantInline(tenant) {
   openTenantEditInspector(tenant.id)
 }
 
-onMounted(loadTenants)
+function setTenantContext(tenant) {
+  const tenantId = String(tenant?.id || '')
+  if (!tenantId || typeof window === 'undefined') {
+    return
+  }
+
+  currentTenantContextId.value = tenantId
+  window.localStorage.setItem(TENANT_STORAGE_KEY, tenantId)
+  window.dispatchEvent(new CustomEvent(TENANT_CONTEXT_CHANGED_EVENT, { detail: { tenantId } }))
+}
+
+function syncCurrentTenantContext() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  currentTenantContextId.value = String(window.localStorage.getItem(TENANT_STORAGE_KEY) || '')
+}
+
+function handleTenantContextChanged(event) {
+  const nextTenantId = String(event?.detail?.tenantId || '').trim()
+  currentTenantContextId.value = nextTenantId
+}
+
+onMounted(() => {
+  syncCurrentTenantContext()
+  loadTenants()
+  window.addEventListener(TENANT_CONTEXT_CHANGED_EVENT, handleTenantContextChanged)
+  window.addEventListener('storage', syncCurrentTenantContext)
+})
 
 watch(
   [visibleTenants, selectedIds],
@@ -87,6 +120,10 @@ watch(
 
 onUnmounted(() => {
   clearCommandSurfaceMetrics()
+  if (typeof window !== 'undefined') {
+    window.removeEventListener(TENANT_CONTEXT_CHANGED_EVENT, handleTenantContextChanged)
+    window.removeEventListener('storage', syncCurrentTenantContext)
+  }
 })
 
 watch(
@@ -128,7 +165,35 @@ watch(
             >
               ✎
             </button>
-            <button class="btn btn-sm btn-primary" type="button" @click="navigateToTenant(row)">Open</button>
+            <button
+              v-if="String(row.id) === currentTenantContextId"
+              class="btn btn-sm btn-outline-secondary"
+              type="button"
+              title="Current Tenant Context"
+              aria-label="Current Tenant Context"
+              disabled
+            >
+              <i class="pi pi-crown" aria-hidden="true"></i>
+            </button>
+            <button
+              v-else
+              class="btn btn-sm btn-outline-secondary"
+              type="button"
+              title="Set Tenant Context"
+              aria-label="Set Tenant Context"
+              @click="setTenantContext(row)"
+            >
+              <i class="pi pi-sign-in" aria-hidden="true"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-primary"
+              type="button"
+              title="Open Tenant Details"
+              aria-label="Open Tenant Details"
+              @click="navigateToTenant(row)"
+            >
+              <i class="pi pi-external-link" aria-hidden="true"></i>
+            </button>
           </div>
         </template>
       </DataTable>

@@ -2,29 +2,28 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DataTable from '../components/DataTable.vue'
-import { createGroupMembership, deleteGroupMembership, listGroupMemberships } from '../lib/api'
+import { createRolePermission, deleteRolePermission, listRolePermissions } from '../lib/api'
 
 const route = useRoute()
-
 const rows = ref([])
 const loading = ref(true)
 const creating = ref(false)
 const deletingId = ref('')
 const error = ref('')
-const groupId = ref('')
+const permissionId = ref('')
 const selectedIds = ref([])
-const sortKey = ref('group_id')
+const sortKey = ref('permission_id')
 const sortDir = ref('asc')
 
 const columns = [
-  { key: 'group_id', label: 'Group ID', sortable: true },
+  { key: 'permission_id', label: 'Permission ID', sortable: true },
   { key: 'id', label: 'Link ID', sortable: false },
 ]
 
 const visibleRows = computed(() => {
-  const userId = String(route.params.id || '')
+  const roleId = String(route.params.id || '')
   return [...rows.value]
-    .filter((row) => row.member_type === 'user' && String(row.member_user_id || '') === userId)
+    .filter((row) => String(row.role_id) === roleId)
     .sort((left, right) => {
       const leftValue = String(left[sortKey.value] || '').toLowerCase()
       const rightValue = String(right[sortKey.value] || '').toLowerCase()
@@ -45,12 +44,11 @@ function handleSortChange(nextKey) {
   sortDir.value = 'asc'
 }
 
-async function loadMembership() {
+async function loadRows() {
   loading.value = true
   error.value = ''
-
   try {
-    rows.value = await listGroupMemberships()
+    rows.value = await listRolePermissions()
   } catch (loadError) {
     error.value = loadError.message
   } finally {
@@ -62,14 +60,12 @@ async function handleCreate() {
   creating.value = true
   error.value = ''
   try {
-    const created = await createGroupMembership({
-      group_id: groupId.value.trim(),
-      member_type: 'user',
-      member_user_id: String(route.params.id || ''),
-      member_group_id: null,
+    const created = await createRolePermission({
+      role_id: String(route.params.id || ''),
+      permission_id: permissionId.value.trim(),
     })
     rows.value = [...rows.value, created]
-    groupId.value = ''
+    permissionId.value = ''
   } catch (createError) {
     error.value = createError.message
   } finally {
@@ -81,7 +77,7 @@ async function handleDelete(row) {
   deletingId.value = String(row.id)
   error.value = ''
   try {
-    await deleteGroupMembership(row.id)
+    await deleteRolePermission(row.id)
     rows.value = rows.value.filter((item) => String(item.id) !== String(row.id))
   } catch (deleteError) {
     error.value = deleteError.message
@@ -90,19 +86,19 @@ async function handleDelete(row) {
   }
 }
 
-onMounted(loadMembership)
-watch(() => route.params.id, loadMembership)
+onMounted(loadRows)
+watch(() => route.params.id, loadRows)
 </script>
 
 <template>
   <section class="users-page">
     <form class="form section-gap" @submit.prevent="handleCreate">
       <label>
-        Group ID
-        <input v-model="groupId" type="text" required />
+        Permission ID
+        <input v-model="permissionId" type="text" required />
       </label>
       <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
-        {{ creating ? 'Adding...' : 'Add Membership' }}
+        {{ creating ? 'Adding...' : 'Add Role Permission' }}
       </button>
     </form>
 

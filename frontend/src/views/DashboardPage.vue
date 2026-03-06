@@ -19,9 +19,11 @@
 
     <h3 class="section-gap">Shortcuts</h3>
     <div class="shortcut-row">
-      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/platform/users">Users</RouterLink>
-      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/platform/groups">Groups</RouterLink>
-      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/platform/tenants">Tenants</RouterLink>
+      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/users">Users</RouterLink>
+      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/groups">Groups</RouterLink>
+      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/roles">Roles</RouterLink>
+      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/permissions">Permissions</RouterLink>
+      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/tenants">Tenants</RouterLink>
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/customization/workspaces">Workspaces</RouterLink>
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/customization/entity-types">Entity Types</RouterLink>
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/customization/entity-records">Entity Records</RouterLink>

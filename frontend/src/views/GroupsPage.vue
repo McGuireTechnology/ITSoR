@@ -64,7 +64,7 @@ function handleSortChange(nextKey) {
 }
 
 function navigateToGroup(group) {
-  router.push(`/platform/groups/${group.id}`)
+  router.push(`/auth/groups/${group.id}`)
 }
 
 function editGroupInline(group) {

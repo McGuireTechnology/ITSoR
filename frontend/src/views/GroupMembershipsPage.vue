@@ -5,26 +5,29 @@ import DataTable from '../components/DataTable.vue'
 import { createGroupMembership, deleteGroupMembership, listGroupMemberships } from '../lib/api'
 
 const route = useRoute()
-
 const rows = ref([])
 const loading = ref(true)
 const creating = ref(false)
 const deletingId = ref('')
 const error = ref('')
-const groupId = ref('')
+const memberType = ref('user')
+const memberUserId = ref('')
+const memberGroupId = ref('')
 const selectedIds = ref([])
-const sortKey = ref('group_id')
+const sortKey = ref('member_type')
 const sortDir = ref('asc')
 
 const columns = [
-  { key: 'group_id', label: 'Group ID', sortable: true },
+  { key: 'member_type', label: 'Member Type', sortable: true },
+  { key: 'member_user_id', label: 'Member User ID', sortable: true },
+  { key: 'member_group_id', label: 'Member Group ID', sortable: true },
   { key: 'id', label: 'Link ID', sortable: false },
 ]
 
 const visibleRows = computed(() => {
-  const userId = String(route.params.id || '')
+  const groupId = String(route.params.id || '')
   return [...rows.value]
-    .filter((row) => row.member_type === 'user' && String(row.member_user_id || '') === userId)
+    .filter((row) => String(row.group_id) === groupId)
     .sort((left, right) => {
       const leftValue = String(left[sortKey.value] || '').toLowerCase()
       const rightValue = String(right[sortKey.value] || '').toLowerCase()
@@ -45,10 +48,9 @@ function handleSortChange(nextKey) {
   sortDir.value = 'asc'
 }
 
-async function loadMembership() {
+async function loadRows() {
   loading.value = true
   error.value = ''
-
   try {
     rows.value = await listGroupMemberships()
   } catch (loadError) {
@@ -63,13 +65,14 @@ async function handleCreate() {
   error.value = ''
   try {
     const created = await createGroupMembership({
-      group_id: groupId.value.trim(),
-      member_type: 'user',
-      member_user_id: String(route.params.id || ''),
-      member_group_id: null,
+      group_id: String(route.params.id || ''),
+      member_type: memberType.value,
+      member_user_id: memberType.value === 'user' ? memberUserId.value.trim() : null,
+      member_group_id: memberType.value === 'group' ? memberGroupId.value.trim() : null,
     })
     rows.value = [...rows.value, created]
-    groupId.value = ''
+    memberUserId.value = ''
+    memberGroupId.value = ''
   } catch (createError) {
     error.value = createError.message
   } finally {
@@ -90,16 +93,27 @@ async function handleDelete(row) {
   }
 }
 
-onMounted(loadMembership)
-watch(() => route.params.id, loadMembership)
+onMounted(loadRows)
+watch(() => route.params.id, loadRows)
 </script>
 
 <template>
   <section class="users-page">
     <form class="form section-gap" @submit.prevent="handleCreate">
       <label>
-        Group ID
-        <input v-model="groupId" type="text" required />
+        Member Type
+        <select v-model="memberType" required>
+          <option value="user">user</option>
+          <option value="group">group</option>
+        </select>
+      </label>
+      <label v-if="memberType === 'user'">
+        Member User ID
+        <input v-model="memberUserId" type="text" required />
+      </label>
+      <label v-else>
+        Member Group ID
+        <input v-model="memberGroupId" type="text" required />
       </label>
       <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
         {{ creating ? 'Adding...' : 'Add Membership' }}

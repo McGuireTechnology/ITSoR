@@ -54,12 +54,12 @@ const inspectedUserRoute = computed(() => {
   if (domain.value !== 'users' || !inspectedUserId.value) {
     return null
   }
-  return `/platform/users/${inspectedUserId.value}`
+  return `/auth/users/${inspectedUserId.value}`
 })
 
-const isUsersListRoute = computed(() => route.path === '/platform/users')
-const isGroupsListRoute = computed(() => route.path === '/platform/groups')
-const isTenantsListRoute = computed(() => route.path === '/platform/tenants')
+const isUsersListRoute = computed(() => route.path === '/auth/users')
+const isGroupsListRoute = computed(() => route.path === '/auth/groups')
+const isTenantsListRoute = computed(() => route.path === '/auth/tenants')
 
 const inspectorComponent = computed(() => {
   if (isUsersListRoute.value) {

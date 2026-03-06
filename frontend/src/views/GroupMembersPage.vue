@@ -45,7 +45,7 @@ function handleSortChange(nextKey) {
 }
 
 function openUser(user) {
-  router.push(`/platform/users/${user.id}`)
+  router.push(`/auth/users/${user.id}`)
 }
 
 async function loadUsers() {

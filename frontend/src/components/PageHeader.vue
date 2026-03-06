@@ -1,22 +1,21 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { getGroupById, getUserById } from '../lib/api'
 import { getListPathForDomain, getWorkspaceForDomain, workspaceConfig } from '../lib/workspaceNav'
 
 const route = useRoute()
-const router = useRouter()
 
 const userCrumbLabel = ref('')
 const groupCrumbLabel = ref('')
-const contextSearch = ref(String(route.query.q || ''))
 
 const namespaceLabelByDomain = {
-  platform_home: 'Overview',
+  auth_home: 'Overview',
   users: 'Users',
   groups: 'Groups',
+  roles: 'Roles',
+  permissions: 'Permissions',
   tenants: 'Tenants',
-  'endpoint-permissions': 'Endpoint Permissions',
   idm_home: 'Overview',
   idm_people: 'People',
   idm_identities: 'Identities',
@@ -30,8 +29,10 @@ const namespaceLabelByDomain = {
   'entity-records': 'Entity Records',
 }
 
-const isUserDetailRoute = computed(() => /^\/platform\/users\/[^/]+(?:\/.*)?$/.test(route.path) && route.path !== '/platform/users/me')
-const isGroupDetailRoute = computed(() => /^\/platform\/groups\/[^/]+(?:\/.*)?$/.test(route.path))
+const isUserDetailRoute = computed(() => /^\/auth\/users\/[^/]+(?:\/.*)?$/.test(route.path) && route.path !== '/auth/users/me')
+const isGroupDetailRoute = computed(() => /^\/auth\/groups\/[^/]+(?:\/.*)?$/.test(route.path))
+const isRoleDetailRoute = computed(() => /^\/auth\/roles\/[^/]+(?:\/.*)?$/.test(route.path))
+const isPermissionDetailRoute = computed(() => /^\/auth\/permissions\/[^/]+(?:\/.*)?$/.test(route.path))
 
 const pageTitle = computed(() => {
   if (isUserDetailRoute.value) {
@@ -42,46 +43,44 @@ const pageTitle = computed(() => {
     const label = groupCrumbLabel.value || String(route.params.id || '')
     return `Group: ${label}`
   }
+  if (isRoleDetailRoute.value) {
+    return `Role: ${String(route.params.id || '')}`
+  }
+  if (isPermissionDetailRoute.value) {
+    return `Permission: ${String(route.params.id || '')}`
+  }
   return route.meta.title || 'Workspace'
-})
-
-const showContextSearch = computed(() => !route.params.id)
-
-const contextSearchPlaceholder = computed(() => {
-  const domain = String(route.meta?.domain || '')
-  if (!domain) {
-    return 'Search section'
-  }
-
-  const listPath = getListPathForDomain(domain)
-  if (!listPath) {
-    return 'Search section'
-  }
-
-  return `Search ${listPath.replace(/^\//, '')}`
 })
 
 const tabs = computed(() => {
   if (isUserDetailRoute.value) {
     const userId = String(route.params.id || '')
     return [
-      { label: 'Overview', to: `/platform/users/${userId}` },
-      { label: 'Endpoint Permissions', to: `/platform/users/${userId}/endpoint-permissions` },
-      { label: 'Group Membership', to: `/platform/users/${userId}/group-membership` },
+      { label: 'Overview', to: `/auth/users/${userId}` },
+      { label: 'Group Membership', to: `/auth/users/${userId}/group-membership` },
+      { label: 'User Roles', to: `/auth/users/${userId}/user-roles` },
+      { label: 'User Tenants', to: `/auth/users/${userId}/user-tenants` },
     ]
   }
   if (isGroupDetailRoute.value) {
     const groupId = String(route.params.id || '')
     return [
-      { label: 'Overview', to: `/platform/groups/${groupId}` },
-      { label: 'Members', to: `/platform/groups/${groupId}/members` },
-      { label: 'Endpoint Permissions', to: `/platform/groups/${groupId}/endpoint-permissions` },
+      { label: 'Overview', to: `/auth/groups/${groupId}` },
+      { label: 'Group Memberships', to: `/auth/groups/${groupId}/group-memberships` },
+      { label: 'Group Roles', to: `/auth/groups/${groupId}/group-roles` },
+    ]
+  }
+  if (isRoleDetailRoute.value) {
+    const roleId = String(route.params.id || '')
+    return [
+      { label: 'Overview', to: `/auth/roles/${roleId}` },
+      { label: 'Role Permissions', to: `/auth/roles/${roleId}/role-permissions` },
     ]
   }
   return []
 })
 
-const showTabs = computed(() => isUserDetailRoute.value || isGroupDetailRoute.value)
+const showTabs = computed(() => isUserDetailRoute.value || isGroupDetailRoute.value || isRoleDetailRoute.value)
 
 async function loadUserCrumb() {
   userCrumbLabel.value = ''
@@ -123,23 +122,6 @@ watch(
     loadGroupCrumb()
   },
 )
-
-watch(
-  () => route.query.q,
-  (q) => {
-    contextSearch.value = String(q || '')
-  },
-)
-
-async function applyContextSearch() {
-  await router.replace({
-    path: route.path,
-    query: {
-      ...route.query,
-      q: contextSearch.value || undefined,
-    },
-  })
-}
 
 const breadcrumbs = computed(() => {
   const domain = String(route.meta?.domain || '')
@@ -193,11 +175,6 @@ const breadcrumbs = computed(() => {
     </nav>
     <div class="page-header-main">
       <h1>{{ pageTitle }}</h1>
-      <form v-if="showContextSearch" class="page-header-search" @submit.prevent="applyContextSearch">
-        <span class="page-search-icon" aria-hidden="true">⌕</span>
-        <input v-model="contextSearch" type="search" :placeholder="contextSearchPlaceholder" />
-        <button type="submit">Search</button>
-      </form>
     </div>
     <div v-if="showTabs" class="page-tabs" role="tablist" aria-label="Page tabs">
       <component

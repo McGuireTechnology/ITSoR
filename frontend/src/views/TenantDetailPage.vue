@@ -57,7 +57,7 @@ async function handleDelete() {
   error.value = ''
   try {
     await deleteTenant(tenant.value.id)
-    await router.push('/platform/tenants')
+    await router.push('/auth/tenants')
   } catch (deleteError) {
     error.value = deleteError.message
   } finally {

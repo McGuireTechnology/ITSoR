@@ -102,7 +102,7 @@ function handleSortChange(nextKey) {
 }
 
 function navigateToEndpointPermission(permission) {
-  router.push(`/platform/endpoint-permissions/${permission.id}`)
+  router.push(`/auth/endpoint-permissions/${permission.id}`)
 }
 
 onMounted(loadEndpointPermissions)

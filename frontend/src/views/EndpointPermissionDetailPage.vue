@@ -71,7 +71,7 @@ async function handleDelete() {
   try {
     await deleteEndpointPermission(endpointPermission.value.id)
     markPermissionsDirty()
-    await router.push('/platform/endpoint-permissions')
+    await router.push('/auth/endpoint-permissions')
   } catch (deleteError) {
     error.value = deleteError.message
   } finally {

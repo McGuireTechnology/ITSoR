@@ -23,7 +23,7 @@ async function handleSubmit() {
       password: password.value,
     })
     setToken(response.access_token)
-    await router.push('/platform/users')
+    await router.push('/auth/users')
   } catch (submitError) {
     error.value = submitError.message
   } finally {

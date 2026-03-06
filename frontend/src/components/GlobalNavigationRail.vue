@@ -29,10 +29,10 @@ const expandedWorkspace = ref(activeWorkspace.value)
 const popupWorkspace = ref(null)
 const workspaceGroups = computed(() => [
   {
-    key: 'platform',
-    label: 'Platform',
+    key: 'auth',
+    label: 'Auth',
     icon: '🖥️',
-    items: workspaceConfig.platform.namespaces,
+    items: workspaceConfig.auth.namespaces,
   },
   {
     key: 'idm',

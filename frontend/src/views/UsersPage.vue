@@ -65,7 +65,7 @@ function handleSortChange(nextKey) {
 }
 
 function navigateToUser(user) {
-  router.push(`/platform/users/${user.id}`)
+  router.push(`/auth/users/${user.id}`)
 }
 
 function editUserInline(user) {
@@ -74,7 +74,7 @@ function editUserInline(user) {
 
 function inspectUser(user) {
   const nextQuery = { ...route.query, inspectUserId: user.id }
-  router.replace({ path: '/platform/users', query: nextQuery })
+  router.replace({ path: '/auth/users', query: nextQuery })
 }
 
 onMounted(loadUsers)

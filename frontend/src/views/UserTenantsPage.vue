@@ -2,29 +2,28 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DataTable from '../components/DataTable.vue'
-import { createGroupMembership, deleteGroupMembership, listGroupMemberships } from '../lib/api'
+import { createUserTenant, deleteUserTenant, listUserTenants } from '../lib/api'
 
 const route = useRoute()
-
 const rows = ref([])
 const loading = ref(true)
 const creating = ref(false)
 const deletingId = ref('')
 const error = ref('')
-const groupId = ref('')
+const tenantId = ref('')
 const selectedIds = ref([])
-const sortKey = ref('group_id')
+const sortKey = ref('tenant_id')
 const sortDir = ref('asc')
 
 const columns = [
-  { key: 'group_id', label: 'Group ID', sortable: true },
+  { key: 'tenant_id', label: 'Tenant ID', sortable: true },
   { key: 'id', label: 'Link ID', sortable: false },
 ]
 
 const visibleRows = computed(() => {
   const userId = String(route.params.id || '')
   return [...rows.value]
-    .filter((row) => row.member_type === 'user' && String(row.member_user_id || '') === userId)
+    .filter((row) => String(row.user_id) === userId)
     .sort((left, right) => {
       const leftValue = String(left[sortKey.value] || '').toLowerCase()
       const rightValue = String(right[sortKey.value] || '').toLowerCase()
@@ -45,12 +44,11 @@ function handleSortChange(nextKey) {
   sortDir.value = 'asc'
 }
 
-async function loadMembership() {
+async function loadRows() {
   loading.value = true
   error.value = ''
-
   try {
-    rows.value = await listGroupMemberships()
+    rows.value = await listUserTenants()
   } catch (loadError) {
     error.value = loadError.message
   } finally {
@@ -62,14 +60,12 @@ async function handleCreate() {
   creating.value = true
   error.value = ''
   try {
-    const created = await createGroupMembership({
-      group_id: groupId.value.trim(),
-      member_type: 'user',
-      member_user_id: String(route.params.id || ''),
-      member_group_id: null,
+    const created = await createUserTenant({
+      user_id: String(route.params.id || ''),
+      tenant_id: tenantId.value.trim(),
     })
     rows.value = [...rows.value, created]
-    groupId.value = ''
+    tenantId.value = ''
   } catch (createError) {
     error.value = createError.message
   } finally {
@@ -81,7 +77,7 @@ async function handleDelete(row) {
   deletingId.value = String(row.id)
   error.value = ''
   try {
-    await deleteGroupMembership(row.id)
+    await deleteUserTenant(row.id)
     rows.value = rows.value.filter((item) => String(item.id) !== String(row.id))
   } catch (deleteError) {
     error.value = deleteError.message
@@ -90,19 +86,19 @@ async function handleDelete(row) {
   }
 }
 
-onMounted(loadMembership)
-watch(() => route.params.id, loadMembership)
+onMounted(loadRows)
+watch(() => route.params.id, loadRows)
 </script>
 
 <template>
   <section class="users-page">
     <form class="form section-gap" @submit.prevent="handleCreate">
       <label>
-        Group ID
-        <input v-model="groupId" type="text" required />
+        Tenant ID
+        <input v-model="tenantId" type="text" required />
       </label>
       <button class="btn btn-primary bg-primary hover:bg-accent border-0" type="submit" :disabled="creating">
-        {{ creating ? 'Adding...' : 'Add Membership' }}
+        {{ creating ? 'Adding...' : 'Add User Tenant' }}
       </button>
     </form>
 

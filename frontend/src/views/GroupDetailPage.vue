@@ -57,7 +57,7 @@ async function handleDelete() {
   error.value = ''
   try {
     await deleteGroup(group.value.id)
-    await router.push('/platform/groups')
+    await router.push('/auth/groups')
   } catch (deleteError) {
     error.value = deleteError.message
   } finally {
