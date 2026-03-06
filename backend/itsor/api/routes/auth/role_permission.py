@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_role_permission_use_cases
+from itsor.api.deps import get_current_user, get_role_permission_use_cases
 from itsor.api.schemas.auth.role_permission import (
     RolePermissionCreate,
     RolePermissionReplace,
@@ -10,7 +10,11 @@ from itsor.api.schemas.auth.role_permission import (
 from itsor.application.use_cases.auth import RolePermissionUseCases
 from itsor.domain.ids import PermissionId, RoleId, RolePermissionId
 
-router = APIRouter(prefix="/role_permissions", tags=["role_permissions"])
+router = APIRouter(
+    prefix="/role_permissions",
+    tags=["role_permissions"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/", response_model=list[RolePermissionResponse])

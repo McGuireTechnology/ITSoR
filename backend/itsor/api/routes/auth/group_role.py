@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_group_role_use_cases
+from itsor.api.deps import get_current_user, get_group_role_use_cases
 from itsor.api.schemas.auth.group_role import (
     GroupRoleCreate,
     GroupRoleReplace,
@@ -10,7 +10,7 @@ from itsor.api.schemas.auth.group_role import (
 from itsor.application.use_cases.auth import GroupRoleUseCases
 from itsor.domain.ids import GroupId, GroupRoleId, RoleId
 
-router = APIRouter(prefix="/group_roles", tags=["group_roles"])
+router = APIRouter(prefix="/group_roles", tags=["group_roles"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=list[GroupRoleResponse])

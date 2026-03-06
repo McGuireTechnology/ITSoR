@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from itsor.api.deps import CurrentUser as User, get_current_user, get_user_use_cases
 from itsor.api.schemas.auth.user import (
@@ -17,12 +17,16 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/", response_model=list[UserResponse])
-def read_users(use_cases: UserUseCases = Depends(get_user_use_cases)):
+def read_users(_: User = Depends(get_current_user), use_cases: UserUseCases = Depends(get_user_use_cases)):
     return use_cases.list_users()
 
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(body: UserCreate, use_cases: UserUseCases = Depends(get_user_use_cases)):
+def create_user(
+    body: UserCreate,
+    _: User = Depends(get_current_user),
+    use_cases: UserUseCases = Depends(get_user_use_cases),
+):
     try:
         return use_cases.create_user(
             username=body.username,
@@ -56,26 +60,45 @@ def signup(body: SignupRequest, use_cases: UserUseCases = Depends(get_user_use_c
 
 
 @router.post("/signin", response_model=AuthTokenResponse)
-def signin(body: SigninRequest, use_cases: UserUseCases = Depends(get_user_use_cases)):
+async def signin(
+    request: Request,
+    use_cases: UserUseCases = Depends(get_user_use_cases),
+):
+    identifier: str
+    password: str
+    content_type = request.headers.get("content-type", "")
+    if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form = await request.form()
+        identifier = str(form.get("username") or "")
+        password = str(form.get("password") or "")
+    else:
+        payload = SigninRequest.model_validate(await request.json())
+        identifier = payload.identifier
+        password = payload.password
+
     try:
-        _, token = use_cases.login(identifier=body.identifier, password=body.password)
+        _, token = use_cases.login(identifier=identifier, password=password)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
     return AuthTokenResponse(access_token=token)
 
 
 @router.post("/signout", status_code=status.HTTP_204_NO_CONTENT)
-def signout():
+def signout(_: User = Depends(get_current_user)):
     return None
 
 
 @router.post("/impersonate", status_code=status.HTTP_204_NO_CONTENT)
-def impersonate():
+def impersonate(_: User = Depends(get_current_user)):
     return None
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-def read_user(user_id: UserId, use_cases: UserUseCases = Depends(get_user_use_cases)):
+def read_user(
+    user_id: UserId,
+    _: User = Depends(get_current_user),
+    use_cases: UserUseCases = Depends(get_user_use_cases),
+):
     user = use_cases.get_user(user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -83,7 +106,12 @@ def read_user(user_id: UserId, use_cases: UserUseCases = Depends(get_user_use_ca
 
 
 @router.put("/{user_id}", response_model=UserResponse)
-def replace_user(user_id: UserId, body: UserReplace, use_cases: UserUseCases = Depends(get_user_use_cases)):
+def replace_user(
+    user_id: UserId,
+    body: UserReplace,
+    _: User = Depends(get_current_user),
+    use_cases: UserUseCases = Depends(get_user_use_cases),
+):
     try:
         return use_cases.replace_user(
             user_id=user_id,
@@ -100,7 +128,12 @@ def replace_user(user_id: UserId, body: UserReplace, use_cases: UserUseCases = D
 
 
 @router.patch("/{user_id}", response_model=UserResponse)
-def update_user(user_id: UserId, body: UserUpdate, use_cases: UserUseCases = Depends(get_user_use_cases)):
+def update_user(
+    user_id: UserId,
+    body: UserUpdate,
+    _: User = Depends(get_current_user),
+    use_cases: UserUseCases = Depends(get_user_use_cases),
+):
     try:
         return use_cases.update_user(
             user_id=user_id,
@@ -117,7 +150,11 @@ def update_user(user_id: UserId, body: UserUpdate, use_cases: UserUseCases = Dep
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: UserId, use_cases: UserUseCases = Depends(get_user_use_cases)):
+def delete_user(
+    user_id: UserId,
+    _: User = Depends(get_current_user),
+    use_cases: UserUseCases = Depends(get_user_use_cases),
+):
     try:
         use_cases.delete_user(user_id)
     except ValueError as exc:

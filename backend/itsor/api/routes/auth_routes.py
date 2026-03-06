@@ -47,7 +47,7 @@ def signup(body: SignupRequest, response: Response, use_cases: UserUseCases = De
     return AuthTokenResponse(access_token=token)
 
 
-@router.post("/login", response_model=AuthTokenResponse)
+@router.post("/users/signin", response_model=AuthTokenResponse)
 def login(body: SigninRequest, response: Response, use_cases: UserUseCases = Depends(get_user_use_cases)):
     try:
         _, token = use_cases.login(body.identifier, body.password)

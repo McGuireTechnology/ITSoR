@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_tenant_use_cases
+from itsor.api.deps import get_current_user, get_tenant_use_cases
 from itsor.api.schemas.auth.tenant import TenantCreate, TenantReplace, TenantResponse, TenantUpdate
 from itsor.application.use_cases.auth import TenantUseCases
 from itsor.domain.ids import TenantId
 
-router = APIRouter(prefix="/tenants", tags=["tenants"])
+router = APIRouter(prefix="/tenants", tags=["tenants"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=list[TenantResponse])

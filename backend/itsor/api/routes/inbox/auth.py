@@ -8,7 +8,7 @@ from itsor.common.security import authenticate_user, issue_access_token
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/auth/token")
+@router.post("/auth/users/signin")
 def issue_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> dict:

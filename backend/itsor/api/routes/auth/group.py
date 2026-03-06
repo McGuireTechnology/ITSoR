@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_group_use_cases
+from itsor.api.deps import get_current_user, get_group_use_cases
 from itsor.api.schemas.auth.group import GroupCreate, GroupReplace, GroupResponse, GroupUpdate
 from itsor.application.use_cases.auth import GroupUseCases
 from itsor.domain.ids import GroupId, TenantId
 
-router = APIRouter(prefix="/groups", tags=["groups"])
+router = APIRouter(prefix="/groups", tags=["groups"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=list[GroupResponse])

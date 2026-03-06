@@ -2,7 +2,7 @@ from typing import Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_group_membership_use_cases
+from itsor.api.deps import get_current_user, get_group_membership_use_cases
 from itsor.api.schemas.auth.group_membership import (
     GroupMembershipCreate,
     GroupMembershipReplace,
@@ -12,7 +12,11 @@ from itsor.api.schemas.auth.group_membership import (
 from itsor.application.use_cases.auth import GroupMembershipUseCases
 from itsor.domain.ids import GroupId, GroupMembershipId, UserId
 
-router = APIRouter(prefix="/group_memberships", tags=["group_memberships"])
+router = APIRouter(
+    prefix="/group_memberships",
+    tags=["group_memberships"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/", response_model=list[GroupMembershipResponse])

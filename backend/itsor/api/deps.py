@@ -60,7 +60,7 @@ SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "itsor_session")
 ROOT_TENANT_ID = os.getenv("ROOT_TENANT_ID", "").strip() or None
 ROOT_TENANT_NAME = os.getenv("ROOT_TENANT_NAME", "Root").strip().lower()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/users/signin", auto_error=False)
 
 CurrentUser = AuthorizationPrincipal
 

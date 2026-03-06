@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_user_role_use_cases
+from itsor.api.deps import get_current_user, get_user_role_use_cases
 from itsor.api.schemas.auth.user_role import (
     UserRoleCreate,
     UserRoleReplace,
@@ -10,7 +10,7 @@ from itsor.api.schemas.auth.user_role import (
 from itsor.application.use_cases.auth import UserRoleUseCases
 from itsor.domain.ids import RoleId, UserId, UserRoleId
 
-router = APIRouter(prefix="/user_roles", tags=["user_roles"])
+router = APIRouter(prefix="/user_roles", tags=["user_roles"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=list[UserRoleResponse])

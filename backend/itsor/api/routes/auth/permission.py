@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from itsor.api.deps import get_permission_use_cases
+from itsor.api.deps import get_current_user, get_permission_use_cases
 from itsor.api.schemas.auth.permission import (
     PermissionCreate,
     PermissionReplace,
@@ -10,7 +10,7 @@ from itsor.api.schemas.auth.permission import (
 from itsor.application.use_cases.auth import PermissionUseCases
 from itsor.domain.ids import PermissionId
 
-router = APIRouter(prefix="/permissions", tags=["permissions"])
+router = APIRouter(prefix="/permissions", tags=["permissions"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model=list[PermissionResponse])
