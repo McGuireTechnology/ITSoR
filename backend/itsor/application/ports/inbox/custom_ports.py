@@ -1,30 +1,30 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Optional
 
-from itsor.application.ports.base_repository import BaseRepository
+from itsor.application.ports.inbox.base_repository import BaseRepository
 
 
-class WorkspaceRepository(BaseRepository[CustomWorkspace], ABC):
+class WorkspaceRepository(BaseRepository[Any], ABC):
     @abstractmethod
-    def get_by_name(self, name: str, tenant_id: str | None = None) -> Optional[CustomWorkspace]:
+    def get_by_name(self, name: str, tenant_id: str | None = None) -> Optional[Any]:
         ...
 
 
-class NamespaceRepository(BaseRepository[CustomNamespace], ABC):
+class NamespaceRepository(BaseRepository[Any], ABC):
     @abstractmethod
-    def get_by_name(self, name: str, workspace_id: str) -> Optional[CustomNamespace]:
+    def get_by_name(self, name: str, workspace_id: str) -> Optional[Any]:
         ...
 
 
-class EntityTypeRepository(BaseRepository[CustomEntityType], ABC):
+class EntityTypeRepository(BaseRepository[Any], ABC):
     @abstractmethod
-    def get_by_name(self, name: str, namespace_id: str) -> Optional[CustomEntityType]:
+    def get_by_name(self, name: str, namespace_id: str) -> Optional[Any]:
         ...
 
 
-class EntityRecordRepository(BaseRepository[CustomEntityRecord], ABC):
+class EntityRecordRepository(BaseRepository[Any], ABC):
     @abstractmethod
-    def get_by_name(self, name: str, entity_type_id: str) -> Optional[CustomEntityRecord]:
+    def get_by_name(self, name: str, entity_type_id: str) -> Optional[Any]:
         ...
 
 

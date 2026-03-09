@@ -2,6 +2,15 @@
 
 from itsor.domain.ids import GroupId, PermissionId, RoleId, TenantId, UserId
 from itsor.domain.models.group_models import Group, GroupMembership, GroupRole
+from itsor.domain.models.navigation_models import (
+    ItemType,
+    Module,
+    ModuleResource,
+    ModuleType,
+    NavigationItem,
+    NavigationView,
+    ViewType,
+)
 from itsor.domain.models.permission_models import (
     AclPolicy,
     AclPrincipal,
@@ -21,11 +30,13 @@ from itsor.domain.models.tenant_models import Tenant
 from itsor.domain.models.user_models import User, UserRole, UserTenant
 
 GroupMember = GroupMembership
+DEFAULT_PERMISSIONS = 0
 
 __all__ = [
     "Group",
     "GroupMembership",
     "GroupMember",
+    "DEFAULT_PERMISSIONS",
     "GroupRole",
     "UserId",
     "TenantId",
@@ -34,6 +45,13 @@ __all__ = [
     "PermissionId",
     "Permission",
     "PermissionEffect",
+    "Module",
+    "ModuleType",
+    "ModuleResource",
+    "NavigationView",
+    "ViewType",
+    "NavigationItem",
+    "ItemType",
     "AclScope",
     "AclPrincipalType",
     "AclPrincipal",

@@ -1,9 +1,14 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import WorkspaceDetailBlade from '../components/blades/WorkspaceDetailBlade.vue'
 import { createWorkspace, listWorkspaces } from '../lib/api'
+import { useBladeStack } from '../lib/blades'
 import { formatNameId } from '../lib/formatters'
 import { useDomainPermissions } from '../lib/permissions'
 
+const router = useRouter()
+const bladeStack = useBladeStack()
 const workspaces = ref([])
 const domain = ref('workspaces')
 const { canWrite } = useDomainPermissions(domain)
@@ -47,6 +52,34 @@ async function handleCreateWorkspace() {
   }
 }
 
+function openWorkspace(workspace) {
+  if (!workspace?.id) {
+    return
+  }
+
+  const workspaceId = String(workspace.id)
+  const bladeId = `workspace-detail-${workspaceId}`
+
+  router.push(`/customization/workspaces/${workspaceId}`)
+
+  if (!bladeStack) {
+    return
+  }
+
+  bladeStack.closeBlade(bladeId)
+  bladeStack.openBlade({
+    id: bladeId,
+    type: 'detail',
+    title: formatNameId(workspace.name, workspace.id, '(unnamed workspace)'),
+    subtitle: workspace.id,
+    component: WorkspaceDetailBlade,
+    props: {
+      workspaceId,
+      bladeId,
+    },
+  })
+}
+
 onMounted(loadWorkspaces)
 </script>
 
@@ -73,7 +106,9 @@ onMounted(loadWorkspaces)
 
     <ul v-else class="user-list">
       <li v-for="workspace in workspaces" :key="workspace.id">
-        <RouterLink :to="`/customization/workspaces/${workspace.id}`">{{ formatNameId(workspace.name, workspace.id, '(unnamed workspace)') }}</RouterLink>
+        <button class="btn btn-link p-0" type="button" @click="openWorkspace(workspace)">
+          {{ formatNameId(workspace.name, workspace.id, '(unnamed workspace)') }}
+        </button>
         <span class="meta">{{ workspace.id }} · owner: {{ workspace.owner_id || '-' }} · group: {{ workspace.group_id || '-' }} · perms: {{ workspace.permissions ?? '-' }}</span>
       </li>
     </ul>

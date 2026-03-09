@@ -92,6 +92,10 @@ pre-commit run --all-files
 - `tests/` cross-project integration/e2e scaffolding
 - `.github/workflows/` CI and deployment workflows
 
+## Authorization
+
+- Canonical resolution order and precedence: [Authorization Resolution Policy](authorization-resolution-policy.md)
+
 ## Contribution Workflow
 
 1. Create a feature branch.

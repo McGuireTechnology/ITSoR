@@ -3,6 +3,7 @@ from typing import Any, List, Literal, Optional, Protocol, cast
 
 from itsor.domain.models import (
     Group,
+    GroupMembership,
     Permission,
     Resource,
     ResourceAction,
@@ -12,7 +13,6 @@ from itsor.domain.models import (
     Tenant,
     User,
     UserTenant,
-    auth_models,
 )
 from itsor.domain.ids import GroupId, PermissionId, RoleId, TenantId, UserId
 from itsor.application.ports.auth.repositories import (
@@ -1076,15 +1076,15 @@ class PlatformGroupMembershipUseCases:
 
 class AuthModelCatalogUseCases:
     _auth_model_classes = {
-        "User": auth_models.User,
-        "Tenant": auth_models.Tenant,
-        "Group": auth_models.Group,
-        "Role": auth_models.Role,
-        "Permission": auth_models.Permission,
-        "UserTenant": auth_models.UserTenant,
-        "GroupMembership": auth_models.GroupMembership,
-        "RoleAssignment": auth_models.RoleAssignment,
-        "RolePermission": auth_models.RolePermission,
+        "User": User,
+        "Tenant": Tenant,
+        "Group": Group,
+        "Role": Role,
+        "Permission": Permission,
+        "UserTenant": UserTenant,
+        "GroupMembership": GroupMembership,
+        "RoleAssignment": RoleAssignment,
+        "RolePermission": RolePermission,
     }
 
     @staticmethod

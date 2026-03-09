@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getGroupById, getUserById } from '../lib/api'
+import { isFavorite, resolveRouteFavoriteEntry, toggleFavorite } from '../lib/navigationState'
 import { getListPathForDomain, getWorkspaceForDomain, workspaceConfig } from '../lib/workspaceNav'
 
 const route = useRoute()
@@ -51,6 +52,25 @@ const pageTitle = computed(() => {
   }
   return route.meta.title || 'Workspace'
 })
+
+const currentFavoriteEntry = computed(() => resolveRouteFavoriteEntry(route))
+const currentIsFavorite = computed(() => {
+  const entry = currentFavoriteEntry.value
+  if (!entry) {
+    return false
+  }
+
+  return isFavorite(entry.level, entry.key)
+})
+
+function toggleCurrentFavorite() {
+  const entry = currentFavoriteEntry.value
+  if (!entry) {
+    return
+  }
+
+  toggleFavorite(entry)
+}
 
 const tabs = computed(() => {
   if (isUserDetailRoute.value) {
@@ -175,6 +195,15 @@ const breadcrumbs = computed(() => {
     </nav>
     <div class="page-header-main">
       <h1>{{ pageTitle }}</h1>
+      <button
+        v-if="currentFavoriteEntry"
+        type="button"
+        class="page-favorite-btn"
+        :aria-label="currentIsFavorite ? 'Remove from favorites' : 'Add to favorites'"
+        @click="toggleCurrentFavorite"
+      >
+        {{ currentIsFavorite ? '★ Favorited' : '☆ Favorite' }}
+      </button>
     </div>
     <div v-if="showTabs" class="page-tabs" role="tablist" aria-label="Page tabs">
       <component

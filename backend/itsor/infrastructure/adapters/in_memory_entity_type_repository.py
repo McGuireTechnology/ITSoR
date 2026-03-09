@@ -1,6 +1,6 @@
 from typing import Any
 
-from itsor.application.ports.custom_ports import EntityTypeRepository
+from itsor.application.ports.inbox.custom_ports import EntityTypeRepository
 from itsor.infrastructure.adapters.in_memory_base_repository import InMemoryBaseRepository
 
 

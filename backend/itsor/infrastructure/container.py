@@ -1,6 +1,6 @@
 import os
 
-from itsor.application.ports.custom_ports import EntityRecordRepository, EntityTypeRepository, NamespaceRepository, WorkspaceRepository
+from itsor.application.ports.inbox.custom_ports import EntityRecordRepository, EntityTypeRepository, NamespaceRepository, WorkspaceRepository
 from itsor.application.ports.auth import (
     GroupMembershipRepository,
     GroupRepository,

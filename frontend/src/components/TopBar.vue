@@ -12,6 +12,7 @@ import {
   listWorkspaces,
 } from '../lib/api'
 import { formatNameId } from '../lib/formatters'
+import { favoriteEntries, recentEntries, trackRouteVisit } from '../lib/navigationState'
 import brandLogo from '../assets/itsor-cube-logo.svg'
 
 const router = useRouter()
@@ -124,12 +125,18 @@ const recentSearchTerms = ref([])
 const searchTypeFilter = ref('all')
 const searchWrapRef = ref(null)
 const appLauncherWrapRef = ref(null)
+const favoritesWrapRef = ref(null)
+const recentsWrapRef = ref(null)
 const userMenuWrapRef = ref(null)
 const tenantContextWrapRef = ref(null)
 const appLauncherOpen = ref(false)
+const favoritesOpen = ref(false)
+const recentsOpen = ref(false)
 const userMenuOpen = ref(false)
 const tenantContextOpen = ref(false)
 const appLauncherPinned = ref(false)
+const favoritesPinned = ref(false)
+const recentsPinned = ref(false)
 const userMenuPinned = ref(false)
 const tenantContextPinned = ref(false)
 const searchPinned = ref(false)
@@ -252,6 +259,8 @@ const canCreateFromSearch = computed(() => {
   }
   return !tenantOptions.value.some((tenant) => matchesTenantSearch(tenant, term))
 })
+const topBarFavorites = computed(() => favoriteEntries.value.slice(0, 20))
+const topBarRecents = computed(() => recentEntries.value.slice(0, 20))
 const searchTypeOptions = computed(() => [{ key: 'all', label: 'All Objects' }, ...searchSources.map((source) => ({ key: source.key, label: source.label }))])
 const searchPlaceholder = computed(() => {
   if (searchTypeFilter.value === 'all') {
@@ -279,15 +288,21 @@ const showSearchDropdown = computed(() => {
 
 function closeMenus() {
   appLauncherOpen.value = false
+  favoritesOpen.value = false
+  recentsOpen.value = false
   userMenuOpen.value = false
   tenantContextOpen.value = false
   appLauncherPinned.value = false
+  favoritesPinned.value = false
+  recentsPinned.value = false
   userMenuPinned.value = false
   tenantContextPinned.value = false
 }
 
 function openAppLauncher() {
   appLauncherOpen.value = true
+  favoritesOpen.value = false
+  recentsOpen.value = false
   userMenuOpen.value = false
 }
 
@@ -305,9 +320,77 @@ function toggleAppLauncherPin() {
   }
 
   appLauncherPinned.value = true
+  favoritesPinned.value = false
+  recentsPinned.value = false
   userMenuPinned.value = false
   tenantContextPinned.value = false
   appLauncherOpen.value = true
+  favoritesOpen.value = false
+  recentsOpen.value = false
+  userMenuOpen.value = false
+  tenantContextOpen.value = false
+}
+
+function openFavoritesMenu() {
+  favoritesOpen.value = true
+  appLauncherOpen.value = false
+  recentsOpen.value = false
+  userMenuOpen.value = false
+}
+
+function closeFavoritesMenu() {
+  if (!favoritesPinned.value) {
+    favoritesOpen.value = false
+  }
+}
+
+function toggleFavoritesPin() {
+  if (favoritesPinned.value) {
+    favoritesPinned.value = false
+    favoritesOpen.value = false
+    return
+  }
+
+  favoritesPinned.value = true
+  appLauncherPinned.value = false
+  recentsPinned.value = false
+  userMenuPinned.value = false
+  tenantContextPinned.value = false
+  favoritesOpen.value = true
+  appLauncherOpen.value = false
+  recentsOpen.value = false
+  userMenuOpen.value = false
+  tenantContextOpen.value = false
+}
+
+function openRecentsMenu() {
+  recentsOpen.value = true
+  appLauncherOpen.value = false
+  favoritesOpen.value = false
+  userMenuOpen.value = false
+}
+
+function closeRecentsMenu() {
+  if (!recentsPinned.value) {
+    recentsOpen.value = false
+  }
+}
+
+function toggleRecentsPin() {
+  if (recentsPinned.value) {
+    recentsPinned.value = false
+    recentsOpen.value = false
+    return
+  }
+
+  recentsPinned.value = true
+  appLauncherPinned.value = false
+  favoritesPinned.value = false
+  userMenuPinned.value = false
+  tenantContextPinned.value = false
+  recentsOpen.value = true
+  appLauncherOpen.value = false
+  favoritesOpen.value = false
   userMenuOpen.value = false
   tenantContextOpen.value = false
 }
@@ -315,6 +398,8 @@ function toggleAppLauncherPin() {
 function openUserMenu() {
   userMenuOpen.value = true
   appLauncherOpen.value = false
+  favoritesOpen.value = false
+  recentsOpen.value = false
 }
 
 function closeUserMenu() {
@@ -448,6 +533,8 @@ async function openTenantsMasterView() {
 function handleDocumentClick(event) {
   const searchWrap = searchWrapRef.value
   const appWrap = appLauncherWrapRef.value
+  const favoritesWrap = favoritesWrapRef.value
+  const recentsWrap = recentsWrapRef.value
   const userWrap = userMenuWrapRef.value
   const tenantWrap = tenantContextWrapRef.value
   const target = event.target
@@ -457,6 +544,14 @@ function handleDocumentClick(event) {
   }
 
   if (appWrap && appWrap.contains(target)) {
+    return
+  }
+
+  if (favoritesWrap && favoritesWrap.contains(target)) {
+    return
+  }
+
+  if (recentsWrap && recentsWrap.contains(target)) {
     return
   }
 
@@ -673,6 +768,14 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => route.fullPath,
+  () => {
+    trackRouteVisit(route)
+  },
+  { immediate: true },
+)
+
 onMounted(() => {
   loadTenantContext()
   loadSearchRecents()
@@ -695,46 +798,111 @@ onUnmounted(() => {
 <template>
   <header class="top-bar bg-brand-deep text-primary-foreground border-brand-purple">
     <div class="topbar-left">
-      <div
-        ref="appLauncherWrapRef"
-        class="app-launcher-wrap dropdown"
-        :class="{ show: appLauncherOpen }"
-        @mouseenter="openAppLauncher"
-        @mouseleave="closeAppLauncher"
-      >
-        <button
-          type="button"
-          class="icon-button app-launcher dropdown-toggle"
-          aria-label="App launcher"
+      <div class="topbar-left-tools">
+        <div
+          ref="appLauncherWrapRef"
+          class="app-launcher-wrap dropdown"
           :class="{ show: appLauncherOpen }"
-          :aria-expanded="appLauncherOpen ? 'true' : 'false'"
-          @click.stop="toggleAppLauncherPin"
+          @mouseenter="openAppLauncher"
+          @mouseleave="closeAppLauncher"
         >
-          <svg class="topbar-icon-glyph app-drawer-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <circle cx="6" cy="6" r="1.5" />
-            <circle cx="12" cy="6" r="1.5" />
-            <circle cx="18" cy="6" r="1.5" />
-            <circle cx="6" cy="12" r="1.5" />
-            <circle cx="12" cy="12" r="1.5" />
-            <circle cx="18" cy="12" r="1.5" />
-            <circle cx="6" cy="18" r="1.5" />
-            <circle cx="12" cy="18" r="1.5" />
-            <circle cx="18" cy="18" r="1.5" />
-          </svg>
-        </button>
-        <div class="app-menu dropdown-menu" :class="{ show: appLauncherOpen }" aria-label="App launcher menu">
-          <p class="app-menu-title">Apps</p>
-          <ul class="app-menu-list">
-            <li v-for="resource in appResources" :key="resource.to">
-              <RouterLink class="app-menu-link dropdown-item" :to="resource.to" @click="closeMenus">{{ resource.label }}</RouterLink>
-            </li>
-          </ul>
-          <div class="app-menu-favorites">
+          <button
+            type="button"
+            class="icon-button app-launcher dropdown-toggle"
+            aria-label="App launcher"
+            :class="{ show: appLauncherOpen }"
+            :aria-expanded="appLauncherOpen ? 'true' : 'false'"
+            @click.stop="toggleAppLauncherPin"
+          >
+            <svg class="topbar-icon-glyph app-drawer-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="6" cy="6" r="1.5" />
+              <circle cx="12" cy="6" r="1.5" />
+              <circle cx="18" cy="6" r="1.5" />
+              <circle cx="6" cy="12" r="1.5" />
+              <circle cx="12" cy="12" r="1.5" />
+              <circle cx="18" cy="12" r="1.5" />
+              <circle cx="6" cy="18" r="1.5" />
+              <circle cx="12" cy="18" r="1.5" />
+              <circle cx="18" cy="18" r="1.5" />
+            </svg>
+          </button>
+          <div class="app-menu dropdown-menu" :class="{ show: appLauncherOpen }" aria-label="App launcher menu">
+            <p class="app-menu-title">Apps</p>
+            <ul class="app-menu-list">
+              <li v-for="resource in appResources" :key="resource.to">
+                <RouterLink class="app-menu-link dropdown-item" :to="resource.to" @click="closeMenus">{{ resource.label }}</RouterLink>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          ref="favoritesWrapRef"
+          class="favorites-menu-wrap dropdown"
+          :class="{ show: favoritesOpen }"
+          @mouseenter="openFavoritesMenu"
+          @mouseleave="closeFavoritesMenu"
+        >
+          <button
+            type="button"
+            class="topbar-mini-menu-trigger dropdown-toggle"
+            :class="{ show: favoritesOpen }"
+            aria-label="Favorites"
+            title="Favorites"
+            :aria-expanded="favoritesOpen ? 'true' : 'false'"
+            @click.stop="toggleFavoritesPin"
+          >
+            <svg class="topbar-icon-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3.8l2.5 5.1 5.6.8-4 3.9.9 5.5-5-2.6-5 2.6.9-5.5-4-3.9 5.6-.8z" fill="currentColor" />
+            </svg>
+          </button>
+
+          <div class="topbar-mini-menu dropdown-menu" :class="{ show: favoritesOpen }" aria-label="Favorites menu">
             <p class="app-menu-title">Favorites</p>
-            <p class="meta">No favorites yet.</p>
+            <ul v-if="topBarFavorites.length" class="app-menu-list">
+              <li v-for="favorite in topBarFavorites" :key="favorite.id">
+                <RouterLink class="app-menu-link dropdown-item" :to="favorite.to" @click="closeMenus">{{ favorite.label }}</RouterLink>
+              </li>
+            </ul>
+            <p v-else class="meta">No favorites yet.</p>
+          </div>
+        </div>
+
+        <div
+          ref="recentsWrapRef"
+          class="recents-menu-wrap dropdown"
+          :class="{ show: recentsOpen }"
+          @mouseenter="openRecentsMenu"
+          @mouseleave="closeRecentsMenu"
+        >
+          <button
+            type="button"
+            class="topbar-mini-menu-trigger dropdown-toggle"
+            :class="{ show: recentsOpen }"
+            aria-label="Recents"
+            title="Recents"
+            :aria-expanded="recentsOpen ? 'true' : 'false'"
+            @click.stop="toggleRecentsPin"
+          >
+            <svg class="topbar-icon-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 6.5a5.5 5.5 0 1 1-3.9 1.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+              <path d="M4.8 6.2h3.8v3.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M12 9v3.2l2.1 1.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <div class="topbar-mini-menu dropdown-menu" :class="{ show: recentsOpen }" aria-label="Recents menu">
+            <p class="app-menu-title">Recent Resources and Items</p>
+            <ul v-if="topBarRecents.length" class="app-menu-list">
+              <li v-for="recent in topBarRecents" :key="recent.id">
+                <RouterLink class="app-menu-link dropdown-item" :to="recent.to" @click="closeMenus">{{ recent.label }}</RouterLink>
+              </li>
+            </ul>
+            <p v-else class="meta">No recents yet.</p>
           </div>
         </div>
       </div>
+
       <div class="brand-cluster">
         <img class="brand-logo" :src="brandLogo" alt="IT-SoR logo" />
         <div class="brand-block">

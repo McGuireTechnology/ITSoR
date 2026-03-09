@@ -8,7 +8,7 @@ from itsor.application.ports.auth.repositories import (
     UserRepository,
 )
 from itsor.domain.ids import GroupId, TenantId, UserId
-from itsor.domain.models.auth_models import Group, Tenant, User
+from itsor.domain.models import Group, Tenant, User
 
 
 class UserUseCases:

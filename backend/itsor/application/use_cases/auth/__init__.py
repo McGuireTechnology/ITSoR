@@ -1,3 +1,6 @@
+from itsor.application.use_cases.auth.authorization_subject_builder import (
+    AuthorizationSubjectBuilder,
+)
 from itsor.application.use_cases.auth.management_use_cases import (
 	GroupMembershipUseCases,
 	GroupRoleUseCases,
@@ -12,6 +15,7 @@ from itsor.application.use_cases.auth.management_use_cases import (
 from itsor.application.use_cases.auth.user_use_cases import UserUseCases
 
 __all__ = [
+	"AuthorizationSubjectBuilder",
 	"GroupMembershipUseCases",
 	"GroupRoleUseCases",
 	"GroupUseCases",

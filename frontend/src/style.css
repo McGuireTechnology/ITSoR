@@ -355,7 +355,7 @@ a:hover {
 .top-bar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 760px) minmax(0, 1fr);
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   position: relative;
   z-index: 1100;
@@ -363,20 +363,30 @@ a:hover {
   color: #f3f2f1;
   border: 1px solid color-mix(in srgb, var(--itsor-deep-blue) 60%, #312e81);
   border-radius: 0;
-  padding: 5px 10px;
+  min-height: 50px;
+  padding: 6px 10px;
 }
 
 .topbar-left,
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .topbar-left {
   grid-column: 1;
   justify-self: start;
   min-width: 0;
+}
+
+.topbar-left-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+  margin-right: 2px;
+  border-right: 1px solid color-mix(in srgb, #ffffff 26%, transparent);
 }
 
 .topbar-actions {
@@ -397,7 +407,7 @@ a:hover {
 .brand-cluster {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
   position: relative;
 }
@@ -452,7 +462,8 @@ a:hover {
 }
 
 .icon-button {
-  min-width: 28px;
+  min-width: 30px;
+  min-height: 30px;
   padding: 4px;
   background: color-mix(in srgb, #ffffff 18%, transparent);
   color: #f3f2f1;
@@ -477,8 +488,53 @@ a:hover {
 }
 
 .app-launcher.dropdown-toggle::after,
-.user-menu-trigger.dropdown-toggle::after {
+.user-menu-trigger.dropdown-toggle::after,
+.topbar-mini-menu-trigger.dropdown-toggle::after {
   display: none;
+}
+
+.favorites-menu-wrap,
+.recents-menu-wrap {
+  position: relative;
+  padding-bottom: 8px;
+  margin-bottom: -8px;
+}
+
+.topbar-mini-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 3px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #f3f2f1;
+}
+
+.topbar-mini-menu-trigger:hover {
+  background: color-mix(in srgb, #ffffff 16%, transparent);
+}
+
+.topbar-mini-menu-trigger.show,
+.app-launcher.show,
+.tenant-context-trigger.show,
+.user-menu-trigger.show {
+  background: color-mix(in srgb, #ffffff 20%, transparent);
+}
+
+.topbar-mini-menu {
+  width: 320px;
+  max-height: 360px;
+  overflow: auto;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #d2d0ce;
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  z-index: 1110;
+  margin-top: 0;
 }
 
 .app-drawer-icon {
@@ -763,9 +819,15 @@ a:hover {
 }
 
 .topbar-actions .tenant-context-menu,
-.topbar-actions .user-menu {
+.topbar-actions .user-menu,
+.topbar-actions .topbar-mini-menu {
   left: auto;
   right: 0;
+}
+
+.topbar-left .topbar-mini-menu {
+  left: 0;
+  right: auto;
 }
 
 .tenant-context-search-label {
@@ -1142,6 +1204,21 @@ a:hover {
   margin: 0;
 }
 
+.page-favorite-btn {
+  border: 1px solid color-mix(in srgb, var(--itsor-purple) 50%, #94a3b8);
+  background: #ffffff;
+  color: #4c1d95;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+.page-favorite-btn:hover {
+  border-color: #5b21b6;
+  color: #ffffff;
+  background: linear-gradient(135deg, #5b21b6 0%, #be185d 100%);
+}
+
 .breadcrumbs {
   display: flex;
   flex-wrap: wrap;
@@ -1495,6 +1572,46 @@ a:hover {
   position: relative;
 }
 
+.rail-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rail-entry-row .pane-link {
+  flex: 1;
+  min-width: 0;
+}
+
+.rail-favorite-btn {
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  min-width: 24px;
+  padding: 4px;
+  line-height: 1;
+}
+
+.rail-favorite-btn:hover {
+  color: #be185d;
+}
+
+.rail-list-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-list-blade {
+  margin-left: 14px;
+  border-left: 1px dashed color-mix(in srgb, var(--itsor-deep-blue) 24%, #cbd5e1);
+  padding-left: 6px;
+}
+
+.rail-list-link {
+  padding-left: 12px;
+}
+
 .rail-primary-link {
   border: 0;
   background: transparent;
@@ -1604,6 +1721,10 @@ a:hover {
 
 .rail-nav.collapsed .rail-sub-link {
   padding-left: 6px;
+}
+
+.rail-nav.collapsed .rail-favorite-btn {
+  display: none;
 }
 
 .rail-collapse-toggle {

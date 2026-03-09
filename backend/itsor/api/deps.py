@@ -6,15 +6,22 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 
 from itsor.application.use_cases.authorization_use_cases import Action, AuthorizationError, AuthorizationPrincipal, AuthorizationUseCases
-from itsor.application.use_cases.custom_use_cases import EntityRecordUseCases, EntityTypeUseCases, NamespaceUseCases, WorkspaceUseCases
-from itsor.application.use_cases.identity_use_cases import (
-    IdmAccountUseCases,
-    IdmGroupMembershipUseCases,
-    IdmGroupUseCases,
-    IdmIdentityUseCases,
-    IdmPersonUseCases,
-    IdmUserUseCases,
-)
+try:
+    from itsor.application.use_cases.custom_use_cases import EntityRecordUseCases, EntityTypeUseCases, NamespaceUseCases, WorkspaceUseCases
+except ModuleNotFoundError:
+    EntityRecordUseCases = EntityTypeUseCases = NamespaceUseCases = WorkspaceUseCases = Any
+
+try:
+    from itsor.application.use_cases.identity_use_cases import (
+        IdmAccountUseCases,
+        IdmGroupMembershipUseCases,
+        IdmGroupUseCases,
+        IdmIdentityUseCases,
+        IdmPersonUseCases,
+        IdmUserUseCases,
+    )
+except ModuleNotFoundError:
+    IdmAccountUseCases = IdmGroupMembershipUseCases = IdmGroupUseCases = IdmIdentityUseCases = IdmPersonUseCases = IdmUserUseCases = Any
 from itsor.application.use_cases.auth import (
     GroupMembershipUseCases,
     GroupRoleUseCases,

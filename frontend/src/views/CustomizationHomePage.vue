@@ -1,7 +1,37 @@
+<script setup>
+import { useBladeStack } from '../lib/blades'
+import CustomizationAppsBlade from '../components/blades/CustomizationAppsBlade.vue'
+
+const bladeStack = useBladeStack()
+
+function openCustomAppsBlade() {
+  if (!bladeStack) {
+    return
+  }
+
+  const bladeId = 'customization-apps'
+  bladeStack.closeBlade(bladeId)
+  bladeStack.openBlade({
+    id: bladeId,
+    type: 'resource',
+    title: 'Custom Apps',
+    subtitle: 'Explore customization apps in blades',
+    component: CustomizationAppsBlade,
+    props: {
+      bladeId,
+    },
+  })
+}
+</script>
+
 <template>
   <section class="dashboard-page bg-brand-surface rounded-3xl p-4 md:p-5">
     <h2 class="text-brand-deep">Customization Overview</h2>
     <p class="meta">Overview and quick access for schema and workspace customization.</p>
+
+    <button class="btn btn-primary mt-2" type="button" @click="openCustomAppsBlade">
+      Open Custom Apps Blade
+    </button>
 
     <h3 class="section-gap">Shortcuts</h3>
     <div class="shortcut-row">

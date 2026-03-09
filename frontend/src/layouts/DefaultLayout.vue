@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import BladeWorkspace from '../components/BladeWorkspace.vue'
 import CommandBar from '../components/CommandBar.vue'
@@ -63,14 +63,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', syncViewport)
 })
-
-watch(
-  () => route.fullPath,
-  () => {
-    bladeStack.clearBlades()
-    manuallyInspectorHidden.value = false
-  },
-)
 
 function handleCloseTopBlade() {
   bladeStack.closeTopBlade()
