@@ -1,12 +1,6 @@
 # Domain Ports Layer
 
-from itsor.application.ports.base_repository import BaseRepository
-from itsor.application.ports.custom_ports import (
-    EntityRecordRepository,
-    EntityTypeRepository,
-    NamespaceRepository,
-    WorkspaceRepository,
-)
+
 from itsor.application.ports.auth.repositories import (
     GroupRepository,
     GroupRoleRepository,

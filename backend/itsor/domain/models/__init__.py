@@ -1,92 +1,55 @@
 # Domain Models Layer
 
-from itsor.domain.models.base_model import (
-    DEFAULT_CONTROL_FLAGS,
-    DEFAULT_GROUP_PERMISSIONS,
-    DEFAULT_OWNER_PERMISSIONS,
-    DEFAULT_PERMISSIONS,
-    DEFAULT_WORLD_PERMISSIONS,
-    BaseModel,
-    PermissionControlFlag,
-    PermissionLevel,
-)
-from itsor.domain.models.custom_models import (
-    CustomEntityRecord,
-    CustomEntityType,
-    CustomNamespace,
-    CustomWorkspace,
-)
-from itsor.domain.models.idm_models import (
-    IdmAccount,
-    IdmGroup,
-    IdmGroupMembership,
-    IdmIdentity,
-    IdmPerson,
-    IdmUser,
-)
 from itsor.domain.ids import GroupId, PermissionId, RoleId, TenantId, UserId
-from itsor.domain.models.auth_models import (
-    Group,
-    GroupMembership,
+from itsor.domain.models.group_models import Group, GroupMembership, GroupRole
+from itsor.domain.models.permission_models import (
+    AclPolicy,
+    AclPrincipal,
+    AclPrincipalType,
+    AclRowPredicate,
+    AclScope,
+    GroupAclPolicy,
+    OwnerAclPolicy,
     Permission,
-    Resource,
-    ResourceAction,
-    Role,
-    RoleAssignment,
-    RolePermission,
-    Tenant,
-    User,
-    UserTenant,
+    PermissionEffect,
+    ResourceAclPolicy,
+    RowAclPolicy,
 )
+from itsor.domain.models.resource_models import Resource, ResourceAction
+from itsor.domain.models.role_models import Role, RoleAssignment, RolePermission
+from itsor.domain.models.tenant_models import Tenant
+from itsor.domain.models.user_models import User, UserRole, UserTenant
 
 GroupMember = GroupMembership
-UserRole = RoleAssignment
-GroupRole = RoleAssignment
-Namespace = CustomNamespace
-EntityType = CustomEntityType
-EntityRecord = CustomEntityRecord
-Workspace = CustomWorkspace
 
 __all__ = [
-    "BaseModel",
-    "PermissionLevel",
-    "PermissionControlFlag",
-    "DEFAULT_OWNER_PERMISSIONS",
-    "DEFAULT_GROUP_PERMISSIONS",
-    "DEFAULT_WORLD_PERMISSIONS",
-    "DEFAULT_CONTROL_FLAGS",
-    "DEFAULT_PERMISSIONS",
     "Group",
     "GroupMembership",
     "GroupMember",
+    "GroupRole",
     "UserId",
     "TenantId",
     "GroupId",
     "RoleId",
     "PermissionId",
     "Permission",
+    "PermissionEffect",
+    "AclScope",
+    "AclPrincipalType",
+    "AclPrincipal",
+    "AclRowPredicate",
+    "AclPolicy",
     "Resource",
     "ResourceAction",
+    "ResourceAclPolicy",
+    "RowAclPolicy",
+    "OwnerAclPolicy",
+    "GroupAclPolicy",
     "Role",
     "RoleAssignment",
     "RolePermission",
+    "Tenant",
+    "User",
     "UserTenant",
     "UserRole",
-    "GroupRole",
-    "IdmGroup",
-    "IdmGroupMembership",
-    "IdmIdentity",
-    "IdmPerson",
-    "IdmAccount",
-    "IdmUser",
-    "CustomNamespace",
-    "Namespace",
-    "CustomEntityType",
-    "CustomEntityRecord",
-    "Tenant",
-    "EntityType",
-    "EntityRecord",
-    "User",
-    "CustomWorkspace",
-    "Workspace",
 ]

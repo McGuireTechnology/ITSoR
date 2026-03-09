@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from itsor.application.ports.base_repository import BaseRepository
 from itsor.domain.ids import GroupId, TenantId
 from itsor.domain.models.auth_models import (
     Group,

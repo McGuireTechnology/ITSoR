@@ -30,6 +30,7 @@
     "adr": "policy",
     "kb": "docs",
     "itsor": "container",
+    "ids": "keys"
   },
   "python.terminal.activateEnvInCurrentTerminal": true,
   "git.blame.editorDecoration.enabled": true,

@@ -1,6 +1,17 @@
 from fastapi import FastAPI
 
-from itsor.api.routes.auth import tenant_router, user_router, user_role_router, user_tenant_router, group_router, group_membership_router, group_role_router, permission_router, role_router, role_permission_router
+from itsor.api.routes.auth import (
+    group_membership_router,
+    group_role_router,
+    group_router,
+    permission_router,
+    role_permission_router,
+    role_router,
+    tenant_router,
+    user_role_router,
+    user_router,
+    user_tenant_router,
+)
 
 app = FastAPI(
     title="ITSoR : Auth API",

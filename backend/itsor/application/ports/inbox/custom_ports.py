@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from itsor.domain.models import CustomEntityRecord, CustomEntityType, CustomNamespace, CustomWorkspace
 from itsor.application.ports.base_repository import BaseRepository
 
 
