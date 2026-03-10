@@ -4,6 +4,7 @@ from itsor.api.routes.auth import (
     group_membership_router,
     group_role_router,
     group_router,
+    navigation_router,
     permission_router,
     role_permission_router,
     role_router,
@@ -22,6 +23,7 @@ app = FastAPI(
 app.include_router(group_router)
 app.include_router(group_membership_router)
 app.include_router(group_role_router)
+app.include_router(navigation_router)
 app.include_router(permission_router)
 app.include_router(role_router)
 app.include_router(role_permission_router)

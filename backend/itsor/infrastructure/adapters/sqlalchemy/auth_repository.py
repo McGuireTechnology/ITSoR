@@ -11,6 +11,9 @@ from itsor.application.ports.auth.repositories import (
     GroupMembershipRepository,
     GroupRepository,
     GroupRoleRepository,
+    NavigationModuleRepository,
+    NavigationResourceRepository,
+    NavigationViewRepository,
     PasswordHasher,
     PermissionRepository,
     RolePermissionRepository,
@@ -24,6 +27,9 @@ from itsor.application.ports.auth.repositories import (
 from itsor.infrastructure.adapters.sqlalchemy_base_repository import SQLAlchemyBaseRepository
 from itsor.infrastructure.database.sqlalchemy.models.auth import GroupModel
 from itsor.infrastructure.database.sqlalchemy.models.auth import (
+    NavigationModuleModel,
+    NavigationResourceModel,
+    NavigationViewModel,
     PlatformEndpointPermissionModel,
 )
 from itsor.infrastructure.database.sqlalchemy.models.auth import (
@@ -48,6 +54,14 @@ def _normalize_action(value: Any) -> str:
 
 def _to_action(value: str) -> str:
     return str(value).strip().lower()
+
+
+def _enum_value(value: Any, default: str) -> str:
+    if value is None:
+        return default
+    if hasattr(value, "value"):
+        return str(getattr(value, "value"))
+    return str(value)
 
 
 def fetch_platform_endpoint_permissions(
@@ -305,6 +319,132 @@ class SQLAlchemyGroupMembershipRepository(
         record.member_group_id = (
             str(entity.member_group_id) if getattr(entity, "member_group_id", None) is not None else None
         )
+
+
+class SQLAlchemyNavigationModuleRepository(
+    SQLAlchemyBaseRepository[Any, NavigationModuleModel],
+    NavigationModuleRepository,
+):
+    model_class = NavigationModuleModel
+
+    def __init__(self, db: Session) -> None:
+        super().__init__(db, "Navigation module")
+
+    def _to_domain(self, record: NavigationModuleModel) -> Any:
+        return record
+
+    def _to_model(self, entity: Any) -> NavigationModuleModel:
+        return NavigationModuleModel(
+            id=str(entity.id),
+            key=str(entity.key),
+            label=str(entity.label),
+            module_type=_enum_value(getattr(entity, "module_type", None), "custom"),
+            tenant_id=str(entity.tenant_id) if getattr(entity, "tenant_id", None) is not None else None,
+            source_id=str(entity.source_id) if getattr(entity, "source_id", None) is not None else None,
+            icon=getattr(entity, "icon", None),
+            order=int(getattr(entity, "order", 0)),
+            enabled=bool(getattr(entity, "enabled", True)),
+        )
+
+    def _apply_updates(self, record: NavigationModuleModel, entity: Any) -> None:
+        record.key = str(entity.key)
+        record.label = str(entity.label)
+        record.module_type = _enum_value(getattr(entity, "module_type", None), "custom")
+        record.tenant_id = str(entity.tenant_id) if getattr(entity, "tenant_id", None) is not None else None
+        record.source_id = str(entity.source_id) if getattr(entity, "source_id", None) is not None else None
+        record.icon = getattr(entity, "icon", None)
+        record.order = int(getattr(entity, "order", 0))
+        record.enabled = bool(getattr(entity, "enabled", True))
+
+    def list_by_tenant(self, tenant_id: str | None) -> list[Any]:
+        rows = self._db.query(NavigationModuleModel).filter(NavigationModuleModel.tenant_id == tenant_id).all()
+        return [self._to_domain(row) for row in rows]
+
+
+class SQLAlchemyNavigationResourceRepository(
+    SQLAlchemyBaseRepository[Any, NavigationResourceModel],
+    NavigationResourceRepository,
+):
+    model_class = NavigationResourceModel
+
+    def __init__(self, db: Session) -> None:
+        super().__init__(db, "Navigation resource")
+
+    def _to_domain(self, record: NavigationResourceModel) -> Any:
+        return record
+
+    def _to_model(self, entity: Any) -> NavigationResourceModel:
+        return NavigationResourceModel(
+            id=str(entity.id),
+            key=str(entity.key),
+            label=str(entity.label),
+            module_id=str(entity.module_id),
+            list_route=str(getattr(entity, "list_route", "")),
+            tenant_id=str(entity.tenant_id) if getattr(entity, "tenant_id", None) is not None else None,
+            source_id=str(entity.source_id) if getattr(entity, "source_id", None) is not None else None,
+            icon=getattr(entity, "icon", None),
+            order=int(getattr(entity, "order", 0)),
+            enabled=bool(getattr(entity, "enabled", True)),
+        )
+
+    def _apply_updates(self, record: NavigationResourceModel, entity: Any) -> None:
+        record.key = str(entity.key)
+        record.label = str(entity.label)
+        record.module_id = str(entity.module_id)
+        record.list_route = str(getattr(entity, "list_route", ""))
+        record.tenant_id = str(entity.tenant_id) if getattr(entity, "tenant_id", None) is not None else None
+        record.source_id = str(entity.source_id) if getattr(entity, "source_id", None) is not None else None
+        record.icon = getattr(entity, "icon", None)
+        record.order = int(getattr(entity, "order", 0))
+        record.enabled = bool(getattr(entity, "enabled", True))
+
+    def list_by_tenant(self, tenant_id: str | None) -> list[Any]:
+        rows = self._db.query(NavigationResourceModel).filter(NavigationResourceModel.tenant_id == tenant_id).all()
+        return [self._to_domain(row) for row in rows]
+
+
+class SQLAlchemyNavigationViewRepository(
+    SQLAlchemyBaseRepository[Any, NavigationViewModel],
+    NavigationViewRepository,
+):
+    model_class = NavigationViewModel
+
+    def __init__(self, db: Session) -> None:
+        super().__init__(db, "Navigation view")
+
+    def _to_domain(self, record: NavigationViewModel) -> Any:
+        return record
+
+    def _to_model(self, entity: Any) -> NavigationViewModel:
+        return NavigationViewModel(
+            id=str(entity.id),
+            key=str(entity.key),
+            label=str(entity.label),
+            view_type=_enum_value(getattr(entity, "view_type", None), "list"),
+            route=str(getattr(entity, "route", "")),
+            resource_id=str(entity.resource_id),
+            tenant_id=str(entity.tenant_id) if getattr(entity, "tenant_id", None) is not None else None,
+            source_id=str(entity.source_id) if getattr(entity, "source_id", None) is not None else None,
+            icon=getattr(entity, "icon", None),
+            order=int(getattr(entity, "order", 0)),
+            enabled=bool(getattr(entity, "enabled", True)),
+        )
+
+    def _apply_updates(self, record: NavigationViewModel, entity: Any) -> None:
+        record.key = str(entity.key)
+        record.label = str(entity.label)
+        record.view_type = _enum_value(getattr(entity, "view_type", None), "list")
+        record.route = str(getattr(entity, "route", ""))
+        record.resource_id = str(entity.resource_id)
+        record.tenant_id = str(entity.tenant_id) if getattr(entity, "tenant_id", None) is not None else None
+        record.source_id = str(entity.source_id) if getattr(entity, "source_id", None) is not None else None
+        record.icon = getattr(entity, "icon", None)
+        record.order = int(getattr(entity, "order", 0))
+        record.enabled = bool(getattr(entity, "enabled", True))
+
+    def list_by_tenant(self, tenant_id: str | None) -> list[Any]:
+        rows = self._db.query(NavigationViewModel).filter(NavigationViewModel.tenant_id == tenant_id).all()
+        return [self._to_domain(row) for row in rows]
 
 
 class SQLAlchemyPlatformEndpointPermissionGateway:
@@ -652,6 +792,9 @@ __all__ = [
     "SQLAlchemyTenantRepository",
     "SQLAlchemyGroupRepository",
     "SQLAlchemyGroupMembershipRepository",
+    "SQLAlchemyNavigationModuleRepository",
+    "SQLAlchemyNavigationResourceRepository",
+    "SQLAlchemyNavigationViewRepository",
     "SQLAlchemyRoleRepository",
     "SQLAlchemyPermissionRepository",
     "SQLAlchemyUserTenantRepository",

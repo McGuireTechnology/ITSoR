@@ -6,7 +6,7 @@ from itsor.domain.models import (
     GroupMembership,
     Permission,
     Resource,
-    ResourceAction,
+    ResourcePermissionAction,
     Role,
     RoleAssignment,
     RolePermission,
@@ -35,8 +35,8 @@ EndpointAction = Literal["read", "write"]
 
 class GroupUseCases:
     @staticmethod
-    def _default_platform_permissions() -> dict[str, list[ResourceAction | str]]:
-        return {"*": [ResourceAction.READ, "write"]}
+    def _default_platform_permissions() -> dict[str, list[ResourcePermissionAction | str]]:
+        return {"*": [ResourcePermissionAction.READ, "write"]}
 
     def __init__(self, repo: GroupRepository) -> None:
         self._repo = repo
@@ -52,7 +52,7 @@ class GroupUseCases:
         name: str,
         tenant_id: str | None = None,
         creator_user_id: str | None = None,
-        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> Group:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
@@ -70,7 +70,7 @@ class GroupUseCases:
         self,
         group_id: str,
         name: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
@@ -88,7 +88,7 @@ class GroupUseCases:
         self,
         group_id: str,
         name: str,
-        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
@@ -187,8 +187,8 @@ class TenantUseCases:
 
 class UserUseCases:
     @staticmethod
-    def _default_platform_permissions() -> dict[str, list[ResourceAction | str]]:
-        return {"*": [ResourceAction.READ, "write"]}
+    def _default_platform_permissions() -> dict[str, list[ResourcePermissionAction | str]]:
+        return {"*": [ResourcePermissionAction.READ, "write"]}
 
     def __init__(
         self,
@@ -312,7 +312,7 @@ class UserUseCases:
         password: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
-        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> User:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
@@ -338,7 +338,7 @@ class UserUseCases:
         username: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
@@ -368,7 +368,7 @@ class UserUseCases:
         username: str,
         email: str,
         password: str,
-        platform_endpoint_permissions: dict[str, list[ResourceAction | str]] | None = None,
+        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:

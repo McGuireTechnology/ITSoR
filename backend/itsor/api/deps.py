@@ -25,6 +25,7 @@ except ModuleNotFoundError:
 from itsor.application.use_cases.auth import (
     GroupMembershipUseCases,
     GroupRoleUseCases,
+    NavigationAdminUseCases,
     GroupUseCases as AuthGroupUseCases,
     PermissionUseCases,
     RolePermissionUseCases,
@@ -47,6 +48,9 @@ from itsor.infrastructure.container import (
     get_group_membership_repository as container_get_group_membership_repository,
     get_group_repository as container_get_group_repository,
     get_group_role_repository as container_get_group_role_repository,
+    get_navigation_module_repository as container_get_navigation_module_repository,
+    get_navigation_resource_repository as container_get_navigation_resource_repository,
+    get_navigation_view_repository as container_get_navigation_view_repository,
     get_idm_group_gateway as container_get_idm_group_gateway,
     get_namespace_repository as container_get_namespace_repository,
     get_password_hasher as container_get_password_hasher,
@@ -86,6 +90,18 @@ def get_group_repository(db=Depends(get_db)):
 
 def get_group_membership_repository(db=Depends(get_db)):
     return container_get_group_membership_repository(db)
+
+
+def get_navigation_module_repository(db=Depends(get_db)):
+    return container_get_navigation_module_repository(db)
+
+
+def get_navigation_resource_repository(db=Depends(get_db)):
+    return container_get_navigation_resource_repository(db)
+
+
+def get_navigation_view_repository(db=Depends(get_db)):
+    return container_get_navigation_view_repository(db)
 
 
 def get_workspace_repository(db=Depends(get_db)):
@@ -257,6 +273,18 @@ def get_role_permission_use_cases(repo=Depends(get_role_permission_repository)) 
 
 def get_group_membership_use_cases(repo=Depends(get_group_membership_repository)) -> GroupMembershipUseCases:
     return GroupMembershipUseCases(repo)
+
+
+def get_navigation_admin_use_cases(
+    module_repo=Depends(get_navigation_module_repository),
+    resource_repo=Depends(get_navigation_resource_repository),
+    view_repo=Depends(get_navigation_view_repository),
+) -> NavigationAdminUseCases:
+    return NavigationAdminUseCases(
+        module_repo=module_repo,
+        resource_repo=resource_repo,
+        view_repo=view_repo,
+    )
 
 
 def get_auth_rbac_use_cases(

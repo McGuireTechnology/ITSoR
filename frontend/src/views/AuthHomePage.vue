@@ -10,6 +10,7 @@
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/roles">Roles</RouterLink>
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/permissions">Permissions</RouterLink>
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/auth/tenants">Tenants</RouterLink>
+      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/admin/navigation">Navigation</RouterLink>
     </div>
   </section>
 </template>

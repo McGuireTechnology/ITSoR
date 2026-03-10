@@ -6,6 +6,9 @@ from itsor.domain.ids import GroupId, TenantId
 from itsor.domain.models import (
     Group,
     GroupMembership,
+    Module,
+    ModuleResource,
+    NavigationView,
     Permission,
     Role,
     RoleAssignment,
@@ -63,6 +66,21 @@ class GroupRoleRepository(RoleAssignmentRepository, ABC): ...
 
 
 class RolePermissionRepository(BaseRepository[RolePermission], ABC): ...
+
+
+class NavigationModuleRepository(BaseRepository[Module], ABC):
+    @abstractmethod
+    def list_by_tenant(self, tenant_id: str | None) -> list[Module]: ...
+
+
+class NavigationResourceRepository(BaseRepository[ModuleResource], ABC):
+    @abstractmethod
+    def list_by_tenant(self, tenant_id: str | None) -> list[ModuleResource]: ...
+
+
+class NavigationViewRepository(BaseRepository[NavigationView], ABC):
+    @abstractmethod
+    def list_by_tenant(self, tenant_id: str | None) -> list[NavigationView]: ...
 
 
 class PasswordHasher(ABC):

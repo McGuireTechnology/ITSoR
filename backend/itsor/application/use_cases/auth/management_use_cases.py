@@ -28,7 +28,7 @@ from itsor.domain.models import (
     GroupMembership,
     Permission,
     Resource,
-    ResourceAction,
+    ResourcePermissionAction,
     Role,
     RoleAssignment,
     RolePermission,
@@ -181,7 +181,7 @@ class PermissionUseCases:
         permission = Permission(
             name=name,
             resource=Resource(resource),
-            action=ResourceAction(action),
+            action=ResourcePermissionAction(action),
         )
         return self._repo.create(permission)
 

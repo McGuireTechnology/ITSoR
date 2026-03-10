@@ -7,6 +7,9 @@ from itsor.application.ports.auth import (
     TenantRepository,
     UserRepository,
     GroupRoleRepository,
+    NavigationModuleRepository,
+    NavigationResourceRepository,
+    NavigationViewRepository,
     PasswordHasher,
     PermissionRepository,
     RolePermissionRepository,
@@ -30,6 +33,9 @@ from itsor.infrastructure.adapters.sqlalchemy.auth_repository import (
     SQLAlchemyGroupMembershipRepository,
     SQLAlchemyGroupRepository,
     SQLAlchemyGroupRoleRepository,
+    SQLAlchemyNavigationModuleRepository,
+    SQLAlchemyNavigationResourceRepository,
+    SQLAlchemyNavigationViewRepository,
     SQLAlchemyPermissionRepository,
     SQLAlchemyPlatformEndpointPermissionGateway,
     SQLAlchemyPlatformGroupMembershipGateway,
@@ -76,6 +82,18 @@ def _get_group_repository_sqlalchemy(db=None) -> GroupRepository:
 
 def _get_group_membership_repository_sqlalchemy(db=None) -> GroupMembershipRepository:
     return SQLAlchemyGroupMembershipRepository(db)
+
+
+def _get_navigation_module_repository_sqlalchemy(db=None) -> NavigationModuleRepository:
+    return SQLAlchemyNavigationModuleRepository(db)
+
+
+def _get_navigation_resource_repository_sqlalchemy(db=None) -> NavigationResourceRepository:
+    return SQLAlchemyNavigationResourceRepository(db)
+
+
+def _get_navigation_view_repository_sqlalchemy(db=None) -> NavigationViewRepository:
+    return SQLAlchemyNavigationViewRepository(db)
 
 
 def _get_workspace_repository_sqlalchemy(db=None) -> WorkspaceRepository:
@@ -163,6 +181,18 @@ def _get_group_membership_repository_memory() -> GroupMembershipRepository:
     raise _raise_platform_sqlalchemy_required()
 
 
+def _get_navigation_module_repository_memory() -> NavigationModuleRepository:
+    raise _raise_platform_sqlalchemy_required()
+
+
+def _get_navigation_resource_repository_memory() -> NavigationResourceRepository:
+    raise _raise_platform_sqlalchemy_required()
+
+
+def _get_navigation_view_repository_memory() -> NavigationViewRepository:
+    raise _raise_platform_sqlalchemy_required()
+
+
 def _get_workspace_repository_memory() -> WorkspaceRepository:
     return _MEMORY_WORKSPACE_REPOSITORY
 
@@ -239,6 +269,18 @@ def _get_group_membership_repository_unsupported() -> GroupMembershipRepository:
     raise _unsupported_backend()
 
 
+def _get_navigation_module_repository_unsupported() -> NavigationModuleRepository:
+    raise _unsupported_backend()
+
+
+def _get_navigation_resource_repository_unsupported() -> NavigationResourceRepository:
+    raise _unsupported_backend()
+
+
+def _get_navigation_view_repository_unsupported() -> NavigationViewRepository:
+    raise _unsupported_backend()
+
+
 def _get_workspace_repository_unsupported() -> WorkspaceRepository:
     raise _unsupported_backend()
 
@@ -304,6 +346,9 @@ if BACKEND == "sqlalchemy":
     get_tenant_repository = _get_tenant_repository_sqlalchemy
     get_group_repository = _get_group_repository_sqlalchemy
     get_group_membership_repository = _get_group_membership_repository_sqlalchemy
+    get_navigation_module_repository = _get_navigation_module_repository_sqlalchemy
+    get_navigation_resource_repository = _get_navigation_resource_repository_sqlalchemy
+    get_navigation_view_repository = _get_navigation_view_repository_sqlalchemy
     get_workspace_repository = _get_workspace_repository_sqlalchemy
     get_namespace_repository = _get_namespace_repository_sqlalchemy
     get_entity_type_repository = _get_entity_type_repository_sqlalchemy
@@ -324,6 +369,9 @@ elif BACKEND == "memory":
     get_tenant_repository = _get_tenant_repository_memory
     get_group_repository = _get_group_repository_memory
     get_group_membership_repository = _get_group_membership_repository_memory
+    get_navigation_module_repository = _get_navigation_module_repository_memory
+    get_navigation_resource_repository = _get_navigation_resource_repository_memory
+    get_navigation_view_repository = _get_navigation_view_repository_memory
     get_workspace_repository = _get_workspace_repository_memory
     get_namespace_repository = _get_namespace_repository_memory
     get_entity_type_repository = _get_entity_type_repository_memory
@@ -344,6 +392,9 @@ else:
     get_tenant_repository = _get_tenant_repository_unsupported
     get_group_repository = _get_group_repository_unsupported
     get_group_membership_repository = _get_group_membership_repository_unsupported
+    get_navigation_module_repository = _get_navigation_module_repository_unsupported
+    get_navigation_resource_repository = _get_navigation_resource_repository_unsupported
+    get_navigation_view_repository = _get_navigation_view_repository_unsupported
     get_workspace_repository = _get_workspace_repository_unsupported
     get_namespace_repository = _get_namespace_repository_unsupported
     get_entity_type_repository = _get_entity_type_repository_unsupported
@@ -365,6 +416,9 @@ __all__ = [
     "get_entity_record_repository",
     "get_entity_type_repository",
     "get_group_repository",
+    "get_navigation_module_repository",
+    "get_navigation_resource_repository",
+    "get_navigation_view_repository",
     "get_group_role_repository",
     "get_idm_group_gateway",
     "get_namespace_repository",
