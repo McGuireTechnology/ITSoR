@@ -13,5 +13,9 @@ struct ITSoRApp: App {
         WindowGroup {
             ContentView()
         }
+#if os(macOS)
+        .windowStyle(.hiddenTitleBar)
+    .windowToolbarStyle(.unifiedCompact(showsTitle: false))
+#endif
     }
 }
