@@ -12,6 +12,45 @@ This reference covers the required first-class model areas:
 - Evidence linkage
 - Drift snapshots and temporal reconstruction
 
+## Domain Model Alias Policy
+
+Domain model exports should prefer canonical bounded-context names and avoid broad semantic renames.
+
+### Canonical exports
+
+- `Module`, `ModuleRole`, `ModuleUser` are the canonical module-domain types.
+- `GroupMembership` is the canonical record type, while `GroupMember` may be used as a focused readability alias.
+
+### Deprecated aliases
+
+The following aliases are deprecated and should be migrated:
+
+| Deprecated alias | Canonical symbol |
+| --- | --- |
+| `App` | `Module` |
+| `AppRole` | `ModuleRole` |
+| `AppUser` | `ModuleUser` |
+
+These aliases currently remain available through a deprecation path to preserve public imports during migration.
+
+### Migration examples
+
+```python
+# Before
+from itsor.domain.models import App, AppRole, AppUser
+
+# After
+from itsor.domain.models import Module, ModuleRole, ModuleUser
+```
+
+```python
+# Before
+from itsor.domain.models.module_models import App
+
+# After
+from itsor.domain.models.module_models import Module
+```
+
 ## Asset-Centric Entities
 
 Assets are the primary anchor and must be represented as explicit entities, not generic blobs.

@@ -174,7 +174,7 @@ Core architecture framing:
 Add Architecture Decision Records (ADRs) in a dedicated section when introducing major technical changes.
 
 - ADR index: [Architecture Decision Records (ADRs)](adr/README.md)
-- Latest: [ADR-0002: Backend Slice Package Layout Standard](adr/0002-backend-slice-package-layout.md)
+- Latest: [ADR-0003: Domain Authorization Resolution Precedence and Tie-Break Rules](adr/0003-domain-authorization-resolution-precedence.md)
 
 ## Backend subapp route map
 

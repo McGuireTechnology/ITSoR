@@ -6,3 +6,4 @@ This section tracks major technical decisions for backend and platform architect
 
 - [ADR-0001: Hexagonal Ports/Adapters Boundaries for Vertical Slices](0001-hexagonal-ports-adapters-boundaries.md)
 - [ADR-0002: Backend Slice Package Layout Standard](0002-backend-slice-package-layout.md)
+- [ADR-0003: Domain Authorization Resolution Precedence and Tie-Break Rules](0003-domain-authorization-resolution-precedence.md)

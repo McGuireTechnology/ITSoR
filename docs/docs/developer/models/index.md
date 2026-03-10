@@ -1,34 +1,28 @@
 # Domain Models
 
-This section defines the core domain slices for ITSoR.
+Developer documentation for identity and access models in the backend domain layer.
 
-## Modeling Intent
+## Identity & Access
 
-- `Index`, `Auth`, and `Platform` are operational slices that enable ITSoR to run.
-- `GRC`, `IDM`, and `ITAM` are value slices that explain why ITSoR exists.
-- All slices align to canonical identifiers, temporal history, and explicit relationships.
+- [User Management Overview](./user_management.md)
+- [User Models](./user_models.md)
+- [Group Models](./group_models.md)
+- [Tenant Models](./tenant_models.md)
+- [Role Models](./role_models.md)
+- [Permission Models](./permission_models.md)
 
-## Slices
+## Module & View Models
 
-- [Auth Domain Models](auth.md)
-- [Platform Domain Models](platform.md)
-- [Governance Risk Compliance Domain Models](grc.md)
-- [Identity Management Domain Models](idm.md)
-- [IT Asset Management Domain Models](itam.md)
-- [DDI Domain Models](ddi.md)
+- [Module Models](./module_models.md)
+- [View Models](./view_models.md)
 
-## Roadmap
+## Resource Models
 
-- [Domain Slice Roadmap](../todo/domain-slice-roadmap.md)
-
-## Shared Modeling Rules
-
-All slices should apply these rules:
-
-1. Every first-class entity has an immutable internal ID.
-2. State changes are auditable and reconstructable over time.
-3. Cross-slice links use stable references, not embedded copies.
-4. Assertions and evidence are linked for controls and risk.
-5. Owner and steward identities resolve to IDM principals.
-6. Cross-domain user/person association should use explicit mapping tables (not inline foreign keys).
-7. Platform person display attributes should resolve through mappings to IDM current identity records.
+- [Resource Models Overview](./resource/index.md)
+- [Resource Models Package Init](./resource/init.md)
+- [Module Resource Models](./resource/module_resource_models.md)
+- [Resource Permission Enums](./resource/permissions_models.md)
+- [Resource Schema Models](./resource/schema_models.md)
+- [Resource Action Models](./resource/action_models.md)
+- [Resource Automation Models](./resource/automation_models.md)
+- [Resource Record Models](./resource/record_models.md)

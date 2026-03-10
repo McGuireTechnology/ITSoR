@@ -50,6 +50,9 @@ markdown_extensions:
   - def_list
   - md_in_html
   - tables
+  - plantuml_markdown:
+      server: https://www.plantuml.com/plantuml
+      format: svg
   - pymdownx.details
   - pymdownx.superfences:
       custom_fences:

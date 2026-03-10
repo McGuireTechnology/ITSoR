@@ -5,12 +5,30 @@ ITSoR is a custom app-building platform focused on IT Management Information Sys
 
 ## Platform Focus
 
-ITSoR is designed to support core IT domains, including:
+ITSoR is designed to support requested IT domains, including:
 
-- CMDB (Configuration Management Database)
+- CMP (Cloud Management Platform)
+- DCIM (Data Center Infrastructure Management)
+- ESM (Enterprise Service Management)
+- GRC (Governance, Risk, and Compliance)
+- HAM (Hardware Asset Management)
+- IDAM (Identity and Access Management)
+- IGA (Identity Governance and Administration)
 - ITAM (IT Asset Management)
 - ITSM (IT Service Management)
-- GRC (Governance, Risk, and Compliance)
+- PAM (Privileged Access Management)
+- SAM (Software Asset Management)
+- UEM (Unified Endpoint Management)
+- CMDB (Configuration Management Database)
+- IPAM (IP Address Management)
+- SIEM (Security Information and Event Management)
+- SOAR (Security Orchestration, Automation, and Response)
+- Vulnerability Management
+- Observability (APM, NPM, DEM)
+- Backup/DR
+- CIMP
+- Automation
+- Orchestration
 
 ## Data Exchange
 

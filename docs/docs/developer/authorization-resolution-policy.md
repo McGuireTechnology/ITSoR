@@ -2,6 +2,10 @@
 
 This page defines the domain-level authorization resolution order implemented in the backend policy module.
 
+Related decision record:
+
+- [ADR-0003: Domain Authorization Resolution Precedence and Tie-Break Rules](adr/0003-domain-authorization-resolution-precedence.md)
+
 ## Canonical Evaluation Order
 
 Authorization is resolved in this exact sequence:
@@ -48,6 +52,19 @@ Only `AclScope.RESOURCE` policies for the requested `(resource, action)` are eva
 
 This stage is intentionally evaluated before owner/group authorization.
 
+### Principal precedence for resource policies
+
+When multiple `AclScope.RESOURCE` policies match, the resolver ranks principal types in this order (highest precedence first):
+
+1. `user`
+2. `group`
+3. `role`
+4. `tenant`
+5. `authenticated`
+6. `public`
+
+If two or more matching resource policies tie at the same principal rank and conflict on effect, **deny wins**.
+
 ---
 
 ## Stage 4: Owner or Group authorization within tenant
@@ -57,6 +74,12 @@ Only `AclScope.OWNER` and `AclScope.GROUP` policies are evaluated.
 - If there is no matching owner/group policy, the result from resource-type authorization remains in effect.
 - If there is a conflict among matching owner/group policies at the same rank, **deny wins**.
 - A matching owner/group deny will deny access.
+
+### Scope and principal precedence for owner/group policies
+
+For coarse checks, owner and group are evaluated at the same scope rank, then principal precedence is applied using the same principal order as Stage 3 (`user` -> `group` -> `role` -> `tenant` -> `authenticated` -> `public`).
+
+When coarse policies tie after ranking and conflict on effect, **deny wins**.
 
 ---
 
@@ -71,6 +94,35 @@ Row result is one of:
 - `none`: no row access
 
 If row-level result is `none`, overall authorization is denied.
+
+### Precedence and tie-breaks for row policies
+
+Row policy ranking uses principal precedence first, then specificity (`resource_id` and/or predicates outrank unconstrained policies).
+
+If matching row policies tie at the winning rank and any tied policy denies, the row result is `none`.
+
+---
+
+## Conflict Examples
+
+### Example 1: Same-rank `RESOURCE` conflict
+
+- Matching `RESOURCE` policies:
+	- `authenticated` allow
+	- `authenticated` deny
+- Result: deny (same rank, deny-wins tie-break).
+
+### Example 2: `OWNER` deny with `RESOURCE` allow
+
+- `RESOURCE` stage yields allow.
+- Matching `OWNER` policy at coarse stage yields deny.
+- Result: deny (coarse deny overrides previously allowed resource-stage result).
+
+### Example 3: Row-level deny after coarse allow
+
+- Coarse stages (`RESOURCE`/`OWNER`/`GROUP`) yield allow.
+- Winning row policies resolve to deny (`none`).
+- Result: deny (row gate is final).
 
 ---
 
