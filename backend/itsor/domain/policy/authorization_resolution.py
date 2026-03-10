@@ -16,7 +16,7 @@ from itsor.domain.models.permission_models import (
     ResourceAclPolicy,
     RowAclPolicy,
 )
-from itsor.domain.models.resource_models import Resource, ResourceAction
+from itsor.domain.models.resource_models import Resource, ResourcePermissionAction
 
 
 _PRINCIPAL_PRECEDENCE: dict[AclPrincipalType, int] = {
@@ -85,7 +85,7 @@ def resolve_authorization(
     *,
     subject: AuthorizationSubject,
     resource: Resource,
-    action: ResourceAction,
+    action: ResourcePermissionAction,
     policies: Sequence[AclPolicy],
     resource_tenant_id: str | None = None,
     superuser_role_ids: frozenset[str] = frozenset({"superuser"}),
@@ -294,22 +294,30 @@ def _resolve_row(
     if any(policy.effect == PermissionEffect.DENY for policy in tied):
         return RowAccessResolution(mode=RowAccessMode.NONE)
 
-    allow_policies = [policy for policy in row_candidates if policy.effect == PermissionEffect.ALLOW]
-    if not allow_policies:
+    winning_allow_policies = [
+        policy for policy in tied if policy.effect == PermissionEffect.ALLOW
+    ]
+    if not winning_allow_policies:
         return RowAccessResolution(mode=RowAccessMode.NONE)
+
+    if all(
+        policy.resource_id is None and not policy.predicates
+        for policy in winning_allow_policies
+    ):
+        return RowAccessResolution(mode=RowAccessMode.ALL)
 
     allow_resource_ids = tuple(
         sorted(
             {
                 policy.resource_id
-                for policy in allow_policies
+                for policy in winning_allow_policies
                 if policy.resource_id is not None
             }
         )
     )
     predicates = tuple(
         predicate
-        for policy in allow_policies
+        for policy in winning_allow_policies
         for predicate in policy.predicates
     )
     return RowAccessResolution(
@@ -388,7 +396,9 @@ def _matches_principal(
     if principal_type == AclPrincipalType.ROLE:
         return principal_id is not None and principal_id in subject.role_ids
     if principal_type == AclPrincipalType.TENANT:
-        return principal_id is not None and subject.tenant_id == principal_id
+        return principal_id is not None and (
+            subject.tenant_id == principal_id or principal_id in subject.tenant_ids
+        )
     return False
 
 

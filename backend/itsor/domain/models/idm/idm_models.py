@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-import ulid
+
+from itsor.domain._ulid import new_ulid_str
 
 
 @dataclass
 class IdmGroupMembership:
-    id: str = field(default_factory=lambda: str(ulid.new()))
+    id: str = field(default_factory=new_ulid_str)
     group_id: str = ""
     member_type: str = "user"
     member_user_id: str | None = None
@@ -14,14 +15,14 @@ class IdmGroupMembership:
 
 @dataclass
 class IdmGroup:
-    id: str = field(default_factory=lambda: str(ulid.new()))
+    id: str = field(default_factory=new_ulid_str)
     name: str = ""
     description: str = ""
 
 
 @dataclass
 class IdmIdentity:
-    id: str = field(default_factory=lambda: str(ulid.new()))
+    id: str = field(default_factory=new_ulid_str)
     person_id: str = ""
     source_system: str = ""
     source_record_id: str = ""
@@ -33,14 +34,14 @@ class IdmIdentity:
 
 @dataclass
 class IdmPerson:
-    id: str = field(default_factory=lambda: str(ulid.new()))
+    id: str = field(default_factory=new_ulid_str)
     display_name: str = ""
     current_identity_id: str | None = None
 
 
 @dataclass
 class IdmAccount:
-    id: str = field(default_factory=lambda: str(ulid.new()))
+    id: str = field(default_factory=new_ulid_str)
     person_id: str = ""
     username: str = ""
     account_status: str = "active"

@@ -1,22 +1,21 @@
 from dataclasses import dataclass, field
 from typing import Literal
 
-import ulid
-
+from itsor.domain._ulid import typed_ulid_factory
 from itsor.domain.ids import GroupId, GroupMembershipId, TenantId, UserId
-from itsor.domain.models.resource_models import ResourceAction
+from itsor.domain.models.resource_models import ResourcePermissionAction
 from itsor.domain.models.role_models import RoleAssignment
 
 
 @dataclass
 class Group:
-    id: GroupId = field(default_factory=lambda: GroupId(str(ulid.new())), init=False)
+    id: GroupId = field(default_factory=typed_ulid_factory(GroupId), init=False)
     tenant_id: TenantId | None
     name: str
     owner_id: UserId | None = None
     group_id: GroupId | None = None
     permissions: int | None = None
-    platform_endpoint_permissions: dict[str, list[ResourceAction | str]] = field(
+    platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] = field(
         default_factory=dict
     )
 
@@ -24,7 +23,7 @@ class Group:
 @dataclass
 class GroupMembership:
     id: GroupMembershipId = field(
-        default_factory=lambda: GroupMembershipId(str(ulid.new())), init=False
+        default_factory=typed_ulid_factory(GroupMembershipId), init=False
     )
     group_id: GroupId
     member_type: Literal["user", "group"]

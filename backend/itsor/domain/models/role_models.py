@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Literal
 
-import ulid
-
+from itsor.domain._ulid import typed_ulid_factory
 from itsor.domain.ids import (
     GroupId,
     PermissionId,
@@ -14,18 +13,34 @@ from itsor.domain.ids import (
 )
 
 
+def _normalize_required_text(value: str, field_name: str) -> str:
+    if not isinstance(value, str):
+        raise ValueError(f"{field_name} must be a string")
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError(f"{field_name} is required")
+    return normalized
+
+
 @dataclass
 class Role:
-    id: RoleId = field(default_factory=lambda: RoleId(str(ulid.new())), init=False)
+    id: RoleId = field(default_factory=typed_ulid_factory(RoleId), init=False)
     name: str
     tenant_id: TenantId | None
-    description: str
+    description: str = ""
+
+    def __post_init__(self) -> None:
+        self.name = _normalize_required_text(self.name, "name")
+        if self.description is None:
+            self.description = ""
+        elif isinstance(self.description, str):
+            self.description = self.description.strip()
 
 
 @dataclass
 class RoleAssignment:
     id: RoleAssignmentId = field(
-        default_factory=lambda: RoleAssignmentId(str(ulid.new())),
+        default_factory=typed_ulid_factory(RoleAssignmentId),
         init=False,
     )
     role_id: RoleId
@@ -58,7 +73,7 @@ class RoleAssignment:
 @dataclass
 class RolePermission:
     id: RolePermissionId = field(
-        default_factory=lambda: RolePermissionId(str(ulid.new())), init=False
+        default_factory=typed_ulid_factory(RolePermissionId), init=False
     )
     role_id: RoleId
     permission_id: PermissionId

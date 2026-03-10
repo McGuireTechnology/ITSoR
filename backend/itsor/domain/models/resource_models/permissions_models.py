@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 
 
-class ResourceAction(str, Enum):
+class ResourcePermissionAction(str, Enum):
 	CREATE = "create"
 	READ = "read"
 	UPDATE = "update"
@@ -11,7 +11,7 @@ class ResourceAction(str, Enum):
 	EXECUTE = "execute"
 
 	@classmethod
-	def from_verb(cls, verb: str) -> ResourceAction:
+	def from_verb(cls, verb: str) -> ResourcePermissionAction:
 		normalized = verb.strip().lower()
 		if normalized in {"write", "modify"}:
 			normalized = cls.UPDATE.value
@@ -21,7 +21,7 @@ class ResourceAction(str, Enum):
 			raise ValueError(f"Unsupported action verb '{verb}'") from exc
 
 	@classmethod
-	def from_nibble(cls, value: int) -> ResourceAction:
+	def from_nibble(cls, value: int) -> ResourcePermissionAction:
 		nibble_map = {
 			0x1: cls.CREATE,
 			0x2: cls.READ,
@@ -36,11 +36,11 @@ class ResourceAction(str, Enum):
 
 	def to_nibble(self) -> int:
 		nibble_map = {
-			ResourceAction.CREATE: 0x1,
-			ResourceAction.READ: 0x2,
-			ResourceAction.UPDATE: 0x4,
-			ResourceAction.DELETE: 0x8,
-			ResourceAction.EXECUTE: 0x10,
+			ResourcePermissionAction.CREATE: 0x1,
+			ResourcePermissionAction.READ: 0x2,
+			ResourcePermissionAction.UPDATE: 0x4,
+			ResourcePermissionAction.DELETE: 0x8,
+			ResourcePermissionAction.EXECUTE: 0x10,
 		}
 		return nibble_map[self]
 
@@ -58,5 +58,4 @@ class Resource(str, Enum):
 	ROLE_PERMISSION = "platform.role_permission"
 
 
-__all__ = ["Resource", "ResourceAction"]
-
+__all__ = ["Resource", "ResourcePermissionAction"]

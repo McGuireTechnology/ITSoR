@@ -4,10 +4,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TypeAlias
 
-import ulid
-
+from itsor.domain._ulid import typed_ulid_factory
 from itsor.domain.ids import GroupId, PermissionId, UserId
-from itsor.domain.models.resource_models import Resource, ResourceAction
+from itsor.domain.models.resource_models import Resource, ResourcePermissionAction
 
 AclScalar: TypeAlias = str | int | float | bool | None
 AclValue: TypeAlias = AclScalar | list[AclScalar]
@@ -62,19 +61,19 @@ class AclRowPredicate:
 
 @dataclass
 class Permission:
-	id: PermissionId = field(default_factory=lambda: PermissionId(str(ulid.new())), init=False)
+	id: PermissionId = field(default_factory=typed_ulid_factory(PermissionId), init=False)
 	name: str
 	resource: Resource
-	action: ResourceAction
+	action: ResourcePermissionAction
 	effect: PermissionEffect = PermissionEffect.ALLOW
 
 
 @dataclass
 class BaseAclPolicy:
-	id: PermissionId = field(default_factory=lambda: PermissionId(str(ulid.new())), init=False)
+	id: PermissionId = field(default_factory=typed_ulid_factory(PermissionId), init=False)
 	name: str
 	resource: Resource
-	action: ResourceAction
+	action: ResourcePermissionAction
 	principal: AclPrincipal
 	effect: PermissionEffect = PermissionEffect.ALLOW
 

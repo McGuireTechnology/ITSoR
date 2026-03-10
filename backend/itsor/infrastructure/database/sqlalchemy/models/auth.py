@@ -1,5 +1,5 @@
 import ulid
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase
 
 from itsor.domain.models import DEFAULT_PERMISSIONS
@@ -42,6 +42,60 @@ class TenantModel(Base):
 	owner_id = Column(String(36), nullable=True, index=True)
 	group_id = Column(String(36), nullable=True, index=True)
 	permissions = Column(Integer, nullable=False, default=DEFAULT_PERMISSIONS)
+
+
+class NavigationModuleModel(Base):
+	__tablename__ = "auth_navigation_modules"
+	__table_args__ = (
+		UniqueConstraint("tenant_id", "key", name="uq_auth_navigation_modules_tenant_key"),
+	)
+
+	id = Column(String(36), primary_key=True)
+	key = Column(String(128), nullable=False, index=True)
+	label = Column(String(255), nullable=False)
+	module_type = Column(String(32), nullable=False, default="custom")
+	tenant_id = Column(String(36), ForeignKey("auth_tenants.id"), nullable=True, index=True)
+	source_id = Column(String(36), ForeignKey("auth_navigation_modules.id"), nullable=True, index=True)
+	icon = Column(String(64), nullable=True)
+	order = Column(Integer, nullable=False, default=0)
+	enabled = Column(Boolean, nullable=False, default=True)
+
+
+class NavigationResourceModel(Base):
+	__tablename__ = "auth_navigation_resources"
+	__table_args__ = (
+		UniqueConstraint("tenant_id", "key", "module_id", name="uq_auth_navigation_resources_tenant_key_module"),
+	)
+
+	id = Column(String(36), primary_key=True)
+	key = Column(String(128), nullable=False, index=True)
+	label = Column(String(255), nullable=False)
+	module_id = Column(String(36), ForeignKey("auth_navigation_modules.id"), nullable=False, index=True)
+	list_route = Column(String(255), nullable=False)
+	tenant_id = Column(String(36), ForeignKey("auth_tenants.id"), nullable=True, index=True)
+	source_id = Column(String(36), ForeignKey("auth_navigation_resources.id"), nullable=True, index=True)
+	icon = Column(String(64), nullable=True)
+	order = Column(Integer, nullable=False, default=0)
+	enabled = Column(Boolean, nullable=False, default=True)
+
+
+class NavigationViewModel(Base):
+	__tablename__ = "auth_navigation_views"
+	__table_args__ = (
+		UniqueConstraint("tenant_id", "key", "resource_id", name="uq_auth_navigation_views_tenant_key_resource"),
+	)
+
+	id = Column(String(36), primary_key=True)
+	key = Column(String(128), nullable=False, index=True)
+	label = Column(String(255), nullable=False)
+	view_type = Column(String(32), nullable=False, default="list")
+	route = Column(String(255), nullable=False)
+	resource_id = Column(String(36), ForeignKey("auth_navigation_resources.id"), nullable=False, index=True)
+	tenant_id = Column(String(36), ForeignKey("auth_tenants.id"), nullable=True, index=True)
+	source_id = Column(String(36), ForeignKey("auth_navigation_views.id"), nullable=True, index=True)
+	icon = Column(String(64), nullable=True)
+	order = Column(Integer, nullable=False, default=0)
+	enabled = Column(Boolean, nullable=False, default=True)
 
 
 class RoleModel(Base):
@@ -181,6 +235,9 @@ PlatformUserTenantModel = UserTenantModel
 __all__ = [
 	"Base",
 	"GroupModel",
+	"NavigationModuleModel",
+	"NavigationResourceModel",
+	"NavigationViewModel",
 	"EndpointPermissionModel",
 	"GroupMembershipModel",
 	"GroupRoleModel",
