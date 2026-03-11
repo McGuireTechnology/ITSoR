@@ -34,10 +34,6 @@ EndpointAction = Literal["read", "write"]
 
 
 class GroupUseCases:
-    @staticmethod
-    def _default_platform_permissions() -> dict[str, list[ResourcePermissionAction | str]]:
-        return {"*": [ResourcePermissionAction.READ, "write"]}
-
     def __init__(self, repo: GroupRepository) -> None:
         self._repo = repo
 
@@ -52,7 +48,6 @@ class GroupUseCases:
         name: str,
         tenant_id: str | None = None,
         creator_user_id: str | None = None,
-        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> Group:
         existing = self._repo.get_by_name(name, tenant_id)
         if existing:
@@ -61,16 +56,12 @@ class GroupUseCases:
         group.owner_id = UserId(creator_user_id) if creator_user_id is not None else None
         group.group_id = None
         group.permissions = None
-        group.platform_endpoint_permissions = (
-            platform_endpoint_permissions or self._default_platform_permissions()
-        )
         return self._repo.create(group)
 
     def update_group(
         self,
         group_id: str,
         name: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
@@ -80,15 +71,12 @@ class GroupUseCases:
             if existing:
                 raise ValueError("Group name already in use")
             group.name = name
-        if platform_endpoint_permissions is not None:
-            group.platform_endpoint_permissions = platform_endpoint_permissions
         return self._repo.update(group)
 
     def replace_group(
         self,
         group_id: str,
         name: str,
-        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> Group:
         group = self._repo.get_by_id(group_id)
         if not group:
@@ -98,9 +86,6 @@ class GroupUseCases:
             if existing:
                 raise ValueError("Group name already in use")
         group.name = name
-        group.platform_endpoint_permissions = (
-            platform_endpoint_permissions or self._default_platform_permissions()
-        )
         return self._repo.update(group)
 
     def delete_group(self, group_id: str) -> None:
@@ -138,14 +123,12 @@ class TenantUseCases:
         admins_group.owner_id = UserId(creator_user_id) if creator_user_id is not None else None
         admins_group.group_id = None
         admins_group.permissions = None
-        admins_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         self._group_repo.create(admins_group)
 
         users_group = Group(name="Tenant Users", tenant_id=created_tenant.id)
         users_group.owner_id = UserId(creator_user_id) if creator_user_id is not None else None
         users_group.group_id = None
         users_group.permissions = None
-        users_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         created_users_group = self._group_repo.create(users_group)
 
         if creator_user_id:
@@ -186,10 +169,6 @@ class TenantUseCases:
 
 
 class UserUseCases:
-    @staticmethod
-    def _default_platform_permissions() -> dict[str, list[ResourcePermissionAction | str]]:
-        return {"*": [ResourcePermissionAction.READ, "write"]}
-
     def __init__(
         self,
         repo: UserRepository,
@@ -236,14 +215,12 @@ class UserUseCases:
         admins_group.owner_id = user.id
         admins_group.group_id = None
         admins_group.permissions = None
-        admins_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         self._group_repo.create(admins_group)
 
         users_group = Group(name="Tenant Users", tenant_id=created_tenant.id)
         users_group.owner_id = user.id
         users_group.group_id = None
         users_group.permissions = None
-        users_group.platform_endpoint_permissions = GroupUseCases._default_platform_permissions()
         created_users_group = self._group_repo.create(users_group)
 
         user.group_id = created_users_group.id
@@ -278,7 +255,6 @@ class UserUseCases:
             email=email,
             password_hash=self._password_hasher.hash_password(password),
         )
-        user.platform_endpoint_permissions = self._default_platform_permissions()
         self._assign_signup_group(user, invite_group_id)
         created = self._repo.create(user)
         token = self._token_codec.create_access_token(str(created.id))
@@ -312,7 +288,6 @@ class UserUseCases:
         password: str,
         invite_group_id: str | None = None,
         create_tenant_name: str | None = None,
-        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> User:
         existing_by_username = self._repo.get_by_username(username)
         if existing_by_username:
@@ -326,9 +301,6 @@ class UserUseCases:
             email=email,
             password_hash=self._password_hasher.hash_password(password),
         )
-        user.platform_endpoint_permissions = (
-            platform_endpoint_permissions or self._default_platform_permissions()
-        )
         self._assign_user_group(user, username, invite_group_id, create_tenant_name)
         return self._repo.create(user)
 
@@ -338,7 +310,6 @@ class UserUseCases:
         username: Optional[str] = None,
         email: Optional[str] = None,
         password: Optional[str] = None,
-        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
@@ -358,8 +329,6 @@ class UserUseCases:
             user.email = email
         if password is not None:
             user.password_hash = self._password_hasher.hash_password(password)
-        if platform_endpoint_permissions is not None:
-            user.platform_endpoint_permissions = platform_endpoint_permissions
         return self._repo.update(user)
 
     def replace_user(
@@ -368,7 +337,6 @@ class UserUseCases:
         username: str,
         email: str,
         password: str,
-        platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] | None = None,
     ) -> User:
         user = self._repo.get_by_id(user_id)
         if not user:
@@ -387,9 +355,6 @@ class UserUseCases:
             user.name = username
         user.email = email
         user.password_hash = self._password_hasher.hash_password(password)
-        user.platform_endpoint_permissions = (
-            platform_endpoint_permissions or self._default_platform_permissions()
-        )
         return self._repo.update(user)
 
     def delete_user(self, user_id: str) -> None:

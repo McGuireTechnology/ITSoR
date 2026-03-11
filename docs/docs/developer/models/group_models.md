@@ -13,7 +13,7 @@ Defines security or organizational groups and how users/groups become members.
 - **Group**
   - May be tenant-scoped (`tenant_id`) or broader depending on use case
   - Optional owner (`owner_id`) and parent group (`group_id`) references
-  - Optional legacy/integer permissions and endpoint permission mapping
+  - Optional legacy/integer permissions value (`permissions`)
 - **GroupMembership**
   - Membership edge with polymorphic member target
   - `member_type` determines whether membership is by user or nested group
@@ -38,7 +38,6 @@ class Group {
   +owner_id: UserId?
   +group_id: GroupId?
   +permissions: int?
-  +platform_endpoint_permissions: Map<String, List<ResourcePermissionAction|String>>
 }
 
 class GroupMembership {

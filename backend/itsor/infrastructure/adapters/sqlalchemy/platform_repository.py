@@ -50,70 +50,6 @@ def _to_action(value: str) -> str:
     return str(value).strip().lower()
 
 
-def fetch_platform_endpoint_permissions(
-    db: Session,
-    *,
-    principal_type: str,
-    principal_id: str | None,
-) -> dict[str, list[str]]:
-    if not principal_id:
-        return {}
-
-    rows = (
-        db.query(PlatformEndpointPermissionModel)
-        .filter(
-            PlatformEndpointPermissionModel.principal_type == principal_type,
-            PlatformEndpointPermissionModel.principal_id == principal_id,
-        )
-        .all()
-    )
-
-    mapped: dict[str, list[str]] = {}
-    for row in rows:
-        endpoint = str(row.endpoint_name)
-        action = _to_action(str(row.action))
-        actions = mapped.setdefault(endpoint, [])
-        if action not in actions:
-            actions.append(action)
-    return mapped
-
-
-def replace_platform_endpoint_permissions(
-    db: Session,
-    *,
-    principal_type: str,
-    principal_id: str | None,
-    permissions: dict[str, list[Any]] | None,
-) -> None:
-    if not principal_id:
-        return
-
-    (
-        db.query(PlatformEndpointPermissionModel)
-        .filter(
-            PlatformEndpointPermissionModel.principal_type == principal_type,
-            PlatformEndpointPermissionModel.principal_id == principal_id,
-        )
-        .delete()
-    )
-
-    normalized = permissions or {}
-    for endpoint_name, actions in normalized.items():
-        if not isinstance(actions, list):
-            continue
-        for action in actions:
-            db.add(
-                PlatformEndpointPermissionModel(
-                    principal_type=principal_type,
-                    principal_id=principal_id,
-                    endpoint_name=str(endpoint_name),
-                    action=_normalize_action(action),
-                )
-            )
-
-    db.commit()
-
-
 class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[Any, UserModel], UserRepository):
     model_class = UserModel
 
@@ -121,15 +57,6 @@ class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[Any, UserModel], UserRep
         super().__init__(db, "User")
 
     def _to_domain(self, record: UserModel) -> Any:
-        setattr(
-            record,
-            "platform_endpoint_permissions",
-            fetch_platform_endpoint_permissions(
-                self._db,
-                principal_type="user",
-                principal_id=record.id,
-            ),
-        )
         return record
 
     def _to_model(self, user: Any) -> UserModel:
@@ -148,26 +75,6 @@ class SQLAlchemyUserRepository(SQLAlchemyBaseRepository[Any, UserModel], UserRep
         record.email = user.email
         record.password_hash = user.password_hash
         record.group_id = user.group_id
-
-    def create(self, entity: Any) -> Any:
-        created = super().create(entity)
-        replace_platform_endpoint_permissions(
-            self._db,
-            principal_type="user",
-            principal_id=created.id,
-            permissions=getattr(entity, "platform_endpoint_permissions", None),
-        )
-        return self.get_by_id(created.id) or created
-
-    def update(self, entity: Any) -> Any:
-        updated = super().update(entity)
-        replace_platform_endpoint_permissions(
-            self._db,
-            principal_type="user",
-            principal_id=updated.id,
-            permissions=getattr(entity, "platform_endpoint_permissions", None),
-        )
-        return self.get_by_id(updated.id) or updated
 
     def get_by_email(self, email: str) -> Any | None:
         record = self._db.query(UserModel).filter(UserModel.email == email).first()
@@ -214,15 +121,6 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Any, GroupModel], Group
         super().__init__(db, "Group")
 
     def _to_domain(self, record: GroupModel) -> Any:
-        setattr(
-            record,
-            "platform_endpoint_permissions",
-            fetch_platform_endpoint_permissions(
-                self._db,
-                principal_type="group",
-                principal_id=record.id,
-            ),
-        )
         return record
 
     def _to_model(self, group: Any) -> GroupModel:
@@ -241,26 +139,6 @@ class SQLAlchemyGroupRepository(SQLAlchemyBaseRepository[Any, GroupModel], Group
         record.owner_id = getattr(group, "owner_id", None)
         record.group_id = getattr(group, "group_id", None)
         record.permissions = getattr(group, "permissions", None)
-
-    def create(self, entity: Any) -> Any:
-        created = super().create(entity)
-        replace_platform_endpoint_permissions(
-            self._db,
-            principal_type="group",
-            principal_id=created.id,
-            permissions=getattr(entity, "platform_endpoint_permissions", None),
-        )
-        return self.get_by_id(created.id) or created
-
-    def update(self, entity: Any) -> Any:
-        updated = super().update(entity)
-        replace_platform_endpoint_permissions(
-            self._db,
-            principal_type="group",
-            principal_id=updated.id,
-            permissions=getattr(entity, "platform_endpoint_permissions", None),
-        )
-        return self.get_by_id(updated.id) or updated
 
     def get_by_name(self, name: str, tenant_id: str | None = None) -> Any | None:
         record = (
@@ -660,8 +538,6 @@ __all__ = [
     "SQLAlchemyRolePermissionRepository",
     "SQLAlchemyPlatformEndpointPermissionGateway",
     "SQLAlchemyPlatformGroupMembershipGateway",
-    "fetch_platform_endpoint_permissions",
-    "replace_platform_endpoint_permissions",
     "BcryptPasswordHasher",
     "JwtTokenCodec",
 ]

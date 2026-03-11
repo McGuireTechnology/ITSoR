@@ -3,7 +3,6 @@ from typing import Literal
 
 from itsor.domain._ulid import typed_ulid_factory
 from itsor.domain.ids import GroupId, GroupMembershipId, TenantId, UserId
-from itsor.domain.models.resource_models import ResourcePermissionAction
 from itsor.domain.models.role_models import RoleAssignment
 
 
@@ -15,9 +14,6 @@ class Group:
     owner_id: UserId | None = None
     group_id: GroupId | None = None
     permissions: int | None = None
-    platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] = field(
-        default_factory=dict
-    )
 
 
 @dataclass

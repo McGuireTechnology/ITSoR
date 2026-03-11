@@ -15,8 +15,6 @@ from itsor.infrastructure.adapters.sqlalchemy.auth_repository import (
     SQLAlchemyUserRepository,
     SQLAlchemyUserRoleRepository,
     SQLAlchemyUserTenantRepository,
-    fetch_platform_endpoint_permissions,
-    replace_platform_endpoint_permissions,
 )
 
 __all__ = [
@@ -34,8 +32,6 @@ __all__ = [
     "SQLAlchemyRolePermissionRepository",
     "SQLAlchemyPlatformEndpointPermissionGateway",
     "SQLAlchemyPlatformGroupMembershipGateway",
-    "fetch_platform_endpoint_permissions",
-    "replace_platform_endpoint_permissions",
     "BcryptPasswordHasher",
     "JwtTokenCodec",
 ]

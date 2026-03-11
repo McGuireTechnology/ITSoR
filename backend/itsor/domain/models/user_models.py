@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 
 from itsor.domain._ulid import typed_ulid_factory
 from itsor.domain.ids import GroupId, TenantId, UserId, UserTenantId
-from itsor.domain.models.resource_models import ResourcePermissionAction
 from itsor.domain.models.role_models import RoleAssignment
 
 
@@ -23,9 +22,6 @@ class User:
     email: str
     password_hash: str
     group_id: GroupId | None = None
-    platform_endpoint_permissions: dict[str, list[ResourcePermissionAction | str]] = field(
-        default_factory=dict
-    )
 
     def __post_init__(self) -> None:
         self.name = _normalize_required_text(self.name, "name")

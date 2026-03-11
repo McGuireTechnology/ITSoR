@@ -109,18 +109,11 @@ If any required check fails, the API returns `403 Forbidden`.
 
 ### Platform endpoint permissions
 
-Endpoint authorization can now be assigned directly on:
-
-- platform users (`users.platform_endpoint_permissions`)
-- platform groups (`groups.platform_endpoint_permissions`)
+Endpoint authorization is assigned to principals (`user` or `group`) via dedicated endpoint permission records.
 
 Storage model:
 
-- persisted in dedicated table: `platform_endpoint_permissions`
-
-Field name:
-
-`platform_endpoint_permissions`
+- persisted in a dedicated endpoint-permissions table
 
 Shape:
 

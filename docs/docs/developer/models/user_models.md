@@ -13,7 +13,6 @@ Represents platform users and their tenant membership relationship.
 - **User**
   - Core identity fields: `name`, `username`, `email`, `password_hash`
   - Optional group association: `group_id`
-  - Endpoint-level permission map: `platform_endpoint_permissions`
 - **UserTenant**
   - Join model linking `user_id` to `tenant_id`
 - **UserRole**
@@ -37,7 +36,6 @@ class User {
   +email: str
   +password_hash: str
   +group_id: GroupId?
-  +platform_endpoint_permissions: Map<String, List<ResourcePermissionAction|String>>
 }
 
 class UserTenant {

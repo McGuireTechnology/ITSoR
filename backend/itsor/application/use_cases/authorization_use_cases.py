@@ -11,7 +11,6 @@ PERMISSION_WRITE = 0b10
 class AuthorizationPrincipal(Protocol):
     id: str
     group_id: str | None
-    platform_endpoint_permissions: dict[str, list[str]] | None
 
 
 class AuthorizationError(Exception):
@@ -27,6 +26,7 @@ class AuthorizationUseCases:
     namespace_repo: Any
     entity_type_repo: Any
     entity_record_repo: Any
+    endpoint_permission_gateway: Any | None = None
     root_tenant_id: str | None = None
     root_tenant_name: str = "root"
 
@@ -178,27 +178,54 @@ class AuthorizationUseCases:
         endpoint = str(endpoint_name).strip().lower()
         op = str(action).strip().lower()
 
-        policies: list[dict[str, list[str]]] = []
-
-        if isinstance(current_user.platform_endpoint_permissions, dict):
-            policies.append(current_user.platform_endpoint_permissions)
+        policies = self._load_endpoint_policies(
+            principal_type="user",
+            principal_id=str(current_user.id),
+        )
 
         if current_user.group_id:
-            group = self.group_repo.get_by_id(str(current_user.group_id))
-            group_policy = getattr(group, "platform_endpoint_permissions", None) if group else None
-            if isinstance(group_policy, dict):
-                policies.append(group_policy)
+            policies.extend(
+                self._load_endpoint_policies(
+                    principal_type="group",
+                    principal_id=str(current_user.group_id),
+                )
+            )
 
         if not policies:
-            return True
-
-        if not any(policy for policy in policies):
             return True
 
         for policy in policies:
             if self._policy_allows(policy, endpoint, op):
                 return True
         return False
+
+    def _load_endpoint_policies(
+        self,
+        *,
+        principal_type: str,
+        principal_id: str,
+    ) -> list[dict[str, list[str]]]:
+        gateway = self.endpoint_permission_gateway
+        list_rows = getattr(gateway, "list_rows", None)
+        if not callable(list_rows):
+            return []
+
+        rows = list_rows(
+            principal_type=principal_type,
+            principal_id=principal_id,
+        )
+
+        policy: dict[str, list[str]] = {}
+        for row in rows:
+            endpoint = str(getattr(row, "endpoint_name", "")).strip().lower()
+            operation = str(getattr(row, "action", "")).strip().lower()
+            if not endpoint or not operation:
+                continue
+            allowed = policy.setdefault(endpoint, [])
+            if operation not in allowed:
+                allowed.append(operation)
+
+        return [policy] if policy else []
 
     @staticmethod
     def _policy_allows(policy: dict[str, list[str]], endpoint: str, action: str) -> bool:

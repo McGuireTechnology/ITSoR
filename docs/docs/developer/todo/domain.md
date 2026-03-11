@@ -77,10 +77,6 @@ Last reviewed: 2026-03-10 (analysis refresh)
 	- Review remaining raw string identifiers and convert to typed IDs where appropriate.
 	- Analysis update: `NavigationItemId` has been implemented and validated (see `domain-p1.md`, Ticket P1-3); broader raw-ID review remains open.
 
-- [ ] **Tighten permission payload typing**
-	- Standardize `platform_endpoint_permissions` value types to avoid mixed enum/string usage.
-	- Add a conversion point if external input still sends strings.
-
 ### P2
 
 - [x] **Reduce alias surface where it blurs domain concepts**
