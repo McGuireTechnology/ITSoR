@@ -18,6 +18,7 @@ from itsor.application.ports.auth import (
     UserRoleRepository,
     UserTenantRepository,
 )
+from itsor.application.ports.oscal import OscalDocumentRepository
 from itsor.infrastructure.adapters.in_memory_entity_record_repository import InMemoryEntityRecordRepository
 from itsor.infrastructure.adapters.in_memory_entity_type_repository import InMemoryEntityTypeRepository
 from itsor.infrastructure.adapters.in_memory_namespace_repository import InMemoryNamespaceRepository
@@ -45,6 +46,10 @@ from itsor.infrastructure.adapters.sqlalchemy.auth_repository import (
     SQLAlchemyUserRepository,
     SQLAlchemyUserRoleRepository,
     SQLAlchemyUserTenantRepository,
+)
+from itsor.infrastructure.adapters.sqlalchemy.oscal_repository import (
+    InMemoryOscalDocumentRepository,
+    SQLAlchemyOscalDocumentRepository,
 )
 from itsor.infrastructure.adapters.sqlalchemy.identity_gateway import SQLAlchemyIdmGroupGateway
 from itsor.infrastructure.adapters.sqlalchemy_entity_record_repository import SQLAlchemyEntityRecordRepository
@@ -112,6 +117,10 @@ def _get_entity_record_repository_sqlalchemy(db=None) -> EntityRecordRepository:
     return SQLAlchemyEntityRecordRepository(db)
 
 
+def _get_oscal_document_repository_sqlalchemy(db=None) -> OscalDocumentRepository:
+    return SQLAlchemyOscalDocumentRepository(db)
+
+
 def _get_role_repository_sqlalchemy(db=None) -> RoleRepository:
     return SQLAlchemyRoleRepository(db)
 
@@ -163,6 +172,7 @@ _MEMORY_WORKSPACE_REPOSITORY = InMemoryWorkspaceRepository()
 _MEMORY_NAMESPACE_REPOSITORY = InMemoryNamespaceRepository()
 _MEMORY_ENTITY_TYPE_REPOSITORY = InMemoryEntityTypeRepository()
 _MEMORY_ENTITY_RECORD_REPOSITORY = InMemoryEntityRecordRepository()
+_MEMORY_OSCAL_DOCUMENT_REPOSITORY = InMemoryOscalDocumentRepository()
 
 
 def _get_user_repository_memory() -> UserRepository:
@@ -207,6 +217,10 @@ def _get_entity_type_repository_memory() -> EntityTypeRepository:
 
 def _get_entity_record_repository_memory() -> EntityRecordRepository:
     return _MEMORY_ENTITY_RECORD_REPOSITORY
+
+
+def _get_oscal_document_repository_memory() -> OscalDocumentRepository:
+    return _MEMORY_OSCAL_DOCUMENT_REPOSITORY
 
 
 def _get_role_repository_memory() -> RoleRepository:
@@ -297,6 +311,10 @@ def _get_entity_record_repository_unsupported() -> EntityRecordRepository:
     raise _unsupported_backend()
 
 
+def _get_oscal_document_repository_unsupported() -> OscalDocumentRepository:
+    raise _unsupported_backend()
+
+
 def _get_role_repository_unsupported() -> RoleRepository:
     raise _unsupported_backend()
 
@@ -353,6 +371,7 @@ if BACKEND == "sqlalchemy":
     get_namespace_repository = _get_namespace_repository_sqlalchemy
     get_entity_type_repository = _get_entity_type_repository_sqlalchemy
     get_entity_record_repository = _get_entity_record_repository_sqlalchemy
+    get_oscal_document_repository = _get_oscal_document_repository_sqlalchemy
     get_role_repository = _get_role_repository_sqlalchemy
     get_permission_repository = _get_permission_repository_sqlalchemy
     get_user_tenant_repository = _get_user_tenant_repository_sqlalchemy
@@ -376,6 +395,7 @@ elif BACKEND == "memory":
     get_namespace_repository = _get_namespace_repository_memory
     get_entity_type_repository = _get_entity_type_repository_memory
     get_entity_record_repository = _get_entity_record_repository_memory
+    get_oscal_document_repository = _get_oscal_document_repository_memory
     get_role_repository = _get_role_repository_memory
     get_permission_repository = _get_permission_repository_memory
     get_user_tenant_repository = _get_user_tenant_repository_memory
@@ -399,6 +419,7 @@ else:
     get_namespace_repository = _get_namespace_repository_unsupported
     get_entity_type_repository = _get_entity_type_repository_unsupported
     get_entity_record_repository = _get_entity_record_repository_unsupported
+    get_oscal_document_repository = _get_oscal_document_repository_unsupported
     get_role_repository = _get_role_repository_unsupported
     get_permission_repository = _get_permission_repository_unsupported
     get_user_tenant_repository = _get_user_tenant_repository_unsupported
@@ -414,6 +435,7 @@ else:
 
 __all__ = [
     "get_entity_record_repository",
+    "get_oscal_document_repository",
     "get_entity_type_repository",
     "get_group_repository",
     "get_navigation_module_repository",

@@ -63,6 +63,7 @@ from itsor.infrastructure.database.sqlalchemy.models.resource import (
 	TableModel,
 	TaskModel,
 )
+from itsor.infrastructure.database.sqlalchemy.models.oscal import OscalDocumentModel
 
 __all__ = [
 	"Base",
@@ -89,6 +90,7 @@ __all__ = [
 	"IdmUserModel",
 	"NamespaceModel",
 	"OwnerAclPolicyModel",
+	"OscalDocumentModel",
 	"ActionModel",
 	"BotModel",
 	"ColumnModel",

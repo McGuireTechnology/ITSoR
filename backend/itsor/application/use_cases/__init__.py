@@ -7,6 +7,7 @@ from itsor.application.use_cases.auth_admin_use_cases import (
     TenantUseCases,
     UserUseCases,
 )
+from itsor.application.use_cases.oscal import OscalDocumentUseCases
 
 __all__ = [
     "BaseUseCase",
@@ -14,4 +15,5 @@ __all__ = [
     "GroupUseCases",
     "TenantUseCases",
     "UserUseCases",
+    "OscalDocumentUseCases",
 ]

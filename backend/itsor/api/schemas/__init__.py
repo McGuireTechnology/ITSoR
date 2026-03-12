@@ -54,6 +54,7 @@ from .resource_models import (
 	TableUpdate,
 )
 from .workspace_schamas import WorkspaceCreate, WorkspaceReplace, WorkspaceResponse, WorkspaceUpdate
+from . import oscal
 
 __all__ = [
 	"EntityRecordCreate",
@@ -127,5 +128,6 @@ __all__ = [
 	"WorkspaceReplace",
 	"WorkspaceResponse",
 	"WorkspaceUpdate",
+	"oscal",
 	"auth",
 ]

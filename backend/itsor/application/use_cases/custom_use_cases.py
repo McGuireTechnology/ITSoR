@@ -1,8 +1,51 @@
+from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
 import ulid
 from itsor.application.ports.inbox.custom_ports import EntityRecordRepository, EntityTypeRepository, NamespaceRepository, WorkspaceRepository
 from itsor.application.use_cases.base_use_case import BaseUseCase
+
+
+@dataclass
+class CustomEntityRecord:
+    id: str
+    entity_type_id: str
+    name: str = ""
+    values_json: dict[str, Any] = field(default_factory=dict)
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class CustomEntityType:
+    id: str
+    namespace_id: str
+    name: str
+    attributes_json: dict[str, Any] = field(default_factory=dict)
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class CustomNamespace:
+    id: str
+    workspace_id: str
+    name: str
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class CustomWorkspace:
+    id: str
+    name: str
+    tenant_id: str | None = None
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: dict[str, Any] = field(default_factory=dict)
 
 
 class EntityRecordUseCases(BaseUseCase):

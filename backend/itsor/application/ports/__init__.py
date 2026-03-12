@@ -13,6 +13,7 @@ from itsor.application.ports.auth.repositories import (
     UserRoleRepository,
     UserTenantRepository,
 )
+from itsor.application.ports.oscal import OscalDocumentRepository
 
 __all__ = [
     "BaseRepository",
@@ -29,5 +30,6 @@ __all__ = [
     "UserRepository",
     "UserRoleRepository",
     "UserTenantRepository",
+    "OscalDocumentRepository",
     "WorkspaceRepository",
 ]

@@ -16,6 +16,10 @@ from itsor.infrastructure.adapters.sqlalchemy.auth_repository import (
     SQLAlchemyUserRoleRepository,
     SQLAlchemyUserTenantRepository,
 )
+from itsor.infrastructure.adapters.sqlalchemy.oscal_repository import (
+    InMemoryOscalDocumentRepository,
+    SQLAlchemyOscalDocumentRepository,
+)
 
 __all__ = [
     "SQLAlchemyUserRepository",
@@ -30,6 +34,8 @@ __all__ = [
     "SQLAlchemyUserRoleRepository",
     "SQLAlchemyGroupRoleRepository",
     "SQLAlchemyRolePermissionRepository",
+    "SQLAlchemyOscalDocumentRepository",
+    "InMemoryOscalDocumentRepository",
     "SQLAlchemyPlatformEndpointPermissionGateway",
     "SQLAlchemyPlatformGroupMembershipGateway",
     "BcryptPasswordHasher",

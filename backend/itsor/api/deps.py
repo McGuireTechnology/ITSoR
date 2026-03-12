@@ -41,6 +41,7 @@ from itsor.application.use_cases.auth_admin_use_cases import (
     AuthModelCatalogUseCases,
     AuthRbacUseCases,
 )
+from itsor.application.use_cases.oscal import OscalDocumentUseCases
 from itsor.infrastructure.database.sqlalchemy import get_db
 from itsor.infrastructure.container import (
     get_entity_record_repository as container_get_entity_record_repository,
@@ -65,6 +66,7 @@ from itsor.infrastructure.container import (
     get_user_tenant_repository as container_get_user_tenant_repository,
     get_workspace_repository as container_get_workspace_repository,
     get_token_codec as container_get_token_codec,
+    get_oscal_document_repository as container_get_oscal_document_repository,
 )
 
 SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "itsor_session")
@@ -118,6 +120,10 @@ def get_entity_type_repository(db=Depends(get_db)):
 
 def get_entity_record_repository(db=Depends(get_db)):
     return container_get_entity_record_repository(db)
+
+
+def get_oscal_document_repository(db=Depends(get_db)):
+    return container_get_oscal_document_repository(db)
 
 
 def get_role_repository(db=Depends(get_db)):
@@ -422,6 +428,12 @@ def get_entity_record_use_cases(
     entity_type_repo=Depends(get_entity_type_repository),
 ) -> EntityRecordUseCases:
     return EntityRecordUseCases(repo, entity_type_repo)
+
+
+def get_oscal_document_use_cases(
+    repo=Depends(get_oscal_document_repository),
+) -> OscalDocumentUseCases:
+    return OscalDocumentUseCases(repo)
 
 
 def get_authorization_service(

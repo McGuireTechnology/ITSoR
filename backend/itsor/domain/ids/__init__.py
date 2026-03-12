@@ -22,6 +22,19 @@ from .tenant_ids import TenantId
 from .user_ids import UserId, UserRoleId, UserTenantId
 from .view_ids import MenuViewId, NavigationItemId
 from .grc_ids import FrameworkId, DomainId, ControlId, ControlLinkId, ControlGuidanceId, ControlExampleId
+from .oscal import (
+    OscalAssessmentPlanId,
+    OscalAssessmentResultId,
+    OscalAssessmentResultsId,
+    OscalCatalogId,
+    OscalComponentDefinitionId,
+    OscalMappingCollectionId,
+    OscalMappingId,
+    OscalPoamId,
+    OscalPoamItemId,
+    OscalProfileId,
+    OscalSystemSecurityPlanId,
+)
 
 __all__ = [
     "FrameworkId",
@@ -30,6 +43,17 @@ __all__ = [
     "ControlLinkId",
     "ControlGuidanceId",
     "ControlExampleId",
+    "OscalCatalogId",
+    "OscalProfileId",
+    "OscalMappingCollectionId",
+    "OscalMappingId",
+    "OscalComponentDefinitionId",
+    "OscalAssessmentPlanId",
+    "OscalAssessmentResultsId",
+    "OscalAssessmentResultId",
+    "OscalPoamId",
+    "OscalPoamItemId",
+    "OscalSystemSecurityPlanId",
     "GroupId",
     "GroupMembershipId",
     "GroupRoleId",
