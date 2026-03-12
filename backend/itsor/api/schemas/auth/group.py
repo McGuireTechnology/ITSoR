@@ -4,6 +4,9 @@ from pydantic import BaseModel
 class TenantScopedNameSchema(BaseModel):
     name: str
     tenant_id: str | None = None
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: int | None = None
 
 
 class GroupCreate(TenantScopedNameSchema):
@@ -17,6 +20,9 @@ class GroupReplace(TenantScopedNameSchema):
 class GroupUpdate(BaseModel):
     name: str | None = None
     tenant_id: str | None = None
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: int | None = None
 
 
 class GroupResponse(TenantScopedNameSchema):

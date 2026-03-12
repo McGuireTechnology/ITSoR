@@ -3,6 +3,9 @@ from pydantic import BaseModel
 
 class NameSchema(BaseModel):
     name: str
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: int | None = None
 
 
 class TenantCreate(NameSchema):
@@ -15,6 +18,9 @@ class TenantReplace(NameSchema):
 
 class TenantUpdate(BaseModel):
     name: str | None = None
+    owner_id: str | None = None
+    group_id: str | None = None
+    permissions: int | None = None
 
 
 class TenantResponse(NameSchema):

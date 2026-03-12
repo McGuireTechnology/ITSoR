@@ -1,5 +1,6 @@
 import ulid
-from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Integer, JSON, String, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase
 
 from itsor.domain.models import DEFAULT_PERMISSIONS
@@ -119,7 +120,7 @@ class PermissionModel(Base):
 		),
 		CheckConstraint("effect in ('allow', 'deny')", name="ck_auth_permissions_effect"),
 		CheckConstraint(
-			"action in ('create', 'read', 'update', 'delete')",
+			"action in ('create', 'read', 'update', 'delete', 'execute')",
 			name="ck_auth_permissions_action",
 		),
 	)
@@ -222,6 +223,100 @@ class EndpointPermissionModel(Base):
 	action = Column(String(16), nullable=False)
 
 
+class ModuleUserModel(Base):
+	__tablename__ = "auth_module_users"
+	__table_args__ = (
+		UniqueConstraint("module_id", "user_id", name="uq_auth_module_users_module_user"),
+		CheckConstraint("role in ('owner', 'editor', 'user', 'read_only')", name="ck_auth_module_users_role"),
+	)
+
+	id = Column(String(36), primary_key=True, default=lambda: str(ulid.new()))
+	module_id = Column(String(36), ForeignKey("auth_navigation_modules.id"), nullable=False, index=True)
+	user_id = Column(String(36), ForeignKey("auth_users.id"), nullable=False, index=True)
+	role = Column(String(32), nullable=False)
+
+
+class NavigationItemModel(Base):
+	__tablename__ = "auth_navigation_items"
+	__table_args__ = (
+		UniqueConstraint("view_id", "label", "route", name="uq_auth_navigation_items_view_label_route"),
+		CheckConstraint("item_type in ('route', 'record', 'action')", name="ck_auth_navigation_items_item_type"),
+	)
+
+	id = Column(String(36), primary_key=True, default=lambda: str(ulid.new()))
+	view_id = Column(String(36), ForeignKey("auth_navigation_views.id"), nullable=False, index=True)
+	label = Column(String(255), nullable=False)
+	item_type = Column(String(16), nullable=False, index=True)
+	route = Column(String(255), nullable=False)
+	resource_id = Column(String(36), nullable=False, index=True)
+	icon = Column(String(64), nullable=True)
+	order = Column(Integer, nullable=False, default=0)
+	metadata_json = Column(JSON().with_variant(JSONB, "postgresql"), nullable=False, default=dict)
+
+
+class AppViewModel(Base):
+	__tablename__ = "auth_app_views"
+	__table_args__ = (
+		UniqueConstraint("app_id", "name", name="uq_auth_app_views_app_name"),
+		CheckConstraint(
+			"type in ('table', 'form', 'detail', 'card', 'deck', 'gallery', 'dashboard', 'map')",
+			name="ck_auth_app_views_type",
+		),
+	)
+
+	id = Column(String(36), primary_key=True, default=lambda: str(ulid.new()))
+	app_id = Column(String(36), nullable=False, index=True)
+	name = Column(String(255), nullable=False, index=True)
+	type = Column(String(32), nullable=False, index=True)
+	table_id = Column(String(36), nullable=True, index=True)
+	position = Column(Integer, nullable=False, default=0)
+	icon = Column(String(64), nullable=True)
+
+
+class AclPolicyModel(Base):
+	__tablename__ = "auth_acl_policies"
+	__table_args__ = (
+		CheckConstraint("scope in ('resource', 'row', 'owner', 'group')", name="ck_auth_acl_policies_scope"),
+		CheckConstraint(
+			"principal_type in ('user', 'group', 'role', 'tenant', 'authenticated', 'public')",
+			name="ck_auth_acl_policies_principal_type",
+		),
+		CheckConstraint("effect in ('allow', 'deny')", name="ck_auth_acl_policies_effect"),
+		CheckConstraint(
+			"action in ('create', 'read', 'update', 'delete', 'execute')",
+			name="ck_auth_acl_policies_action",
+		),
+	)
+
+	id = Column(String(36), primary_key=True, default=lambda: str(ulid.new()))
+	name = Column(String(255), nullable=False, index=True)
+	resource = Column(String(255), nullable=False, index=True)
+	action = Column(String(16), nullable=False, index=True)
+	effect = Column(String(16), nullable=False, index=True, default="allow")
+	scope = Column(String(16), nullable=False, index=True)
+	principal_type = Column(String(32), nullable=False, index=True)
+	principal_id = Column(String(64), nullable=True, index=True)
+	resource_id = Column(String(64), nullable=True, index=True)
+	predicates_json = Column(JSON().with_variant(JSONB, "postgresql"), nullable=False, default=list)
+	owner_field = Column(String(64), nullable=False, default="owner_id")
+	owner_user_id = Column(String(36), nullable=True, index=True)
+	group_field = Column(String(64), nullable=False, default="group_id")
+	allowed_group_ids_json = Column(JSON().with_variant(JSONB, "postgresql"), nullable=False, default=list)
+
+
+ResourceAclPolicyModel = AclPolicyModel
+RowAclPolicyModel = AclPolicyModel
+OwnerAclPolicyModel = AclPolicyModel
+GroupAclPolicyModel = AclPolicyModel
+
+ModuleModel = NavigationModuleModel
+ModuleResourceModel = NavigationResourceModel
+MenuViewModel = NavigationViewModel
+
+UserRoleAssignmentModel = UserRoleModel
+GroupRoleAssignmentModel = GroupRoleModel
+
+
 PlatformEndpointPermissionModel = EndpointPermissionModel
 PlatformGroupMembershipModel = GroupMembershipModel
 PlatformGroupRoleModel = GroupRoleModel
@@ -234,16 +329,29 @@ PlatformUserTenantModel = UserTenantModel
 
 __all__ = [
 	"Base",
+	"AclPolicyModel",
+	"AppViewModel",
+	"GroupAclPolicyModel",
 	"GroupModel",
+	"GroupRoleAssignmentModel",
+	"MenuViewModel",
+	"ModuleModel",
+	"ModuleResourceModel",
 	"NavigationModuleModel",
+	"NavigationItemModel",
 	"NavigationResourceModel",
 	"NavigationViewModel",
+	"ModuleUserModel",
+	"OwnerAclPolicyModel",
+	"ResourceAclPolicyModel",
+	"RowAclPolicyModel",
 	"EndpointPermissionModel",
 	"GroupMembershipModel",
 	"GroupRoleModel",
 	"PermissionModel",
 	"RoleModel",
 	"RolePermissionModel",
+	"UserRoleAssignmentModel",
 	"UserRoleModel",
 	"UserTenantModel",
 	"PlatformEndpointPermissionModel",

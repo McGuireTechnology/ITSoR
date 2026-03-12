@@ -17,11 +17,13 @@ Represents platform users and their tenant membership relationship.
   - Join model linking `user_id` to `tenant_id`
 - **UserRole**
   - Alias of `RoleAssignment` from `role_models.py`
+  - For user assignments, `assignee_type = "user"` and `user_id` points to `User.id`
 
 ## Invariants
 
 - `User.name`, `User.username`, and `User.email` must be non-empty trimmed strings.
 - `User.id` and `UserTenant.id` are generated ULID-backed typed identifiers.
+- For `UserRole`, user assignments must set `user_id` and leave `group_id` unset.
 
 ## PlantUML
 
@@ -51,6 +53,7 @@ class UserRole <<alias>> {
 UserTenant --> User : user_id
 UserTenant --> TenantId : tenant_id
 User --> GroupId : group_id
+UserRole --> User : user_id (when assignee_type=user)
 UserRole --> RoleAssignment : alias
 
 @enduml

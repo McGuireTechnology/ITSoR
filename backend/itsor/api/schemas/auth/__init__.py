@@ -1,5 +1,21 @@
+from .acl_policy import (
+    AclPolicyCreate,
+    AclPolicyReplace,
+    AclPolicyResponse,
+    AclPolicyUpdate,
+)
+from .app_view import AppViewCreate, AppViewReplace, AppViewResponse, AppViewUpdate
 from .group import GroupCreate, GroupReplace, GroupResponse, GroupUpdate
 from .navigation import (
+    MenuViewCreate,
+    MenuViewResponse,
+    MenuViewUpdate,
+    ModuleCreate,
+    ModuleResourceCreate,
+    ModuleResourceResponse,
+    ModuleResourceUpdate,
+    ModuleResponse,
+    ModuleUpdate,
     NavigationDefaultResponse,
     NavigationLoadDefaultsRequest,
     NavigationModuleCreate,
@@ -13,11 +29,23 @@ from .navigation import (
     NavigationViewResponse,
     NavigationViewUpdate,
 )
+from .navigation_item import (
+    NavigationItemCreate,
+    NavigationItemReplace,
+    NavigationItemResponse,
+    NavigationItemUpdate,
+)
 from .group_membership import (
     GroupMembershipCreate,
     GroupMembershipReplace,
     GroupMembershipResponse,
     GroupMembershipUpdate,
+)
+from .module_user import (
+    ModuleUserCreate,
+    ModuleUserReplace,
+    ModuleUserResponse,
+    ModuleUserUpdate,
 )
 from .group_role import GroupRoleCreate, GroupRoleReplace, GroupRoleResponse, GroupRoleUpdate
 from .permission import PermissionCreate, PermissionReplace, PermissionResponse, PermissionUpdate
@@ -42,9 +70,34 @@ from .user_role import UserRoleCreate, UserRoleReplace, UserRoleResponse, UserRo
 from .user_tenant import UserTenantCreate, UserTenantReplace, UserTenantResponse, UserTenantUpdate
 
 __all__ = [
+    "AclPolicyCreate",
+    "AclPolicyReplace",
+    "AclPolicyResponse",
+    "AclPolicyUpdate",
+    "AppViewCreate",
+    "AppViewReplace",
+    "AppViewResponse",
+    "AppViewUpdate",
     "AuthTokenResponse",
     "GroupCreate",
+    "MenuViewCreate",
+    "MenuViewResponse",
+    "MenuViewUpdate",
+    "ModuleCreate",
+    "ModuleUserCreate",
+    "ModuleUserReplace",
+    "ModuleUserResponse",
+    "ModuleUserUpdate",
+    "ModuleResourceCreate",
+    "ModuleResourceResponse",
+    "ModuleResourceUpdate",
+    "ModuleResponse",
+    "ModuleUpdate",
     "NavigationDefaultResponse",
+    "NavigationItemCreate",
+    "NavigationItemReplace",
+    "NavigationItemResponse",
+    "NavigationItemUpdate",
     "NavigationLoadDefaultsRequest",
     "NavigationModuleCreate",
     "NavigationModuleResponse",

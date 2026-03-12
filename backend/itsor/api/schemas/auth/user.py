@@ -2,12 +2,16 @@ from pydantic import BaseModel
 
 
 class UserIdentitySchema(BaseModel):
+    name: str
     username: str
     email: str
+    group_id: str | None = None
 
 
 class UserCreate(UserIdentitySchema):
     password: str
+    invite_group_id: str | None = None
+    create_tenant_name: str | None = None
 
 
 class UserReplace(UserIdentitySchema):
@@ -15,8 +19,10 @@ class UserReplace(UserIdentitySchema):
 
 
 class UserUpdate(BaseModel):
+    name: str | None = None
     username: str | None = None
     email: str | None = None
+    group_id: str | None = None
     password: str | None = None
 
 
@@ -27,8 +33,7 @@ class UserResponse(UserIdentitySchema):
 
 
 class SignupRequest(UserCreate):
-    invite_group_id: str | None = None
-    create_tenant_name: str | None = None
+    pass
 
 
 class SigninRequest(BaseModel):
