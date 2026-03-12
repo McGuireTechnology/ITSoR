@@ -38,6 +38,8 @@ import AuthHomePage from './views/AuthHomePage.vue'
 import AdminNavigationPage from './views/AdminNavigationPage.vue'
 import IdentityHomePage from './views/IdentityHomePage.vue'
 import CustomizationHomePage from './views/CustomizationHomePage.vue'
+import OscalDocumentsPage from './views/OscalDocumentsPage.vue'
+import GrcHomePage from './views/GrcHomePage.vue'
 
 const routes = [
   { path: '/', redirect: '/home' },
@@ -82,6 +84,39 @@ const routes = [
   { path: '/customization/entity-types/:id', component: EntityTypeDetailPage, props: true, meta: { domain: 'entity-types', title: 'Entity Type Detail' } },
   { path: '/customization/entity-records', component: EntityRecordsPage, meta: { domain: 'entity-records', title: 'Entity Records' } },
   { path: '/customization/entity-records/:id', component: EntityRecordDetailPage, props: true, meta: { domain: 'entity-records', title: 'Entity Record Detail' } },
+  { path: '/grc/overview', component: GrcHomePage, meta: { domain: 'grc_home', title: 'GRC Overview', showCommandBar: false } },
+  { path: '/grc/home', redirect: '/grc/overview' },
+  { path: '/grc/control', redirect: '/grc/control/catalogs' },
+  { path: '/grc/control/catalogs', redirect: '/grc/control/catalogs/list' },
+  { path: '/grc/control/catalogs/list', component: OscalDocumentsPage, props: { fixedType: 'catalog', titleOverride: 'Control · Catalogs · List', viewMode: 'list' }, meta: { domain: 'grc_control_catalogs_list', title: 'Control Catalogs List' } },
+  { path: '/grc/control/catalogs/create', component: OscalDocumentsPage, props: { fixedType: 'catalog', titleOverride: 'Control · Catalogs · Create', viewMode: 'create' }, meta: { domain: 'grc_control_catalogs_create', title: 'Control Catalogs Create' } },
+  { path: '/grc/control/profiles', redirect: '/grc/control/profiles/list' },
+  { path: '/grc/control/profiles/list', component: OscalDocumentsPage, props: { fixedType: 'profile', titleOverride: 'Control · Profiles · List', viewMode: 'list' }, meta: { domain: 'grc_control_profiles_list', title: 'Control Profiles List' } },
+  { path: '/grc/control/profiles/create', component: OscalDocumentsPage, props: { fixedType: 'profile', titleOverride: 'Control · Profiles · Create', viewMode: 'create' }, meta: { domain: 'grc_control_profiles_create', title: 'Control Profiles Create' } },
+  { path: '/grc/control/mappings', redirect: '/grc/control/mappings/list' },
+  { path: '/grc/control/mappings/list', component: OscalDocumentsPage, props: { fixedType: 'mapping', titleOverride: 'Control · Mappings · List', viewMode: 'list' }, meta: { domain: 'grc_control_mappings_list', title: 'Control Mappings List' } },
+  { path: '/grc/control/mappings/create', component: OscalDocumentsPage, props: { fixedType: 'mapping', titleOverride: 'Control · Mappings · Create', viewMode: 'create' }, meta: { domain: 'grc_control_mappings_create', title: 'Control Mappings Create' } },
+  { path: '/grc/assessment', redirect: '/grc/assessment/plans' },
+  { path: '/grc/assessment/plans', redirect: '/grc/assessment/plans/list' },
+  { path: '/grc/assessment/plans/list', component: OscalDocumentsPage, props: { fixedType: 'assessment-plan', titleOverride: 'Assessment · Plans · List', viewMode: 'list' }, meta: { domain: 'grc_assessment_plans_list', title: 'Assessment Plans List' } },
+  { path: '/grc/assessment/plans/create', component: OscalDocumentsPage, props: { fixedType: 'assessment-plan', titleOverride: 'Assessment · Plans · Create', viewMode: 'create' }, meta: { domain: 'grc_assessment_plans_create', title: 'Assessment Plans Create' } },
+  { path: '/grc/assessment/results', redirect: '/grc/assessment/results/list' },
+  { path: '/grc/assessment/results/list', component: OscalDocumentsPage, props: { fixedType: 'assessment-results', titleOverride: 'Assessment · Results · List', viewMode: 'list' }, meta: { domain: 'grc_assessment_results_list', title: 'Assessment Results List' } },
+  { path: '/grc/assessment/results/create', component: OscalDocumentsPage, props: { fixedType: 'assessment-results', titleOverride: 'Assessment · Results · Create', viewMode: 'create' }, meta: { domain: 'grc_assessment_results_create', title: 'Assessment Results Create' } },
+  { path: '/grc/assessment/poams', redirect: '/grc/assessment/poams/list' },
+  { path: '/grc/assessment/poams/list', component: OscalDocumentsPage, props: { fixedType: 'poam', titleOverride: 'Assessment · POA&M · List', viewMode: 'list' }, meta: { domain: 'grc_assessment_poams_list', title: 'Assessment POA&M List' } },
+  { path: '/grc/assessment/poams/create', component: OscalDocumentsPage, props: { fixedType: 'poam', titleOverride: 'Assessment · POA&M · Create', viewMode: 'create' }, meta: { domain: 'grc_assessment_poams_create', title: 'Assessment POA&M Create' } },
+  { path: '/grc/implementation', redirect: '/grc/implementation/component-definitions' },
+  { path: '/grc/implementation/component-definitions', redirect: '/grc/implementation/component-definitions/list' },
+  { path: '/grc/implementation/component-definitions/list', component: OscalDocumentsPage, props: { fixedType: 'component-definition', titleOverride: 'Implementation · Component Definitions · List', viewMode: 'list' }, meta: { domain: 'grc_implementation_component_definitions_list', title: 'Implementation Component Definitions List' } },
+  { path: '/grc/implementation/component-definitions/create', component: OscalDocumentsPage, props: { fixedType: 'component-definition', titleOverride: 'Implementation · Component Definitions · Create', viewMode: 'create' }, meta: { domain: 'grc_implementation_component_definitions_create', title: 'Implementation Component Definitions Create' } },
+  { path: '/grc/implementation/system-security-plans', redirect: '/grc/implementation/system-security-plans/list' },
+  { path: '/grc/implementation/system-security-plans/list', component: OscalDocumentsPage, props: { fixedType: 'system-security-plan', titleOverride: 'Implementation · System Security Plans · List', viewMode: 'list' }, meta: { domain: 'grc_implementation_system_security_plans_list', title: 'Implementation System Security Plans List' } },
+  { path: '/grc/implementation/system-security-plans/create', component: OscalDocumentsPage, props: { fixedType: 'system-security-plan', titleOverride: 'Implementation · System Security Plans · Create', viewMode: 'create' }, meta: { domain: 'grc_implementation_system_security_plans_create', title: 'Implementation System Security Plans Create' } },
+  { path: '/oscal/overview', redirect: '/grc/overview' },
+  { path: '/oscal/home', redirect: '/grc/overview' },
+  { path: '/oscal/documents', redirect: '/grc/control/catalogs/list' },
+  { path: '/customization/oscal', redirect: '/oscal/documents' },
   { path: '/users', redirect: '/admin/users' },
   { path: '/users/me', redirect: '/admin/users/me' },
   { path: '/users/:id', redirect: (to) => `/admin/users/${to.params.id}` },
@@ -110,6 +145,8 @@ const routes = [
   { path: '/entity-types/:id', redirect: (to) => `/customization/entity-types/${to.params.id}` },
   { path: '/entity-records', redirect: '/customization/entity-records' },
   { path: '/entity-records/:id', redirect: (to) => `/customization/entity-records/${to.params.id}` },
+  { path: '/oscal', redirect: '/grc/overview' },
+  { path: '/grc', redirect: '/grc/overview' },
 ]
 
 const router = createRouter({

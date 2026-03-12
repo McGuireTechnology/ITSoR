@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { commandSurfaceMetrics } from '../lib/commandSurface'
+import { getListPathForDomain } from '../lib/workspaceNav'
 import {
   openGroupDeleteInspector,
   openGroupCreateInspector,
@@ -31,7 +32,7 @@ const isGroupsListRoute = computed(() => route.path === '/auth/groups')
 const isTenantsListRoute = computed(() => route.path === '/auth/tenants')
 const selectedIds = computed(() => commandSurfaceMetrics.selectedIds || [])
 
-const listPath = computed(() => (domain.value ? `/${domain.value}` : '/'))
+const listPath = computed(() => getListPathForDomain(domain.value) || '/')
 
 async function openList() {
   await router.push(listPath.value)

@@ -13,6 +13,7 @@ import {
 } from '../lib/api'
 import { formatNameId } from '../lib/formatters'
 import { favoriteEntries, recentEntries, trackRouteVisit } from '../lib/navigationState'
+import { activeWorkspace, setActiveWorkspace, workspaceConfig } from '../lib/workspaceNav'
 import brandLogo from '../assets/itsor-cube-logo.svg'
 
 const router = useRouter()
@@ -26,15 +27,30 @@ const GLOBAL_TENANT_LABEL = 'All Tenants'
 const fallbackTenantLabel = import.meta.env.VITE_TENANT_NAME || 'Default Tenant'
 const userDisplayName = import.meta.env.VITE_USER_DISPLAY_NAME || 'Signed-in user'
 const userOrg = import.meta.env.VITE_USER_ORG || 'ITSoR Tenant'
+const appWorkspaceIcons = {
+  admin: '🖥️',
+  idm: '🪪',
+  customization: '⚙️',
+  grc: '📚',
+}
 
-const appResources = [
-  { label: 'Users', to: '/auth/users' },
-  { label: 'Groups', to: '/auth/groups' },
-  { label: 'Roles', to: '/auth/roles' },
-  { label: 'Permissions', to: '/auth/permissions' },
-  { label: 'Tenants', to: '/auth/tenants' },
-  { label: 'Workspaces', to: '/customization/workspaces' },
-]
+function getNamespaceRoute(namespace) {
+  return String(namespace?.to || namespace?.resources?.[0]?.to || '/home')
+}
+
+function getWorkspaceDefaultRoute(workspace) {
+  const firstNamespace = workspace?.namespaces?.[0]
+  return getNamespaceRoute(firstNamespace)
+}
+
+const appResources = computed(() => {
+  return Object.entries(workspaceConfig).map(([key, workspace]) => ({
+    key,
+    label: workspace.label,
+    to: getWorkspaceDefaultRoute(workspace),
+    icon: appWorkspaceIcons[key] || '🧭',
+  }))
+})
 
 const searchSources = [
   {
@@ -141,6 +157,7 @@ const userMenuPinned = ref(false)
 const tenantContextPinned = ref(false)
 const searchPinned = ref(false)
 const searchDropdownOpen = ref(false)
+const appLauncherQuery = ref('')
 const hasSearched = ref(false)
 const tenantOptions = ref([])
 const activeTenantId = ref('')
@@ -285,6 +302,14 @@ const showSearchDropdown = computed(() => {
 
   return searching.value || !!error.value || results.value.length > 0 || hasSearched.value
 })
+const filteredAppResources = computed(() => {
+  const term = appLauncherQuery.value.trim().toLowerCase()
+  if (!term) {
+    return appResources.value
+  }
+
+  return appResources.value.filter((resource) => String(resource.label || '').toLowerCase().includes(term))
+})
 
 function closeMenus() {
   appLauncherOpen.value = false
@@ -297,6 +322,7 @@ function closeMenus() {
   recentsPinned.value = false
   userMenuPinned.value = false
   tenantContextPinned.value = false
+  appLauncherQuery.value = ''
 }
 
 function openAppLauncher() {
@@ -310,6 +336,17 @@ function closeAppLauncher() {
   if (!appLauncherPinned.value) {
     appLauncherOpen.value = false
   }
+}
+
+async function selectAppWorkspace(workspace) {
+  setActiveWorkspace(workspace.key)
+  const targetRoute = String(workspace.to || '/home')
+
+  if (targetRoute && targetRoute !== route.path) {
+    await router.push(targetRoute)
+  }
+
+  closeMenus()
 }
 
 function toggleAppLauncherPin() {
@@ -826,13 +863,35 @@ onUnmounted(() => {
               <circle cx="18" cy="18" r="1.5" />
             </svg>
           </button>
-          <div class="app-menu dropdown-menu" :class="{ show: appLauncherOpen }" aria-label="App launcher menu">
-            <p class="app-menu-title">Apps</p>
-            <ul class="app-menu-list">
-              <li v-for="resource in appResources" :key="resource.to">
-                <RouterLink class="app-menu-link dropdown-item" :to="resource.to" @click="closeMenus">{{ resource.label }}</RouterLink>
-              </li>
-            </ul>
+          <div class="app-menu app-menu-launcher dropdown-menu" :class="{ show: appLauncherOpen }" aria-label="App launcher menu">
+            <div class="app-launcher-menu">
+              <label class="app-launcher-search-wrap">
+                <i class="pi pi-search app-launcher-search-icon" aria-hidden="true"></i>
+                <input
+                  v-model="appLauncherQuery"
+                  type="search"
+                  class="app-launcher-search"
+                  placeholder="Find apps"
+                  aria-label="Find apps"
+                />
+              </label>
+
+              <ul class="app-launcher-grid" role="list">
+                <li v-for="resource in filteredAppResources" :key="resource.key" class="app-launcher-grid-item">
+                  <button
+                    type="button"
+                    class="app-launcher-tile"
+                    :class="{ active: activeWorkspace === resource.key }"
+                    @click="selectAppWorkspace(resource)"
+                  >
+                    <span class="app-launcher-tile-icon" aria-hidden="true">{{ resource.icon }}</span>
+                    <span class="app-launcher-tile-label">{{ resource.label }}</span>
+                  </button>
+                </li>
+              </ul>
+
+              <p v-if="!filteredAppResources.length" class="meta">No apps match your search.</p>
+            </div>
           </div>
         </div>
 

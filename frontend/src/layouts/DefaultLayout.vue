@@ -4,8 +4,8 @@ import { useRoute } from 'vue-router'
 import BladeWorkspace from '../components/BladeWorkspace.vue'
 import CommandBar from '../components/CommandBar.vue'
 import ContextInspectorPane from '../components/ContextInspectorPane.vue'
-import GlobalNavigationRail from '../components/GlobalNavigationRail.vue'
 import PageHeader from '../components/PageHeader.vue'
+import SectionNavigator from '../components/SectionNavigator.vue'
 import TopBar from '../components/TopBar.vue'
 import { createBladeStack, provideBladeStack } from '../lib/blades'
 
@@ -95,7 +95,7 @@ function handleBladeUpdate(event) {
 
     <div class="admin-shell">
       <aside class="admin-rail admin-pane">
-        <GlobalNavigationRail :collapsed="railCollapsed" @toggle="toggleRailCollapse" />
+        <SectionNavigator :collapsed="railCollapsed" @toggle="toggleRailCollapse" />
       </aside>
 
       <section class="admin-workspace">

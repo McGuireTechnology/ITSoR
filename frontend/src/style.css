@@ -559,6 +559,11 @@ a:hover {
   margin-top: 0;
 }
 
+.app-menu.app-menu-launcher {
+  width: min(440px, calc(100vw - 24px));
+  padding: 0;
+}
+
 .app-menu-title {
   margin: 0 0 8px;
   font-size: 0.78rem;
@@ -595,6 +600,88 @@ a:hover {
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid #e1dfdd;
+}
+
+.app-launcher-menu {
+  width: min(420px, calc(100vw - 24px));
+  max-height: 520px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.app-launcher-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid #e1dfdd;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 12px;
+  background: #f8f8f8;
+}
+
+.app-launcher-search-icon {
+  color: #605e5c;
+  font-size: 0.86rem;
+}
+
+.app-launcher-search {
+  border: 0;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  color: #201f1e;
+  font-size: 0.86rem;
+}
+
+.app-launcher-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.app-launcher-grid-item {
+  min-width: 0;
+}
+
+.app-launcher-tile {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #201f1e;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  min-height: 92px;
+}
+
+.app-launcher-tile:hover {
+  background: #f3f2f1;
+}
+
+.app-launcher-tile.active {
+  border-color: color-mix(in srgb, var(--itsor-purple) 50%, #d2d0ce);
+  background: color-mix(in srgb, var(--itsor-purple) 10%, #ffffff);
+}
+
+.app-launcher-tile-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.app-launcher-tile-label {
+  font-size: 0.75rem;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
 }
 
 .topbar-search {
@@ -2021,6 +2108,18 @@ a:hover {
   .app-menu {
     left: -6px;
     width: min(280px, calc(100vw - 24px));
+  }
+
+  .app-menu.app-menu-launcher {
+    width: min(360px, calc(100vw - 24px));
+  }
+
+  .app-launcher-menu {
+    width: min(340px, calc(100vw - 24px));
+  }
+
+  .app-launcher-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .dashboard-grid {

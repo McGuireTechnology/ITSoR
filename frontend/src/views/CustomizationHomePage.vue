@@ -39,6 +39,7 @@ function openCustomAppsBlade() {
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/customization/namespaces">Namespaces</RouterLink>
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/customization/entity-types">Entity Types</RouterLink>
       <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/customization/entity-records">Entity Records</RouterLink>
+      <RouterLink class="shortcut-chip border-brand-purple/30 hover:border-brand-pink hover:text-brand-pink" to="/customization/oscal">OSCAL</RouterLink>
     </div>
   </section>
 </template>

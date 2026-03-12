@@ -11,6 +11,8 @@ const props = defineProps({
   },
 })
 
+defineEmits(['toggle'])
+
 const route = useRoute()
 
 watch(
@@ -21,7 +23,24 @@ watch(
   { immediate: true },
 )
 
-const activeWorkspaceModel = computed(() => workspaceConfig[activeWorkspace.value])
+const activeWorkspaceModel = computed(() => workspaceConfig[activeWorkspace.value] || { namespaces: [] })
+const normalizedNamespaces = computed(() => {
+  return (activeWorkspaceModel.value.namespaces || [])
+    .map((item, index) => {
+      const to = String(item?.to || item?.resources?.[0]?.to || '')
+      if (!to) {
+        return null
+      }
+
+      return {
+        key: item?.key || `${item?.label || 'namespace'}-${index}`,
+        label: String(item?.label || 'Workspace'),
+        icon: String(item?.icon || '🧭'),
+        to,
+      }
+    })
+    .filter(Boolean)
+})
 const sectionNavRef = ref(null)
 let tooltipInstances = []
 
@@ -65,8 +84,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="sectionNavRef" class="section-nav-body pane-body">
-    <ul class="section-list pane-list">
-      <li v-for="item in activeWorkspaceModel.namespaces" :key="item.to">
+    <ul class="section-list pane-list pane-scroll-body">
+      <li v-for="item in normalizedNamespaces" :key="item.key">
         <RouterLink
           class="section-link pane-link"
           :to="item.to"
@@ -75,9 +94,28 @@ onBeforeUnmount(() => {
           :data-bs-placement="collapsed ? 'right' : null"
         >
           <span class="section-icon pane-icon" aria-hidden="true">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
+          <span v-if="!collapsed">{{ item.label }}</span>
         </RouterLink>
       </li>
     </ul>
+
+    <button
+      type="button"
+      class="pane-bottom-toggle pane-toggle"
+      :aria-label="collapsed ? 'Expand navigation pane' : 'Collapse navigation pane'"
+      @click="$emit('toggle')"
+    >
+      <svg
+        class="pane-toggle-icon"
+        :class="collapsed ? 'is-expand is-left' : 'is-collapse is-left'"
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+      >
+        <rect x="1.5" y="2" width="13" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2" />
+        <path d="M5 2V14" stroke="currentColor" stroke-width="1.2" />
+        <path d="M10.5 5.5L7.5 8L10.5 10.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span v-if="!collapsed">Navigation</span>
+    </button>
   </div>
 </template>

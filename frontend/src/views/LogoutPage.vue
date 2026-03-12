@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { logoutUser } from '../lib/api'
-import { clearToken } from '../lib/auth'
+import { clearToken, hasValidToken } from '../lib/auth'
 import itsorCubeLogo from '../assets/itsor-cube-logo.svg'
 
 const router = useRouter()
@@ -10,10 +10,12 @@ const message = ref('Signing out...')
 
 onMounted(async () => {
   try {
-    await logoutUser()
+    if (hasValidToken()) {
+      await logoutUser()
+    }
     message.value = 'You are logged out.'
   } catch (logoutError) {
-    message.value = logoutError.message
+    message.value = 'You are logged out.'
   } finally {
     clearToken()
     await router.replace('/login')
