@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from itsor.api.apps import auth_app
+from itsor.api.apps import auth_app, itam_app
 from itsor.infrastructure.database.sqlalchemy import create_tables
 
 
@@ -55,6 +55,7 @@ app.add_middleware(
 )
 
 app.mount("/auth", auth_app)
+app.mount("/itam", itam_app)
 
 
 @app.get("/")

@@ -21,8 +21,15 @@ from .role_ids import RoleAssignmentId, RoleId, RolePermissionId
 from .tenant_ids import TenantId
 from .user_ids import UserId, UserRoleId, UserTenantId
 from .view_ids import MenuViewId, NavigationItemId
+from .grc_ids import FrameworkId, DomainId, ControlId, ControlLinkId, ControlGuidanceId, ControlExampleId
 
 __all__ = [
+    "FrameworkId",
+    "DomainId",
+    "ControlId",
+    "ControlLinkId",
+    "ControlGuidanceId",
+    "ControlExampleId",
     "GroupId",
     "GroupMembershipId",
     "GroupRoleId",
