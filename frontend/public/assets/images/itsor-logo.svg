@@ -1,0 +1,35 @@
+<svg width="360" height="88" viewBox="0 0 360 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="badgeGrad" x1="10" y1="6" x2="82" y2="82" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1D4ED8"/>
+      <stop offset="0.55" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#D946EF"/>
+    </linearGradient>
+    <linearGradient id="topFace" x1="46" y1="18" x2="46" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EFF6FF"/>
+      <stop offset="1" stop-color="#C4B5FD"/>
+    </linearGradient>
+    <linearGradient id="leftFace" x1="25" y1="35" x2="46" y2="69" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#93C5FD"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="rightFace" x1="46" y1="35" x2="67" y2="69" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E9D5FF"/>
+      <stop offset="1" stop-color="#C026D3"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="100" y1="16" x2="294" y2="72" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1D4ED8"/>
+      <stop offset="0.55" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#D946EF"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="10" y="8" width="72" height="72" rx="18" fill="url(#badgeGrad)"/>
+  <path d="M46 18L25 30L46 42L67 30L46 18Z" fill="url(#topFace)"/>
+  <path d="M25 30V54L46 66V42L25 30Z" fill="url(#leftFace)"/>
+  <path d="M67 30V54L46 66V42L67 30Z" fill="url(#rightFace)"/>
+  <path d="M46 26L32 34L46 42L60 34L46 26Z" fill="#FFFFFF" fill-opacity="0.52"/>
+
+  <text x="100" y="52" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="46" font-weight="800" fill="url(#textGrad)" letter-spacing="0.5">ITSoR</text>
+  <text x="102" y="70" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" fill="#334155" letter-spacing="0.2">IT System of Record</text>
+</svg>

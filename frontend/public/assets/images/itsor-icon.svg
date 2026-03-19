@@ -1,0 +1,27 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="16" y1="12" x2="112" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1D4ED8"/>
+      <stop offset="0.55" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#D946EF"/>
+    </linearGradient>
+    <linearGradient id="topFace" x1="64" y1="26" x2="64" y2="55" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EFF6FF"/>
+      <stop offset="1" stop-color="#C4B5FD"/>
+    </linearGradient>
+    <linearGradient id="leftFace" x1="31" y1="52" x2="63" y2="106" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#93C5FD"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="rightFace" x1="64" y1="52" x2="97" y2="106" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E9D5FF"/>
+      <stop offset="1" stop-color="#C026D3"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bgGrad)"/>
+  <path d="M64 25L31 44L64 63L97 44L64 25Z" fill="url(#topFace)"/>
+  <path d="M31 44V82L64 102V63L31 44Z" fill="url(#leftFace)"/>
+  <path d="M97 44V82L64 102V63L97 44Z" fill="url(#rightFace)"/>
+  <path d="M64 37L42 49L64 62L86 49L64 37Z" fill="#FFFFFF" fill-opacity="0.55"/>
+</svg>
