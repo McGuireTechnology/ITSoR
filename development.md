@@ -1,5 +1,135 @@
 # FastAPI Project - Development
 
+## Windows Setup (VS Code + WSL Ubuntu + Docker Desktop)
+
+If you are developing on Windows, the recommended setup is:
+
+* **WSL 2** with an **Ubuntu** distribution
+* **Docker Desktop** with **WSL integration enabled**
+* **VS Code** with the **WSL** and **Dev Containers** extensions
+
+This gives you Linux tooling, native-feeling editor support, and Docker containers that can access your repo in WSL.
+
+### 1) Install and configure WSL with Ubuntu
+
+In PowerShell (as Administrator):
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+Then reboot if prompted and finish the Ubuntu first-run setup (username/password).
+
+Verify WSL is using version 2:
+
+```powershell
+wsl -l -v
+```
+
+If needed, set Ubuntu to WSL2:
+
+```powershell
+wsl --set-version Ubuntu 2
+```
+
+### 2) Install Docker Desktop and enable WSL integration
+
+1. Install Docker Desktop for Windows.
+2. In Docker Desktop settings:
+   * **General**: enable **Use the WSL 2 based engine**.
+   * **Resources → WSL Integration**: enable integration for your Ubuntu distro.
+3. From Ubuntu, verify Docker works:
+
+```bash
+docker version
+docker compose version
+```
+
+### 3) Install VS Code and required extensions
+
+Install VS Code for Windows and add:
+
+* **WSL** extension (`ms-vscode-remote.remote-wsl`)
+* **Dev Containers** extension (`ms-vscode-remote.remote-containers`)
+
+Open your Ubuntu shell and run:
+
+```bash
+code .
+```
+
+If you get `code: command not found` in Ubuntu/WSL:
+
+1. Make sure VS Code is installed on Windows (not only inside WSL).
+2. Open VS Code on Windows and install the **WSL** extension.
+3. In Ubuntu, close/reopen the shell and run:
+
+```bash
+which code
+```
+
+If `which code` still returns nothing, use this VS Code workflow instead (no `code` CLI required):
+
+1. Open VS Code on Windows.
+2. Open the Command Palette (`F1` / `Ctrl+Shift+P`).
+3. Run **WSL: Connect to WSL**.
+4. Run **Git: Clone** and paste the repository URL.
+5. Open the cloned folder in the WSL window.
+
+You can also open an already-cloned folder from Windows Command Prompt / PowerShell:
+
+```powershell
+code .
+```
+
+or directly target a WSL folder URI:
+
+```powershell
+code --folder-uri "vscode-remote://wsl+Ubuntu/home/<your-user>/<path-to-repo>"
+```
+
+### 4) Clone and initialize the repository in WSL
+
+Do this inside Ubuntu (recommended path: your Linux home directory, not `/mnt/c/...`):
+
+```bash
+cd ~
+git clone <your-repository-url> ITSoR
+cd ITSoR
+```
+
+Before first run, review `.env` and update any default placeholder values (for example values like `changethis`) to match your local setup.
+
+Then start the stack:
+
+```bash
+docker compose watch
+```
+
+On first run, Docker will build/pull images and initialize services. This may take a few minutes.
+
+### 5) Keep everything working together
+
+Recommended workflow:
+
+1. Start Docker Desktop first.
+2. Open Ubuntu (WSL) and `cd` into the repository.
+3. Open in VS Code via `code .` (this ensures the editor is attached to WSL).
+4. Run `docker compose watch` from the WSL terminal.
+
+Quick health checks:
+
+```bash
+docker compose ps
+docker compose logs backend
+```
+
+If Docker commands fail in WSL:
+
+* confirm Docker Desktop is running
+* verify WSL integration is enabled for Ubuntu
+* run `wsl --shutdown` from PowerShell and restart Docker Desktop + Ubuntu
+
 ## Docker Compose
 
 * Start the local stack with Docker Compose:
