@@ -12,6 +12,10 @@ import { buildNavigationFromOpenApi, getNavigation } from "@/lib/apiNavigation"
 
 const getCurrentApp = (pathname: string) => {
   const [app] = pathname.split("/").filter(Boolean)
+  const reservedRoutes = new Set(["admin", "items", "settings"])
+  if (!app || reservedRoutes.has(app)) {
+    return "default"
+  }
   return app || "default"
 }
 

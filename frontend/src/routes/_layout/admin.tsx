@@ -25,14 +25,6 @@ export const Route = createFileRoute("/_layout/admin")({
         to: "/",
       })
     }
-    throw redirect({
-      to: "/$app/$section/$resource",
-      params: {
-        app: "default",
-        section: "admin",
-        resource: "users",
-      },
-    })
   },
   head: () => ({
     meta: [

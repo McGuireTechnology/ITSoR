@@ -1,15 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 
 import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
-  beforeLoad: () => {
-    throw redirect({
-      to: "/$app",
-      params: { app: "default" },
-    })
-  },
   head: () => ({
     meta: [
       {

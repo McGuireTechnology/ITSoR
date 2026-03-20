@@ -21,6 +21,7 @@ import { User } from "./User"
 
 const getPathSegments = (pathname: string) =>
   pathname.split("/").filter(Boolean)
+const reservedRoutes = new Set(["admin", "items", "settings"])
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
@@ -35,7 +36,8 @@ export function AppSidebar() {
     placeholderData: buildNavigationFromOpenApi({}),
   })
   const [appFromPath = "default"] = getPathSegments(pathname)
-  const selectedApp = appFromPath || "default"
+  const selectedApp =
+    !appFromPath || reservedRoutes.has(appFromPath) ? "default" : appFromPath
 
   const appSections = navigation?.[selectedApp]
   const appItems: Item[] = Object.entries(appSections ?? {}).flatMap(
