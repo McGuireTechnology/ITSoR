@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Search } from "lucide-react"
 import { Suspense } from "react"
 
@@ -18,6 +18,16 @@ function getItemsQueryOptions() {
 
 export const Route = createFileRoute("/_layout/items")({
   component: Items,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/$app/$section/$resource",
+      params: {
+        app: "default",
+        section: "core",
+        resource: "items",
+      },
+    })
+  },
   head: () => ({
     meta: [
       {
@@ -54,6 +64,10 @@ function ItemsTable() {
 }
 
 function Items() {
+  return <ItemsPage />
+}
+
+export function ItemsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
