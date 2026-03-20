@@ -54,6 +54,10 @@ function ItemsTable() {
 }
 
 function Items() {
+  return <ItemsPage />
+}
+
+export function ItemsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">

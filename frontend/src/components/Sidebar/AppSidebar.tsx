@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query"
+import { useRouterState } from "@tanstack/react-router"
 import { Briefcase, Home, Users } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -9,20 +11,57 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
+import {
+  buildNavigationFromOpenApi,
+  getNavigation,
+  toTitle,
+} from "@/lib/apiNavigation"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
 
-const baseItems: Item[] = [
-  { icon: Home, title: "Dashboard", path: "/" },
-  { icon: Briefcase, title: "Items", path: "/items" },
-]
+const getPathSegments = (pathname: string) =>
+  pathname.split("/").filter(Boolean)
+const reservedRoutes = new Set(["admin", "items", "settings"])
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const { data: navigation } = useQuery({
+    queryFn: getNavigation,
+    queryKey: ["api-navigation"],
+    staleTime: 1000 * 60 * 10,
+    retry: 1,
+    placeholderData: buildNavigationFromOpenApi({}),
+  })
+  const [appFromPath = "default"] = getPathSegments(pathname)
+  const selectedApp =
+    !appFromPath || reservedRoutes.has(appFromPath) ? "default" : appFromPath
 
-  const items = currentUser?.is_superuser
-    ? [...baseItems, { icon: Users, title: "Admin", path: "/admin" }]
-    : baseItems
+  const appSections = navigation?.[selectedApp]
+  const appItems: Item[] = Object.entries(appSections ?? {}).flatMap(
+    ([section, resources]) => {
+      return [...resources]
+        .sort((left, right) => left.localeCompare(right))
+        .map((resource) => ({
+          icon: resource === "users" ? Users : Briefcase,
+          title: toTitle(resource),
+          subtitle: toTitle(section),
+          path: `/${selectedApp}/${section}/${resource}`,
+        }))
+    },
+  )
+
+  const items: Item[] = [
+    { icon: Home, title: "Dashboard", path: `/${selectedApp}` },
+    ...appItems.filter((item) => {
+      if (item.title === "Users" && !currentUser?.is_superuser) {
+        return false
+      }
+      return true
+    }),
+  ]
 
   return (
     <Sidebar collapsible="icon">
